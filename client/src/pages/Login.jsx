@@ -1,5 +1,6 @@
-// src/pages/Login.js
+// src/pages/Login.jsx
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -7,7 +8,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle login logic here (e.g., making an API request to login)
+    // Handle login logic here
     console.log('Logging in with:', { email, password });
   };
 
@@ -29,6 +30,12 @@ const Login = () => {
         />
         <button type="submit">Login</button>
       </form>
+      
+      {/* Link to Sign Up page */}
+      <div>
+        <p>Don't have an account?</p>
+        <Link to="/signup">Sign up here</Link>
+      </div>
     </div>
   );
 };
