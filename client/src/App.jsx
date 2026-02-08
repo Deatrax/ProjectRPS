@@ -1,12 +1,14 @@
 // src/App.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './index.css';
 
 function App() {
   const [count, setCount] = useState(0);
+  const { user, logout } = useAuth();
 
   return (
     <>
@@ -33,7 +35,18 @@ function App() {
 
       {/* Link to the login page */}
       <div>
-        <Link to="/login">Go to Login</Link> {/* This will navigate to /login */}
+        {user ? (
+          <div>
+            <h2>Welcome, {user.name}!</h2>
+            <button onClick={logout}>Logout</button>
+          </div>
+        ) : (
+          <div>
+            <Link to="/login">Go to Login</Link>
+            <br />
+            <Link to="/signup">Go to Sign Up</Link>
+          </div>
+        )}
       </div>
     </>
   );

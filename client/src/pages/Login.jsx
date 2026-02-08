@@ -1,10 +1,15 @@
 // src/pages/Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -13,12 +18,12 @@ const Login = () => {
       const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       console.log('Login successful:', response.data);
 
-      // Save token or handle successful login logic (e.g., redirect to dashboard)
-      localStorage.setItem('token', response.data.token);  // Save the JWT token in local storage
-      // Redirect or update UI accordingly
+      login(response.data.user, response.data.token);
+      navigate('/');
     } catch (error) {
-      console.log('Login failed:', error.response.data);
+      console.log('Login failed:', error.response?.data || error.message);
       // Handle error (e.g., show error message)
+      alert(error.response?.data?.message || 'Login failed');
     }
   };
 

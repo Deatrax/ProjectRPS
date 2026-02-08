@@ -21,10 +21,6 @@ router.post("/signup", async (req, res) => {
     // Create new user
     const user = new User({ name, email, password });
 
-    // Encrypt password before saving
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
     // Save the user in the database
     await user.save();
 
@@ -54,7 +50,7 @@ router.post("/login", async (req, res) => {
     }
 
     // Check if the password matches
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }

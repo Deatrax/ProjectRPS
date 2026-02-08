@@ -1,12 +1,17 @@
 // src/pages/SignUp.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,10 +25,16 @@ const SignUp = () => {
       const response = await axios.post('http://localhost:5000/api/auth/signup', { name, email, password });
       console.log('Sign Up successful:', response.data);
 
-      // Handle success (e.g., redirect to login page)
+      if (response.data.token) {
+        login(response.data.user, response.data.token);
+        navigate('/');
+      } else {
+        navigate('/login');
+      }
+
     } catch (error) {
-      console.log('Sign Up failed:', error.response.data);
-      // Handle error (e.g., show error message)
+      console.log('Sign Up failed:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Sign Up failed');
     }
   };
 
