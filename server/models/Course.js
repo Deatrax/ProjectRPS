@@ -1,5 +1,16 @@
 const mongoose = require('mongoose');
 
+const TaskSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    description: { type: String },
+    completed: { type: Boolean, default: false },
+}, { timestamps: true });
+
+const AssignmentSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    description: { type: String },
+}, { timestamps: true });
+
 const CourseSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -22,6 +33,8 @@ const CourseSchema = new mongoose.Schema({
         required: true,
         ref: 'User',
     },
+    tasks: [TaskSchema], 
+    assignments: [AssignmentSchema], 
 }, {
     timestamps: true, 
 });
