@@ -206,10 +206,11 @@ const Dashboard = () => {
                                 {/* Task Dots */}
                                 <div className="timeline-tasks-layer">
                                     {timelineTasks.map((task, idx) => {
-                                        const leftPosition = task.position * 80 + 30;
+                                        const leftPosition = task.position * 80 + 30; // Center in 80px column (roughly)
                                         const sameDateTasks = timelineTasks.filter(t => t.position === task.position);
                                         const taskIndex = sameDateTasks.findIndex(t => t.id === task.id);
-                                        const verticalOffset = taskIndex * 8;
+                                        // Increased spacing to 28px for better visual stacking
+                                        const verticalOffset = taskIndex * 28;
 
                                         return (
                                             <div
@@ -221,7 +222,9 @@ const Dashboard = () => {
                                                 }}
                                             >
                                                 {/* Connection line */}
-                                                <div className="task-connection-line"></div>
+                                                <div className="task-connection-line"
+                                                    style={{ height: `${9 + (verticalOffset / 16)}rem` }}
+                                                ></div>
 
                                                 {/* Dot */}
                                                 <div

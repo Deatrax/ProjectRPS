@@ -270,6 +270,8 @@
     /* IE/Edge */
     padding-bottom: 10px;
     /* space for scrollbar */
+    padding-top: 20px;
+    /* space for hover cards at top */
 }
 
 /* Optional: Custom scrollbar for Webkit */
@@ -289,7 +291,8 @@
 
 .timeline-content {
     position: relative;
-    height: 220px;
+    height: 320px;
+    /* Significantly increased to fit hover cards */
     /* min-width set inline */
 }
 
@@ -326,7 +329,9 @@
     transform: translateX(-50%);
     width: 1px;
     height: 100%;
+    /* Will span the full height */
     background-color: rgba(59, 130, 246, 0.2);
+    z-index: 0;
 }
 
 .date-marker {
@@ -337,6 +342,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 5;
 }
 
 .marker-dot {
@@ -396,52 +402,69 @@
 /* Timeline Tasks */
 .timeline-tasks-layer {
     position: absolute;
-    top: 5rem;
+    top: 9rem;
+    /* Pushed down significantly to give room for tooltips */
     left: 0;
     right: 0;
+    height: 100%;
 }
 
 .timeline-task-marker {
     position: absolute;
     /* left and top set inline */
     z-index: 10;
+    transition: z-index 0.2s;
+    /* delay slightly to keep tooltip on top while transitioning out */
+}
+
+.timeline-task-marker:hover {
+    z-index: 100;
+    /* Bring to front on hover */
 }
 
 .task-connection-line {
     position: absolute;
-    bottom: 0;
+    bottom: 50%;
+    /* Connect from dot upwards */
     left: 50%;
     transform: translateX(-50%);
     width: 1px;
-    height: 2rem;
+    height: 7rem;
+    /* Make it reach up to the date line roughly */
     background-color: var(--border-color);
-    opacity: 0.4;
+    opacity: 0.2;
     transition: opacity 0.2s;
+    pointer-events: none;
+    transform-origin: bottom center;
 }
 
 .timeline-task-marker:hover .task-connection-line {
-    opacity: 0.7;
+    opacity: 0.6;
+    background-color: var(--accent-blue);
 }
 
 .task-dot {
     position: relative;
-    width: 0.75rem;
-    height: 0.75rem;
+    width: 0.875rem;
+    /* Slightly larger */
+    height: 0.875rem;
     border-radius: 50%;
     box-shadow: 0 0 0 2px var(--bg-primary);
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
 }
 
 .timeline-task-marker:hover .task-dot {
-    transform: scale(1.5);
+    transform: scale(1.3);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .task-ping {
     position: absolute;
-    inset: 0;
+    inset: -4px;
     border-radius: 50%;
-    opacity: 0.2;
-    animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.3;
+    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 /* Hover Card for Timeline Task */
@@ -449,27 +472,31 @@
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 2rem;
+    bottom: 1.5rem;
+    /* Position above the dot */
     width: 280px;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
-    z-index: 50;
+    z-index: 100;
+    margin-bottom: 10px;
 }
 
 .timeline-task-marker:hover .task-hover-card {
     opacity: 1;
     visibility: visible;
-    bottom: 2.5rem;
+    bottom: 2rem;
+    /* Slide up slightly */
+    pointer-events: auto;
+    /* Allow interaction if needed */
 }
 
 .card-content {
     background-color: var(--bg-primary);
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     padding: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px var(--border-color);
     position: relative;
 }
 
