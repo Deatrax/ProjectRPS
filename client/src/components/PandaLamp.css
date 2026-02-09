@@ -1,0 +1,416 @@
+:root {
+  --bg: #0b1020;
+  --light: #ffe9a6;
+  --card: rgba(255, 255, 255, 0.08);
+  --card2: rgba(255, 255, 255, 0.12);
+  --text: rgba(255, 255, 255, 0.9);
+  --muted: rgba(255, 255, 255, 0.65);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 700px at 50% 10%, #18224a 0%, var(--bg) 60%);
+  color: var(--text);
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+/* --- SCENE CONTAINER --- */
+.scene {
+  width: min(1000px, 94vw);
+  min-height: 700px;
+  border-radius: 28px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- LAMP AREA --- */
+.lamp-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 280px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 20; /* Keep lamp button on top of everything */
+}
+
+.lamp {
+  width: 240px;
+  height: 200px;
+  background: transparent;
+  border: 0;
+  position: relative;
+  cursor: pointer;
+  z-index: 2; 
+}
+
+/* Lamp Shade */
+.lamp-top {
+  position: absolute;
+  left: 50%;
+  top: 0; 
+  width: 220px;
+  height: 140px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: none;
+  border-bottom: none;
+  border-radius: 110px 110px 30px 30px;
+}
+
+/* Lamp Bulb */
+.lamp-bulb {
+  position: absolute;
+  left: 50%;
+  top: 100px;
+  width: 44px;
+  height: 50px;
+  transform: translateX(-50%);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  z-index: 3;
+}
+
+/* Lamp Base Knob */
+.lamp-base {
+  position: absolute;
+  left: 50%;
+  top: 145px;
+  width: 20px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.10);
+  z-index: 3;
+}
+
+.hint {
+  color: var(--muted);
+  margin-top: -20px;
+  font-size: 14px;
+}
+
+/* --- LIGHT BEAM --- */
+.lamp-beam-container {
+  position: absolute;
+  top: 138px; /* Touching bottom of lamp shade */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 600px;
+  pointer-events: none;
+  z-index: 1; /* Behind Panda */
+}
+
+.lamp-glow {
+  width: 680px; 
+  height: 100%;
+  margin: 0 auto;
+  background: linear-gradient(180deg, rgba(255, 233, 166, 0.45) 0%, rgba(255, 233, 166, 0) 80%);
+  clip-path: polygon(34% 0%, 66% 0%, 100% 100%, 0% 100%);
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+/* --- PANDA & CARDS AREA --- */
+.panda-area {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: block; 
+  /* Reduced margin to move Panda UPWARDS closer to the light */
+  margin-top: 100px; 
+}
+
+.panda {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  width: 260px;
+  height: 320px;
+  
+  /* DEFAULT HIDDEN STATE: 
+     translate(-50%, 200px) -> Pushed DOWN 200px.
+     This ensures it slides UP when it becomes active. 
+  */
+  transform: translate(-50%, 200px);
+  
+  opacity: 0;
+  transition: opacity 600ms ease, transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 5;
+}
+
+
+/* Ears */
+.ear {
+  position: absolute;
+  width: 70px; height: 70px;
+  background: #0d0f12;
+  border-radius: 50%;
+  top: 0;
+}
+.ear.left { left: 40px; }
+.ear.right { right: 40px; }
+
+/* Head */
+.head {
+  position: absolute;
+  left: 50%; top: 30px;
+  width: 220px; height: 200px;
+  transform: translateX(-50%);
+  background: #f7f7f7;
+  border-radius: 110px;
+  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Face */
+.eye-patch {
+  position: absolute;
+  width: 70px; height: 80px;
+  top: 55px;
+  background: #0d0f12;
+  border-radius: 50%;
+  opacity: 0.95;
+}
+.eye-patch.left { left: 40px; transform: rotate(-10deg); }
+.eye-patch.right { right: 40px; transform: rotate(10deg); }
+
+.eye {
+  position: absolute;
+  left: 50%; top: 36px;
+  width: 18px; height: 18px;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.eye::after {
+  content: "";
+  position: absolute; left: 50%; top: 50%;
+  width: 8px; height: 8px;
+  transform: translate(-50%, -50%);
+  background: #0d0f12;
+  border-radius: 50%;
+}
+
+.nose {
+  position: absolute;
+  left: 50%; top: 130px;
+  width: 16px; height: 12px;
+  transform: translateX(-50%);
+  background: #0d0f12;
+  border-radius: 0 0 10px 10px;
+}
+
+.mouth {
+  position: absolute;
+  left: 50%; top: 148px;
+  width: 40px; height: 20px;
+  transform: translateX(-50%);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.6);
+  border-radius: 0 0 50px 50px;
+  opacity: 0.55;
+}
+
+/* Body */
+.body {
+  position: absolute;
+  left: 50%; top: 210px;
+  width: 240px; height: 140px;
+  transform: translateX(-50%);
+  background: #f7f7f7;
+  border-radius: 120px 120px 80px 80px;
+  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.06);
+}
+
+.arm {
+  position: absolute;
+  width: 90px; height: 60px;
+  background: #0d0f12;
+  border-radius: 40px;
+  top: 20px;
+  transition: transform 500ms ease;
+}
+.arm.left { left: 12px; transform-origin: 80% 20%; }
+.arm.right { right: 12px; transform-origin: 20% 20%; }
+
+
+/* --- CARDS --- */
+.card {
+  width: 100%;
+  max-width: 360px;
+  padding: 24px 24px;
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  z-index: 10;
+  
+  /* Absolute positioning for animations */
+  position: absolute;
+  left: 50%;
+  top: 60px; /* Align with Panda's chest */
+  
+  /* Default Hidden State: Centered and slightly transparent */
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  
+  transition: opacity 450ms ease, transform 500ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.card h2 { margin: 0 0 8px; font-size: 24px; text-align: center; }
+.card p { margin: 0 0 20px; color: var(--muted); text-align: center; }
+
+.card.form label {
+  display: block;
+  margin: 12px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.card.form input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--card2);
+  color: var(--text);
+  outline: none;
+}
+.card.form input:focus {
+  border-color: rgba(255, 233, 166, 0.7);
+  box-shadow: 0 0 0 3px rgba(255, 233, 166, 0.15);
+}
+
+.primary {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 233, 166, 0.22);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 200ms;
+}
+.primary:hover {
+  background: rgba(255, 233, 166, 0.3);
+}
+
+.switch-text {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 16px 0;
+  text-align: center;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--light);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  padding: 0;
+  margin-left: 4px;
+}
+.link-btn:hover {
+  color: #fff;
+}
+
+
+
+/* --- STATE LOGIC --- */
+@keyframes blinkOpen {
+  0% { transform: translateX(-50%) scaleY(0.15); }
+  40% { transform: translateX(-50%) scaleY(1); }
+  70% { transform: translateX(-50%) scaleY(0.25); }
+  100% { transform: translateX(-50%) scaleY(1); }
+}
+/* 1. Lamp Off/On */
+.state-lampOff .lamp-glow { opacity: 0; }
+.state-lampOn .lamp-glow { opacity: 1; }
+
+.state-panda .panda {
+  opacity: 1;
+  /* ANIMATION: Moves UP from 200px to 0px (Center) */
+  transform: translate(-50%, -100px);
+  z-index: 5;
+}
+
+/* 2. WELCOME STATE (Card on Belly) */
+.state-welcome #welcomeCard {
+  opacity: 1;
+  pointer-events: auto;
+  /* ANIMATION: Drops DOWN from -200px to 150px (Belly Position) */
+  transform: translate(-50%, 220%);
+}
+
+/* Arms for Welcome (Holding the belly card) */
+.state-welcome .arm.left { transform: rotate(25deg) translate(5px, 0px); }
+.state-welcome .arm.right { transform: rotate(-25deg) translate(-5px, 0px); }
+
+.state-login .panda {
+  opacity: 1;
+  transform: translate(calc(-50% - 220px), -100px);
+}
+/* 3. LOGIN STATE (Card Center/Chest) */
+.state-login #loginCard {
+  opacity: 1;
+  pointer-events: auto;
+  /* ANIMATION: Drops DOWN from -200px to 0px (Chest Position) */
+  transform: translate(calc(-50% + 200px), 55%);
+}
+.state-login .eye { animation: blinkOpen 900ms ease both; }
+
+/* Arms for Login (Holding the chest card) */
+.state-login .arm.left { transform: rotate(14deg) translateY(10px); }
+.state-login .arm.right { transform: rotate(-14deg) translateY(10px); }
+
+
+/* 4. SIGNUP STATE (Split View) */
+.state-signup .panda {
+  opacity: 1;
+  transform: translate(calc(-50% - 220px), -100px);
+}
+
+.state-signup #signupCard {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(calc(-50% + 200px), 20%);
+}
+.state-signup .eye { animation: blinkOpen 900ms ease both; }
+
+/* Arms Open (Presenting) */
+.state-signup .arm.left { transform: rotate(-38deg) translate(20px, -55px); }
+.state-signup .arm.right { transform: rotate(38deg) translate(-20px, -55px); }
+
+.state-waking .eye { animation: blinkOpen 900ms ease both; }
+
+.state-coverEyes .arm.left { transform: rotate(-38deg) translate(20px, -55px); }
+.state-coverEyes .arm.right { transform: rotate(38deg) translate(-20px, -55px); }
+.state-coverEyes .eye { background: transparent; }
+.state-coverEyes .eye::after { width: 26px; height: 3px; border-radius: 3px; background: #f2f2f2; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
