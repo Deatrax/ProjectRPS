@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, User,
     Plus, Calendar, Clock, Moon, Sun
@@ -361,18 +362,19 @@ const Dashboard = () => {
 };
 
 // Dock Item
-const DockItem = ({ icon: Icon, label }) => {
+const DockItem = ({ icon: Icon, label, path }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
         <div className="dock-item-wrapper">
-            <button
+            <Link
+                to={path}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 className="dock-btn"
             >
                 <Icon size={20} />
-            </button>
+            </Link>
 
             {isHovered && (
                 <div className="dock-tooltip">

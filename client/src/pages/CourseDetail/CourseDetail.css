@@ -1,0 +1,250 @@
+.course-detail-page {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.course-detail-sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    padding: 2rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.course-detail-sidebar h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.course-detail-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.course-detail-sidebar li {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.course-detail-sidebar li:hover {
+    background-color: #e0e0e0;
+    color: #007bff; 
+}
+
+.course-detail-sidebar li.active {
+    background-color: #007bff; 
+    color: white;
+    font-weight: bold;
+}
+
+.course-detail-sidebar li.active:hover {
+    background-color: #0056b3; 
+}
+
+.course-detail-content {
+    flex-grow: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.course-detail-content h2 {
+    font-size: 2.2rem;
+    color: #333;
+    margin-bottom: 1rem; 
+}
+
+.course-detail-content h3 {
+    font-size: 1.8rem;
+    color: #444;
+    margin-bottom: 0.8rem;
+}
+
+.course-detail-content p {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1rem; 
+}
+
+.materials-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.upload-material-container {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.upload-material-container h4 {
+    font-size: 1.4rem;
+    color: #444;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.add-material-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #3b82f6; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    width: fit-content;
+    align-self: center; 
+    margin-bottom: 1rem;
+}
+
+.add-material-btn:hover {
+    background-color: #2563eb; 
+}
+
+.selected-file-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-top: 1rem;
+}
+
+.selected-file-preview span {
+    font-weight: 500;
+    color: #333;
+    word-break: break-all; 
+}
+
+.selected-file-preview input[type="text"] {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    width: 100%;
+    text-align: center;
+}
+
+.file-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.file-actions .action-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.file-actions .action-btn.delete-action-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.file-actions .action-btn.delete-action-btn:hover {
+    background-color: #c82333;
+}
+
+.file-actions .action-btn.primary-action-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.file-actions .action-btn.primary-action-btn:hover {
+    background-color: #218838;
+}
+
+.file-actions .action-btn:not(.delete-action-btn):not(.primary-action-btn) {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.file-actions .action-btn:not(.delete-action-btn):not(.primary-action-btn):hover {
+    background-color: #e0e0e0;
+}
+
+.materials-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.material-item {
+    background: #ffffff;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.material-item a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.material-item a:hover {
+    text-decoration: underline;
+}
+
+.material-item .material-description {
+    font-size: 0.9rem;
+    color: #777;
+    flex-grow: 2;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+.material-item .delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.material-item .delete-btn:hover {
+    background-color: #c82333;
+}
+
+.course-detail-page .error-message {
+    color: #dc3545;
+    font-weight: bold;
+    margin-top: 1rem;
+    text-align: center;
+}
