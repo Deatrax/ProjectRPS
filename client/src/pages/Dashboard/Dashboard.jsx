@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import './Dashboard.css';
 
-const Dashboard3rd = () => {
+const Dashboard = () => {
     // State management
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [painScore, setPainScore] = useState(45);
@@ -420,4 +420,4 @@ const DockItem = ({ icon: Icon, label, isDarkMode }) => {
     );
 };
 
-export default Dashboard3rd;
+export default Dashboard;

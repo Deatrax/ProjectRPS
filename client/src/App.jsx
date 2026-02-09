@@ -39,6 +39,7 @@ function App() {
           <div>
             <h2>Welcome, {user.name}!</h2>
             <button onClick={logout}>Logout</button>
+            <Link to="/dashboard">Go to Dashboard</Link>
           </div>
         ) : (
           <div>
