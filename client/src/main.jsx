@@ -4,8 +4,8 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';  // Import routing components
 import './index.css';
 import App from './App.jsx';
-import Login from './pages/Login.jsx';  // Import Login page
-import SignUp from './pages/Signup.jsx';  // Import SignUp page
+import Login from './pages/Login/Login.jsx';  // Import Login page
+import SignUp from './pages/Signup/Signup.jsx';  // Import SignUp pag
 import { AuthProvider } from './context/AuthContext.jsx';
 
 createRoot(document.getElementById('root')).render(
