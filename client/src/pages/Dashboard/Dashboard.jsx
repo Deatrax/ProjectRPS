@@ -39,20 +39,6 @@ const Dashboard = () => {
         ));
     };
 
-    // Theme classes
-    const theme = {
-        bg: isDarkMode ? 'bg-[#191919]' : 'bg-white',
-        secondaryBg: isDarkMode ? 'bg-[#252525]' : 'bg-gray-50',
-        text: isDarkMode ? 'text-gray-100' : 'text-gray-900',
-        textSecondary: isDarkMode ? 'text-gray-400' : 'text-gray-600',
-        textMuted: isDarkMode ? 'text-gray-500' : 'text-gray-500',
-        border: isDarkMode ? 'border-gray-800' : 'border-gray-200',
-        hover: isDarkMode ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100',
-        divider: isDarkMode ? 'border-gray-800' : 'border-gray-100',
-        navBg: isDarkMode ? 'bg-[#191919]/95' : 'bg-white/95',
-        cardHover: isDarkMode ? 'hover:bg-[#212121]' : 'hover:bg-gray-50/80',
-    };
-
     // Get timeline data
     const getNotionTimeline = () => {
         const today = new Date();
@@ -98,126 +84,118 @@ const Dashboard = () => {
     const timelineTasks = getTasksOnTimeline();
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${theme.bg}`}>
+        <div className="dashboard-container" data-theme={isDarkMode ? 'dark' : 'light'}>
             {/* Minimal Navbar */}
-            <nav className={`sticky top-0 z-40 ${theme.navBg} backdrop-blur-xl border-b ${theme.border}`}>
-                <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <h1 className={`text-lg font-semibold ${theme.text}`}>
+            <nav className="dashboard-nav">
+                <div className="nav-content">
+                    <div className="nav-left">
+                        <h1 className="nav-title">
                             RPS Dashboard
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="nav-right">
                         {/* Dark Mode Toggle */}
                         <button
                             onClick={() => setIsDarkMode(!isDarkMode)}
-                            className={`p-2 rounded-lg ${theme.hover} transition-colors ${theme.textSecondary}`}
+                            className="theme-toggle-btn"
                         >
                             {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
                         </button>
 
                         {/* User */}
-                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${theme.hover} transition-colors cursor-pointer`}>
-                            <div className={`w-6 h-6 rounded-md bg-blue-500 flex items-center justify-center text-white text-xs font-semibold`}>
+                        <div className="user-badge">
+                            <div className="user-avatar">
                                 SM
                             </div>
-                            <span className={`text-sm font-medium ${theme.text}`}>Sadman</span>
+                            <span className="user-name">Sadman</span>
                         </div>
                     </div>
                 </div>
             </nav>
 
-            <div className="max-w-6xl mx-auto px-8 py-8 pb-32">
-                {/* Hero Status - Notion Style (No Card) */}
-                <div className="mb-12">
-                    <div className="flex items-baseline gap-3 mb-4">
-                        <h2 className={`text-4xl font-bold ${theme.text}`}>
+            <div className="main-content">
+                {/* Hero Status - Notion Style */}
+                <div className="hero-section">
+                    <div className="pain-score-header">
+                        <h2 className="pain-score-value">
                             {painScore}
                         </h2>
-                        <span className={`text-sm font-medium ${theme.textMuted} uppercase tracking-wide`}>
+                        <span className="pain-score-label">
                             Pain Score
                         </span>
                     </div>
 
-                    <div className={`h-2 ${theme.secondaryBg} rounded-full overflow-hidden mb-4`}>
+                    <div className="progress-bar-container">
                         <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700"
+                            className="progress-bar-fill"
                             style={{ width: `${painScore}%` }}
                         ></div>
                     </div>
 
-                    <p className={`${theme.textSecondary} text-sm`}>
+                    <p className="active-tasks-text">
                         {tasks.filter(t => !t.completed).length} active tasks across your courses
                     </p>
                 </div>
 
                 {/* Quick Actions - Minimal Style */}
-                <div className="flex gap-2 mb-10">
-                    <button className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${theme.text} ${theme.hover} rounded-lg transition-colors`}>
+                <div className="quick-actions">
+                    <button className="action-btn primary">
                         <Plus size={16} />
                         New Task
                     </button>
-                    <button className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${theme.textSecondary} ${theme.hover} rounded-lg transition-colors`}>
+                    <button className="action-btn secondary">
                         <BookOpen size={16} />
                         Add Course
                     </button>
-                    <button className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${theme.textSecondary} ${theme.hover} rounded-lg transition-colors`}>
+                    <button className="action-btn secondary">
                         <Calendar size={16} />
                         Calendar
                     </button>
                 </div>
 
                 {/* Timeline Section - Notion Style */}
-                <div className="mb-12">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Clock size={18} className={theme.textMuted} />
-                        <h3 className={`text-sm font-semibold ${theme.text} uppercase tracking-wide`}>
+                <div className="timeline-section">
+                    <div className="section-header">
+                        <Clock size={18} className="text-muted" style={{ color: 'var(--text-muted)' }} />
+                        <h3 className="section-title">
                             Timeline
                         </h3>
-                        <span className={`text-xs ${theme.textMuted}`}>• Next 3 weeks</span>
+                        <span className="section-subtitle">• Next 3 weeks</span>
                     </div>
 
-                    <div className={`py-6 border-t border-b ${theme.divider}`}>
-                        <div className="overflow-x-auto scrollbar-hide">
-                            <div className="relative" style={{ minWidth: `${timeline.length * 80}px`, height: '180px' }}>
+                    <div className="timeline-wrapper">
+                        <div className="timeline-scroll-area">
+                            <div className="timeline-content" style={{ minWidth: `${timeline.length * 80}px` }}>
                                 {/* Timeline Base Line */}
-                                <div className={`absolute top-8 left-0 right-0 h-px ${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'}`}></div>
+                                <div className="timeline-base-line"></div>
 
                                 {/* Date Markers */}
-                                <div className="absolute top-0 left-0 right-0 flex">
+                                <div className="timeline-grid">
                                     {timeline.map((day, index) => (
                                         <div
                                             key={index}
-                                            className="relative"
-                                            style={{ width: '80px' }}
+                                            className="timeline-day"
                                         >
                                             {/* Today indicator */}
                                             {day.isToday && (
-                                                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-px h-full bg-blue-500/20"></div>
+                                                <div className="today-indicator"></div>
                                             )}
 
                                             {/* Date marker */}
-                                            <div className="absolute top-7 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
-                                                <div className={`w-2 h-2 rounded-full ${day.isToday
-                                                    ? 'bg-blue-500 ring-2 ring-blue-500/20'
-                                                    : isDarkMode
-                                                        ? 'bg-gray-700'
-                                                        : 'bg-gray-300'
-                                                    }`}></div>
+                                            <div className="date-marker">
+                                                <div className={`marker-dot ${day.isToday ? 'today' : ''}`}></div>
 
                                                 {/* Date label */}
-                                                <div className={`mt-3 text-center ${day.isToday ? 'scale-105' : ''}`}>
-                                                    <div className={`text-xs font-medium ${day.isToday ? 'text-blue-500' : theme.textMuted
-                                                        }`}>
+                                                <div className={`date-label ${day.isToday ? 'today' : ''}`}>
+                                                    <div className="day-name">
                                                         {day.dayName}
                                                     </div>
-                                                    <div className={`text-sm font-semibold ${day.isToday ? theme.text : theme.textSecondary
-                                                        }`}>
+                                                    <div className="day-num">
                                                         {day.dayNum}
                                                     </div>
                                                     {(index === 0 || day.dayNum === 1) && (
-                                                        <div className={`text-xs ${theme.textMuted} mt-0.5`}>{day.monthName}</div>
+                                                        <div className="month-name">{day.monthName}</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -226,7 +204,7 @@ const Dashboard = () => {
                                 </div>
 
                                 {/* Task Dots */}
-                                <div className="absolute top-20 left-0 right-0">
+                                <div className="timeline-tasks-layer">
                                     {timelineTasks.map((task, idx) => {
                                         const leftPosition = task.position * 80 + 30;
                                         const sameDateTasks = timelineTasks.filter(t => t.position === task.position);
@@ -236,70 +214,57 @@ const Dashboard = () => {
                                         return (
                                             <div
                                                 key={task.id}
-                                                className="absolute group cursor-pointer"
+                                                className="timeline-task-marker"
                                                 style={{
                                                     left: `${leftPosition}px`,
-                                                    top: `${verticalOffset}px`,
-                                                    zIndex: 10
+                                                    top: `${verticalOffset}px`
                                                 }}
                                             >
                                                 {/* Connection line */}
-                                                <div
-                                                    className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-px h-8 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'
-                                                        } opacity-40 group-hover:opacity-70 transition-opacity`}
-                                                ></div>
+                                                <div className="task-connection-line"></div>
 
                                                 {/* Dot */}
                                                 <div
-                                                    className="relative w-3 h-3 rounded-full shadow-sm transform transition-all duration-200 group-hover:scale-150"
+                                                    className="task-dot"
                                                     style={{
                                                         backgroundColor: task.courseColor,
-                                                        boxShadow: `0 0 0 2px ${isDarkMode ? '#191919' : '#ffffff'}`
                                                     }}
                                                 >
                                                     <div
-                                                        className="absolute inset-0 rounded-full animate-ping opacity-20"
+                                                        className="task-ping"
                                                         style={{ backgroundColor: task.courseColor }}
                                                     ></div>
                                                 </div>
 
-                                                {/* Hover Card - Notion Style */}
-                                                <div
-                                                    className="absolute left-1/2 transform -translate-x-1/2 bottom-8 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:bottom-10 transition-all duration-300 pointer-events-none z-50"
-                                                    style={{ width: '280px' }}
-                                                >
-                                                    <div
-                                                        className={`${isDarkMode ? 'bg-[#2a2a2a]' : 'bg-white'} rounded-lg p-4 shadow-2xl border ${theme.border} relative`}
-                                                    >
-                                                        {/* Arrow */}
-                                                        <div
-                                                            className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-6 border-r-6 border-t-6 border-transparent`}
-                                                            style={{ borderTopColor: isDarkMode ? '#2a2a2a' : '#ffffff' }}
-                                                        ></div>
+                                                {/* Hover Card */}
+                                                <div className="task-hover-card">
+                                                    <div className="card-content">
+                                                        {/* Arrow (optional, handled by CSS placement mostly) */}
+                                                        {/* <div className="card-arrow"></div> */}
 
-                                                        <div className="flex items-start gap-3">
+                                                        <div className="card-body">
                                                             <div
-                                                                className="w-1 h-12 rounded-full flex-shrink-0"
+                                                                className="course-stripe"
                                                                 style={{ backgroundColor: task.courseColor }}
                                                             ></div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className={`text-xs font-semibold ${theme.textMuted} mb-1 uppercase tracking-wide`}>
+                                                            <div className="card-details">
+                                                                <div className="card-course">
                                                                     {task.course}
                                                                 </div>
-                                                                <div className={`text-sm font-semibold ${theme.text} mb-3`}>
+                                                                <div className="card-title">
                                                                     {task.name}
                                                                 </div>
-                                                                <div className="flex items-center gap-3 text-xs">
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <span className={theme.textMuted}>Diff:</span>
-                                                                        <span className={`font-semibold ${theme.textSecondary}`}>{task.difficulty}/10</span>
+                                                                <div className="card-meta">
+                                                                    <div className="meta-item">
+                                                                        <span className="meta-label">Diff:</span>
+                                                                        <span className="meta-value">{task.difficulty}/10</span>
                                                                     </div>
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <span className={theme.textMuted}>Weight:</span>
-                                                                        <span className={`font-semibold ${theme.textSecondary}`}>{task.weight}%</span>
+                                                                    <div className="meta-item">
+                                                                        <span className="meta-label">Weight:</span>
+                                                                        <span className="meta-value">{task.weight}%</span>
                                                                     </div>
                                                                 </div>
-                                                                <div className={`text-xs ${theme.textMuted} mt-2`}>
+                                                                <div className="card-date">
                                                                     {new Date(task.deadline).toLocaleDateString('en-US', {
                                                                         month: 'short',
                                                                         day: 'numeric',
@@ -321,56 +286,55 @@ const Dashboard = () => {
 
                 {/* Tasks List - Notion Style */}
                 <div>
-                    <div className="flex items-center gap-2 mb-6">
-                        <CheckSquare size={18} className={theme.textMuted} />
-                        <h3 className={`text-sm font-semibold ${theme.text} uppercase tracking-wide`}>
+                    <div className="section-header">
+                        <CheckSquare size={18} className="text-muted" style={{ color: 'var(--text-muted)' }} />
+                        <h3 className="section-title">
                             Tasks
                         </h3>
-                        <span className={`text-xs ${theme.textMuted}`}>• Sorted by priority</span>
+                        <span className="section-subtitle">• Sorted by priority</span>
                     </div>
 
-                    <div className="space-y-px">
+                    <div className="task-list">
                         {tasks.slice(0, 10).map((task, index) => (
                             <div
                                 key={task.id}
-                                className={`group flex items-center gap-4 px-3 py-3 -mx-3 rounded-lg transition-colors ${theme.cardHover} ${task.completed ? 'opacity-50' : ''
-                                    }`}
+                                className={`task-item ${task.completed ? 'completed' : ''}`}
                             >
                                 {/* Checkbox */}
                                 <input
                                     type="checkbox"
                                     checked={task.completed}
                                     onChange={() => toggleTask(task.id)}
-                                    className="w-4 h-4 rounded border-2 border-gray-300 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                                    className="task-checkbox"
                                 />
 
                                 {/* Course Color */}
                                 <div
-                                    className="w-1 h-8 rounded-full flex-shrink-0"
+                                    className="task-course-dot"
                                     style={{ backgroundColor: task.courseColor }}
                                 ></div>
 
                                 {/* Task Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className={`font-medium ${theme.text} mb-0.5 ${task.completed ? 'line-through' : ''}`}>
+                                <div className="task-content">
+                                    <div className="task-title">
                                         {task.name}
                                     </div>
-                                    <div className={`text-xs ${theme.textSecondary} flex items-center gap-2`}>
+                                    <div className="task-subtitle">
                                         <span>{task.course}</span>
-                                        <span className={theme.textMuted}>•</span>
+                                        <span>•</span>
                                         <span>{task.deadline}</span>
                                     </div>
                                 </div>
 
                                 {/* Stats - Minimal */}
-                                <div className="flex items-center gap-4 text-xs">
-                                    <div className={`flex items-center gap-1.5 ${theme.textSecondary}`}>
-                                        <span className={theme.textMuted}>Diff</span>
-                                        <span className="font-semibold">{task.difficulty}</span>
+                                <div className="task-stats">
+                                    <div className="meta-item">
+                                        <span className="meta-label">Diff</span>
+                                        <span className="meta-value">{task.difficulty}</span>
                                     </div>
-                                    <div className={`flex items-center gap-1.5 ${theme.textSecondary}`}>
-                                        <span className={theme.textMuted}>Wt</span>
-                                        <span className="font-semibold">{task.weight}%</span>
+                                    <div className="meta-item">
+                                        <span className="meta-label">Wt</span>
+                                        <span className="meta-value">{task.weight}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -380,11 +344,11 @@ const Dashboard = () => {
             </div>
 
             {/* Minimal Dock */}
-            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-                <div className={`${isDarkMode ? 'bg-[#2a2a2a]' : 'bg-white'} rounded-xl shadow-2xl px-2 py-2 border ${theme.border}`}>
-                    <div className="flex items-center gap-1">
+            <div className="dock-container">
+                <div className="dock-content">
+                    <div className="flex items-center gap-1" style={{ display: 'flex', gap: '0.25rem' }}>
                         {dockItems.map((item, index) => (
-                            <DockItem key={index} {...item} isDarkMode={isDarkMode} />
+                            <DockItem key={index} {...item} />
                         ))}
                     </div>
                 </div>
@@ -394,26 +358,22 @@ const Dashboard = () => {
 };
 
 // Dock Item
-const DockItem = ({ icon: Icon, label, isDarkMode }) => {
+const DockItem = ({ icon: Icon, label }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
-        <div className="relative">
+        <div className="dock-item-wrapper">
             <button
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className={`p-2.5 rounded-lg ${isDarkMode ? 'hover:bg-[#353535]' : 'hover:bg-gray-100'
-                    } transition-all transform hover:scale-110 duration-200`}
+                className="dock-btn"
             >
-                <Icon size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+                <Icon size={20} />
             </button>
 
             {isHovered && (
-                <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1 ${isDarkMode ? 'bg-[#353535]' : 'bg-gray-800'
-                    } text-white text-xs font-medium rounded-md whitespace-nowrap animate-fadeIn`}>
+                <div className="dock-tooltip">
                     {label}
-                    <div className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${isDarkMode ? 'border-t-[#353535]' : 'border-t-gray-800'
-                        }`}></div>
                 </div>
             )}
         </div>

@@ -1,38 +1,572 @@
-/* Dashboard3rd - Notion-style CSS */
-
-/* Hide scrollbar but keep functionality */
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
+/* Dashboard CSS Variables */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    /* gray-50 */
+    --text-primary: #111827;
+    /* gray-900 */
+    --text-secondary: #4b5563;
+    /* gray-600 */
+    --text-muted: #6b7280;
+    /* gray-500 */
+    --border-color: #e5e7eb;
+    /* gray-200 */
+    --hover-bg: #f3f4f6;
+    /* gray-100 */
+    --divider-color: #f3f4f6;
+    /* gray-100 */
+    --nav-bg: rgba(255, 255, 255, 0.95);
+    --card-hover: rgba(249, 250, 251, 0.8);
+    --shadow-color: rgba(0, 0, 0, 0.05);
+    --accent-blue: #3b82f6;
+    --accent-indigo: #6366f1;
 }
 
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+[data-theme='dark'] {
+    --bg-primary: #191919;
+    --bg-secondary: #252525;
+    --text-primary: #f3f4f6;
+    /* gray-100 */
+    --text-secondary: #9ca3af;
+    /* gray-400 */
+    --text-muted: #6b7280;
+    /* gray-500 */
+    --border-color: #1f2937;
+    /* gray-800 */
+    --hover-bg: #2a2a2a;
+    --divider-color: #1f2937;
+    /* gray-800 */
+    --nav-bg: rgba(25, 25, 25, 0.95);
+    --card-hover: #212121;
+    --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
-/* Smooth transitions */
-* {
-    transition-property: background-color, border-color, color, fill, stroke;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
+/* Base Styles */
+.dashboard-container {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-/* Custom checkbox styling for Notion look */
-input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
+/* Navbar */
+.dashboard-nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background-color: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.nav-content {
+    max-width: 72rem;
+    /* max-w-6xl */
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-title {
+    font-size: 1.125rem;
+    /* text-lg */
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.theme-toggle-btn {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
     cursor: pointer;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.user-badge:hover {
+    background-color: var(--hover-bg);
+}
+
+.user-avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.375rem;
+    background-color: var(--accent-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.user-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Main Content Area */
+.main-content {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem;
+    padding-bottom: 8rem;
+}
+
+/* Hero Section */
+.hero-section {
+    margin-bottom: 3rem;
+}
+
+.pain-score-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.pain-score-value {
+    font-size: 2.25rem;
+    /* text-4xl */
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.pain-score-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.progress-bar-container {
+    height: 0.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, #3b82f6, #6366f1);
+    border-radius: 9999px;
+    transition: width 0.7s ease-in-out;
+}
+
+.active-tasks-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    background-color: transparent;
+}
+
+.action-btn.primary {
+    color: var(--text-primary);
+}
+
+.action-btn.secondary {
+    color: var(--text-secondary);
+}
+
+.action-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Section Common */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin: 0;
+}
+
+.section-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Timeline */
+.timeline-section {
+    margin-bottom: 3rem;
+}
+
+.timeline-wrapper {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--divider-color);
+    border-bottom: 1px solid var(--divider-color);
+}
+
+.timeline-scroll-area {
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+.timeline-scroll-area::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.timeline-content {
     position: relative;
-    transition: all 0.2s ease;
+    height: 180px;
+}
+
+.timeline-base-line {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.timeline-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+}
+
+.timeline-day {
+    position: relative;
+    width: 80px;
+    /* Fixed width per day */
     flex-shrink: 0;
 }
 
-input[type="checkbox"]:checked {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+.today-indicator {
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100%;
+    background-color: rgba(59, 130, 246, 0.2);
 }
 
-input[type="checkbox"]:checked::after {
+.date-marker {
+    position: absolute;
+    top: 1.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.marker-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    /* gray-300 default */
+}
+
+[data-theme='dark'] .marker-dot {
+    background-color: #374151;
+    /* gray-700 */
+}
+
+.marker-dot.today {
+    background-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.date-label {
+    margin-top: 0.75rem;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.date-label.today {
+    transform: scale(1.05);
+}
+
+.day-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.today .day-name {
+    color: var(--accent-blue);
+}
+
+.day-num {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.today .day-num {
+    color: var(--text-primary);
+}
+
+.month-name {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.125rem;
+}
+
+/* Timeline Tasks */
+.timeline-tasks-layer {
+    position: absolute;
+    top: 5rem;
+    left: 0;
+    right: 0;
+}
+
+.timeline-task-marker {
+    position: absolute;
+    /* left and top set inline */
+    z-index: 10;
+}
+
+.task-connection-line {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 2rem;
+    background-color: var(--border-color);
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
+
+.timeline-task-marker:hover .task-connection-line {
+    opacity: 0.7;
+}
+
+.task-dot {
+    position: relative;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--bg-primary);
+    transition: transform 0.2s;
+}
+
+.timeline-task-marker:hover .task-dot {
+    transform: scale(1.5);
+}
+
+.task-ping {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Hover Card for Timeline Task */
+.task-hover-card {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 2rem;
+    width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 50;
+}
+
+.timeline-task-marker:hover .task-hover-card {
+    opacity: 1;
+    visibility: visible;
+    bottom: 2.5rem;
+}
+
+.card-content {
+    background-color: var(--bg-primary);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    position: relative;
+}
+
+.card-arrow {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: var(--bg-primary) transparent transparent transparent;
+}
+
+/* Border for arrow requires specific handling or pseudo-element trick, keeping simple for now or using drop-shadow on parent */
+
+.card-body {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.course-stripe {
+    width: 0.25rem;
+    height: 3rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.card-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-course {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.card-meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+}
+
+.meta-item {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+}
+
+.meta-label {
+    color: var(--text-muted);
+}
+
+.meta-value {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.card-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+/* Task List */
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    /* space-y-px equivalent concept, usually needs a background for separators, or use margin */
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.task-item:hover {
+    background-color: var(--card-hover);
+}
+
+.task-item.completed {
+    opacity: 0.5;
+}
+
+.task-checkbox {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+    border: 2px solid #d1d5db;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.task-checkbox:checked {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.task-checkbox:checked::after {
     content: '✓';
     position: absolute;
     top: 50%;
@@ -43,114 +577,119 @@ input[type="checkbox"]:checked::after {
     font-weight: bold;
 }
 
-/* Fade in animation */
+.task-course-dot {
+    width: 0.25rem;
+    height: 2rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.task-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+}
+
+.completed .task-title {
+    text-decoration: line-through;
+}
+
+.task-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.task-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+}
+
+/* Dock */
+.dock-container {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+}
+
+.dock-content {
+    background-color: var(--bg-primary);
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.25rem;
+}
+
+.dock-item-wrapper {
+    position: relative;
+}
+
+.dock-btn {
+    padding: 0.625rem;
+    border-radius: 0.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dock-btn:hover {
+    background-color: var(--hover-bg);
+    transform: scale(1.1);
+}
+
+.dock-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0.625rem;
+    background-color: var(--text-primary);
+    /* inverted usage usually */
+    color: var(--bg-primary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Reusing fadeIn from previous CSS if available, otherwise defining it */
+
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-5px);
+        transform: translate(-50%, -5px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate(-50%, 0);
     }
 }
 
-.animate-fadeIn {
-    animation: fadeIn 0.2s ease-out;
-}
-
-/* Pulse animation for dots */
 @keyframes ping {
 
     75%,
     100% {
         transform: scale(2);
         opacity: 0;
-    }
-}
-
-.animate-ping {
-    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-/* Minimal focus states */
-button:focus,
-input:focus {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-}
-
-button:focus-visible {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-}
-
-/* Smooth hover transitions */
-.transition-hover {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Selection styling */
-::selection {
-    background-color: rgba(59, 130, 246, 0.2);
-}
-
-/* Dark mode selection */
-.dark ::selection {
-    background-color: rgba(59, 130, 246, 0.3);
-}
-
-/* Remove tap highlight on mobile */
-* {
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Better text rendering */
-body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-}
-
-/* Notion-style divider */
-.notion-divider {
-    border: none;
-    border-top: 1px solid;
-    opacity: 0.1;
-}
-
-/* Subtle hover elevation */
-.hover-lift:hover {
-    transform: translateY(-1px);
-}
-
-/* Timeline dot glow */
-.dot-glow {
-    filter: drop-shadow(0 0 4px currentColor);
-}
-
-/* Minimal shadow */
-.shadow-minimal {
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.shadow-minimal-lg {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Dark mode shadows */
-@media (prefers-color-scheme: dark) {
-    .shadow-minimal {
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    }
-
-    .shadow-minimal-lg {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
     }
 }
