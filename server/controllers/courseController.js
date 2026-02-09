@@ -1,7 +1,7 @@
 const Course = require('../models/Course');
 const asyncHandler = require('express-async-handler'); 
 
-
+// Get all courses
 const getCourses = asyncHandler(async (req, res) => {
     const courses = await Course.find({ user: req.user.id });
     res.json(courses);
@@ -14,8 +14,7 @@ const createCourse = asyncHandler(async (req, res) => {
     // Check if course with this code already exists for the user
     const existingCourse = await Course.findOne({ user: req.user.id, code: code });
     if (existingCourse) {
-        res.status(400);
-        throw new Error('Course with this code already exists for this user.');
+        return res.status(400).json({ message: 'Course with this code already exists for this user.' });
     }
 
     const newCourse = new Course({

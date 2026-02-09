@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    getCourses, 
-    createCourse, 
-    deleteCourse, 
+const {
+    getCourses,
+    createCourse,
+    deleteCourse,
     getCourseById,
     getTasks,
     addTask,

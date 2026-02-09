@@ -26,16 +26,19 @@ const uploadMaterial = asyncHandler(async (req, res) => {
     }
 
     try {
+        // Convert buffer to data URI
+        const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+        
         // Upload file to Cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const result = await cloudinary.uploader.upload(dataUri, {
             folder: `course_materials/${courseId}`, 
             resource_type: 'auto', 
-            access_mode: 'public', 
+            public_id: req.file.originalname.split('.')[0] + '-' + Date.now(), 
         });
 
         const newMaterial = await Material.create({
             title,
-            description,
+            description: description || '', 
             fileUrl: result.secure_url,
             publicId: result.public_id,
             course: courseId,

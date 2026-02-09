@@ -29,6 +29,8 @@ export default function CourseDetails() {
   const [isRenaming, setIsRenaming] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [materialError, setMaterialError] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -148,41 +150,45 @@ export default function CourseDetails() {
     }
   };
 
-  const deleteItem = async (type, itemId) => {
-    if (!user || !user.token) {
-      setItemError('User not authenticated.');
-      return;
-    }
-    if (!window.confirm(`Are you sure you want to delete this ${type.slice(0, -1)}?`)) {
-      return;
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    const { type, item } = itemToDelete;
+    let deleteUrl = '';
+
+    if (type === 'task') {
+        deleteUrl = `http://localhost:5000/api/courses/${id}/tasks/${item._id}`;
+    } else if (type === 'assignment') {
+        deleteUrl = `http://localhost:5000/api/courses/${id}/assignments/${item._id}`;
+    } else if (type === 'material') {
+        deleteUrl = `http://localhost:5000/api/materials/${id}/${item._id}`;
     }
 
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        await axios.delete(deleteUrl, config);
 
-      if (type === 'tasks') {
-        await axios.delete(`http://localhost:5000/api/courses/${id}/tasks/${itemId}`, config);
-        setTasks(prev => prev.filter(item => item._id !== itemId));
-      } else if (type === 'assignments') {
-        await axios.delete(`http://localhost:5000/api/courses/${id}/assignments/${itemId}`, config);
-        setAssignments(prev => prev.filter(item => item._id !== itemId));
-      } else if (type === 'materials') {
-        const materialToDelete = materials.find(m => m._id === itemId);
-        if (materialToDelete) {
-             await handleDeleteMaterial(itemId, materialToDelete.publicId);
-             setMaterials(prev => prev.filter(item => item._id !== itemId));
-        } else {
-            setItemError('Material not found for deletion.');
+        if (type === 'task') {
+            setTasks(prev => prev.filter(t => t._id !== item._id));
+        } else if (type === 'assignment') {
+            setAssignments(prev => prev.filter(a => a._id !== item._id));
+        } else if (type === 'material') {
+            setMaterials(prev => prev.filter(m => m._id !== item._id));
         }
-      }
     } catch (err) {
-      console.error(`Error deleting ${type}:`, err);
-      setItemError(err.response?.data?.message || `Failed to delete ${type}.`);
+        console.error(`Error deleting ${type}:`, err);
+        setError(err.response?.data?.message || `Failed to delete ${type}.`);
+    } finally {
+        setShowDeleteConfirm(false);
+        setItemToDelete(null);
     }
+  };
+
+  const handleDeleteClick = (e, type, item) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setItemToDelete({ type, item });
+      setShowDeleteConfirm(true);
   };
 
   const handleFileChange = (e) => {
@@ -231,30 +237,6 @@ export default function CourseDetails() {
       setMaterialError(err.response?.data?.message || 'Material upload failed.');
     } finally {
       setUploading(false);
-    }
-  };
-
-  const handleDeleteMaterial = async (materialId, publicId) => {
-    if (!user || !user.token) {
-      setMaterialError('User not authenticated.');
-      return;
-    }
-    if (!window.confirm('Are you sure you want to delete this material?')) {
-      return;
-    }
-
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      await axios.delete(`http://localhost:5000/api/materials/${id}/${materialId}`, config);
-      const materialsResponse = await axios.get(`http://localhost:5000/api/materials/${id}`, config);
-      setMaterials(materialsResponse.data);
-    } catch (err) {
-      console.error('Error deleting material:', err);
-      setMaterialError(err.response?.data?.message || 'Material deletion failed.');
     }
   };
 
@@ -309,6 +291,26 @@ export default function CourseDetails() {
           <h1>{courseDetails.name}</h1>
           <p>{courseDetails.description}</p>
         </div>
+
+        {showDeleteConfirm && itemToDelete && (
+            <div className="modal-overlay">
+                <div className="modal">
+                    <div className="modal-header">
+                        <h2>Confirm Deletion</h2>
+                    </div>
+                    <p>Are you sure you want to delete the {itemToDelete.type} "{itemToDelete.item.title}"?</p>
+                    <div className="modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+                        <button onClick={() => {setShowDeleteConfirm(false); setItemToDelete(null);}} className="btn-secondary">
+                            Cancel
+                        </button>
+                        <button onClick={confirmDelete} className="btn-primary">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
 
 
         {showAddItem && (
@@ -370,7 +372,7 @@ export default function CourseDetails() {
                       <h3 className={task.completed ? 'completed' : ''}>{task.title}</h3>
                       {task.description && <p>{task.description}</p>}
                     </div>
-                    <button onClick={() => deleteItem('tasks', task._id)} className="btn-delete">
+                    <button onClick={(e) => handleDeleteClick(e, 'task', task)} className="btn-delete">
                       <X size={16} />
                     </button>
                   </div>
@@ -400,7 +402,7 @@ export default function CourseDetails() {
                       <h3>{assignment.title}</h3>
                       {assignment.description && <p>{assignment.description}</p>}
                     </div>
-                    <button onClick={() => deleteItem('assignments', assignment._id)} className="btn-delete">
+                    <button onClick={(e) => handleDeleteClick(e, 'assignment', assignment)} className="btn-delete">
                       <X size={16} />
                     </button>
                   </div>
@@ -473,7 +475,7 @@ export default function CourseDetails() {
                       </h3>
                       {material.description && <p>{material.description}</p>}
                     </div>
-                    <button onClick={() => deleteItem('materials', material._id)} className="btn-delete">
+                    <button onClick={(e) => handleDeleteClick(e, 'material', material)} className="btn-delete">
                       <X size={16} />
                     </button>
                   </div>

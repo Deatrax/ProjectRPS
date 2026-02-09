@@ -12,8 +12,11 @@ const Courses = () => {
   const [error, setError] = useState(null);
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [newCourseName, setNewCourseName] = useState('');
+  const [newCourseCode, setNewCourseCode] = useState('');
   const [newCourseDesc, setNewCourseDesc] = useState('');
   const [addingCourse, setAddingCourse] = useState(false); 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState(null);
 
   const fetchCourses = async () => {
     if (!user || !user.token) {
@@ -43,8 +46,8 @@ const Courses = () => {
   }, [user]);
 
   const addCourse = async () => {
-    if (!newCourseName.trim()) {
-      setError('Course name is required.');
+    if (!newCourseName.trim() || !newCourseCode.trim()) {
+      setError('Course name and code are required.');
       return;
     }
     if (!user || !user.token) {
@@ -65,46 +68,57 @@ const Courses = () => {
 
       const response = await axios.post(
         'http://localhost:5000/api/courses',
-        { name: newCourseName, code: newCourseName.substring(0, 3).toUpperCase() + Math.floor(Math.random() * 100), description: newCourseDesc },
+        { name: newCourseName, code: newCourseCode, description: newCourseDesc },
         config
       );
-      setCourses([...courses, response.data]); 
+      setCourses([...courses, response.data]);
       setNewCourseName('');
+      setNewCourseCode('');
       setNewCourseDesc('');
       setShowAddCourse(false);
     } catch (err) {
       console.error('Error adding course:', err);
-      setError(err.response?.data?.message || 'Failed to add course.');
+      const errorMessage = err.response?.data?.message || 'Failed to add course.';
+      if (errorMessage.includes('Course with this code already exists')) {
+        setError('A course with this code already exists. Please use a different code.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setAddingCourse(false);
     }
   };
 
-  const handleDeleteCourse = async (e, id) => {
-    e.preventDefault(); 
-    e.stopPropagation(); 
-
-    if (!user || !user.token) {
-      setError('User not authenticated. Please log in.');
-      return;
-    }
-
-    if (!window.confirm('Are you sure you want to delete this course?')) {
-      return;
+  const confirmDelete = async () => {
+    if (!courseToDelete || !user || !user.token) {
+        setError('Course or user not identified for deletion.');
+        setShowDeleteConfirm(false);
+        return;
     }
 
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      await axios.delete(`http://localhost:5000/api/courses/${id}`, config);
-      setCourses(courses.filter((course) => course._id !== id));
+        const config = {
+            headers: {
+                Authorization: `Bearer ${user.token}`,
+            },
+        };
+        await axios.delete(`http://localhost:5000/api/courses/${courseToDelete._id}`, config);
+        setCourses(courses.filter((course) => course._id !== courseToDelete._id));
+        setShowDeleteConfirm(false);
+        setCourseToDelete(null);
     } catch (err) {
-      console.error('Error deleting course:', err);
-      setError(err.response?.data?.message || 'Failed to delete course.');
+        console.error('Error deleting course:', err);
+        setError(err.response?.data?.message || 'Failed to delete course.');
+        setShowDeleteConfirm(false);
+        setCourseToDelete(null);
     }
+  };
+
+  const handleDeleteCourse = (e, course) => {
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    setCourseToDelete(course);
+    setShowDeleteConfirm(true);
   };
 
   if (loading) {
@@ -135,7 +149,7 @@ const Courses = () => {
             <div className="modal">
               <div className="modal-header">
                 <h2>New Course</h2>
-                <button onClick={() => {setShowAddCourse(false); setError(null); setNewCourseName(''); setNewCourseDesc('');}} className="btn-close">
+                <button onClick={() => {setShowAddCourse(false); setError(null); setNewCourseName(''); setNewCourseCode(''); setNewCourseDesc('');}} className="btn-close">
                   <X size={24} />
                 </button>
               </div>
@@ -144,6 +158,13 @@ const Courses = () => {
                 placeholder="Course name"
                 value={newCourseName}
                 onChange={(e) => setNewCourseName(e.target.value)}
+                className="input-field"
+              />
+              <input
+                type="text"
+                placeholder="Course code"
+                value={newCourseCode}
+                onChange={(e) => setNewCourseCode(e.target.value)}
                 className="input-field"
               />
               <textarea
@@ -157,6 +178,25 @@ const Courses = () => {
                 {addingCourse ? 'Adding...' : 'Create Course'}
               </button>
               {error && <p className="error-message">{error}</p>}
+            </div>
+          </div>
+        )}
+
+        {showDeleteConfirm && courseToDelete && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <div className="modal-header">
+                <h2>Confirm Deletion</h2>
+              </div>
+              <p>Are you sure you want to delete the course "{courseToDelete.name}"?</p>
+              <div className="modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+                <button onClick={() => {setShowDeleteConfirm(false); setCourseToDelete(null);}} className="btn-secondary">
+                  Cancel
+                </button>
+                <button onClick={confirmDelete} className="btn-primary">
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -181,7 +221,7 @@ const Courses = () => {
                       <span>0 materials</span>
                     </div>
                      <button
-                      onClick={(e) => handleDeleteCourse(e, course._id)}
+                      onClick={(e) => handleDeleteCourse(e, course)}
                       className="delete-btn-card"
                       title="Delete Course"
                     >

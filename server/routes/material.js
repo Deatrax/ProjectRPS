@@ -1,25 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs'); 
 const { uploadMaterial, getCourseMaterials, deleteMaterial } = require('../controllers/materialController');
 const { protect } = require('../middleware/authMiddleware');
 
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure Multer storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '..', 'uploads')); 
-    },
-    filename: function (req, file, cb) {
-        cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
-    }
-});
+// Configure Multer to store files in memory
+const storage = multer.memoryStorage();
 
 // Filter file types
 const fileFilter = (req, file, cb) => {
