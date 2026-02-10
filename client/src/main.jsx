@@ -10,7 +10,6 @@ import Dashboard from './pages/Dashboard/Dashboard.jsx'; // Import Dashboard pag
 import AddCourse from './pages/Courses/AddCourse.jsx'; // Import AddCourse page
 import TaskPicker from './components/TaskPicker.jsx'; // Import TaskPicker component
 import { AuthProvider } from './context/AuthContext.jsx';
-import TaskPicker from './components/TaskPicker.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
