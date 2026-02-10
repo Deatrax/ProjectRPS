@@ -1,80 +1,81 @@
-/* --- Global Resets & React Root Setup --- */
-:root {
+/* --- Scoped Resets & Setup for TaskPicker --- */
+.task-picker-scope {
+    /* Variables */
     --wheel-height: 150px;
     --item-height: 50px;
-    --primary-color: #4a90e2; 
+    --primary-color: #4a90e2;
     --primary-dark: #357abd;
     --accent-glow: rgba(74, 144, 226, 0.4);
     --bg-dark: #18224a;
     --glass-border: rgba(255, 255, 255, 0.1);
-}
-* {
-  box-sizing: border-box;
-}
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden; /* Prevent horizontal scrollbar */
-}
 
-body {
+    /* Body/Root replacements */
     font-family: 'Poppins', sans-serif;
     /* Deep Space Gradient */
     background: radial-gradient(circle at 50% 10%, #1f2c5c 0%, #0b1020 80%);
     color: #333;
     min-height: 100vh;
-}
-
-/* 
-   Target the React Root element (id="root") specifically.
-   React apps wrap everything in this div. We need to make sure 
-   IT is full width, or the children won't expand.
-*/
-#root {
     width: 100%;
+
+    /* Layout */
     display: flex;
-    justify-content: center; /* Centers the .picker-container horizontally */
+    justify-content: center;
     padding-top: 40px;
     padding-bottom: 40px;
+    box-sizing: border-box;
+
+    /* Text alignment checks */
+    text-align: left;
+}
+
+.task-picker-scope * {
     box-sizing: border-box;
 }
 
 /* --- Main Container --- */
-.picker-container {
+.task-picker-scope .picker-container {
     /* STRICTLY 80% WIDTH */
-    width: 80%; 
-    max-width: 1000px; /* Optional cap so it's not too wide on huge monitors */
-    min-width: 350px;  /* Prevents it from crushing on mobile */
-    
+    width: 80%;
+    max-width: 1000px;
+    /* Optional cap so it's not too wide on huge monitors */
+    min-width: 350px;
+    /* Prevents it from crushing on mobile */
+
     background: transparent;
     display: flex;
     flex-direction: column;
-    gap: 25px; 
-    animation: fadeIn 0.8s ease-out;
+    gap: 25px;
+    animation: taskPickerFadeIn 0.8s ease-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes taskPickerFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* --- Page Title --- */
-.page-title {
+.task-picker-scope .page-title {
     color: #fff;
     font-size: 36px;
     font-weight: 600;
     margin: 0;
     padding-bottom: 10px;
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
     position: relative;
-    text-align: left; /* Ensure title aligns with content */
+    text-align: left;
+    /* Ensure title aligns with content */
 }
 
-.page-title::after {
+.task-picker-scope .page-title::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -86,7 +87,7 @@ body {
 }
 
 /* --- Date Picker Section (Glassmorphism) --- */
-.date-picker-section {
+.task-picker-scope .date-picker-section {
     display: flex;
     justify-content: center;
     position: relative;
@@ -97,11 +98,12 @@ body {
     border-radius: 16px;
     padding: 20px 0;
     height: var(--wheel-height);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    width: 100%; /* Ensure picker spans full container width */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    /* Ensure picker spans full container width */
 }
 
-.date-picker-section::before {
+.task-picker-scope .date-picker-section::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -116,18 +118,22 @@ body {
     z-index: 1;
 }
 
-.wheel {
+.task-picker-scope .wheel {
     height: var(--wheel-height);
-    width: 30%; /* 3 columns taking up 30% each roughly */
+    width: 30%;
+    /* 3 columns taking up 30% each roughly */
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     text-align: center;
     scrollbar-width: none;
     z-index: 2;
 }
-.wheel::-webkit-scrollbar { display: none; }
 
-.wheel-item {
+.task-picker-scope .wheel::-webkit-scrollbar {
+    display: none;
+}
+
+.task-picker-scope .wheel-item {
     height: var(--item-height);
     display: flex;
     align-items: center;
@@ -139,16 +145,18 @@ body {
     cursor: pointer;
 }
 
-.wheel-spacer { height: var(--item-height); }
+.task-picker-scope .wheel-spacer {
+    height: var(--item-height);
+}
 
-.wheel:hover .wheel-item:hover {
+.task-picker-scope .wheel:hover .wheel-item:hover {
     color: #fff;
     transform: scale(1.1);
     text-shadow: 0 0 12px var(--primary-color);
 }
 
 /* --- Form Section --- */
-fieldset {
+.task-picker-scope fieldset {
     background-color: #ffffff;
     border: none;
     border-radius: 20px;
@@ -156,11 +164,13 @@ fieldset {
     margin: 0;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     position: relative;
-    width: 100%; /* Ensure form spans full container width */
-    box-sizing: border-box; /* Includes padding in width calculation */
+    width: 100%;
+    /* Ensure form spans full container width */
+    box-sizing: border-box;
+    /* Includes padding in width calculation */
 }
 
-legend {
+.task-picker-scope legend {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     padding: 8px 20px;
@@ -172,12 +182,12 @@ legend {
     box-shadow: 0 4px 15px var(--accent-glow);
 }
 
-.form-group {
+.task-picker-scope .form-group {
     margin-bottom: 25px;
     position: relative;
 }
 
-.form-group label {
+.task-picker-scope .form-group label {
     display: block;
     margin-bottom: 10px;
     font-size: 13px;
@@ -188,9 +198,9 @@ legend {
     text-align: left;
 }
 
-.form-group input[type="text"],
-.form-group textarea,
-.form-group select {
+.task-picker-scope .form-group input[type="text"],
+.task-picker-scope .form-group textarea,
+.task-picker-scope .form-group select {
     width: 100%;
     padding: 15px;
     border: 2px solid transparent;
@@ -203,14 +213,14 @@ legend {
     color: #333;
 }
 
-.form-group textarea {
+.task-picker-scope .form-group textarea {
     resize: vertical;
     min-height: 100px;
 }
 
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.task-picker-scope .form-group input:focus,
+.task-picker-scope .form-group textarea:focus,
+.task-picker-scope .form-group select:focus {
     outline: none;
     background-color: #fff;
     border-color: var(--primary-color);
@@ -218,18 +228,19 @@ legend {
 }
 
 /* --- Fancy Radio Chips --- */
-.radio-group {
+.task-picker-scope .radio-group {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
-    justify-content: flex-start; /* Align to left */
+    justify-content: flex-start;
+    /* Align to left */
 }
 
-.radio-group input[type="radio"] {
+.task-picker-scope .radio-group input[type="radio"] {
     display: none;
 }
 
-.radio-group label {
+.task-picker-scope .radio-group label {
     background-color: #f4f6f9;
     padding: 10px 20px;
     border-radius: 30px;
@@ -241,17 +252,17 @@ legend {
     border: 2px solid transparent;
     display: flex;
     align-items: center;
-    text-transform: capitalize; 
+    text-transform: capitalize;
     margin-bottom: 0;
     text-align: center;
 }
 
-.radio-group label:hover {
+.task-picker-scope .radio-group label:hover {
     background-color: #e2e6ea;
     transform: translateY(-2px);
 }
 
-.radio-group input[type="radio"]:checked + label {
+.task-picker-scope .radio-group input[type="radio"]:checked+label {
     background: var(--primary-color);
     color: white;
     box-shadow: 0 4px 15px var(--accent-glow);
@@ -259,7 +270,7 @@ legend {
 }
 
 /* --- Upload Box --- */
-.upload-box {
+.task-picker-scope .upload-box {
     border: 2px dashed #cbd5e0;
     border-radius: 12px;
     height: 70px;
@@ -274,20 +285,20 @@ legend {
     overflow: hidden;
 }
 
-.upload-box:hover {
+.task-picker-scope .upload-box:hover {
     border-color: var(--primary-color);
     background: #ebf8ff;
     color: var(--primary-color);
 }
 
-.plus-icon { 
-    font-size: 28px; 
-    margin-right: 12px; 
+.task-picker-scope .plus-icon {
+    font-size: 28px;
+    margin-right: 12px;
     font-weight: 300;
 }
 
 /* --- Submit Button --- */
-.submit-btn {
+.task-picker-scope .submit-btn {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     border: none;
@@ -305,18 +316,27 @@ legend {
     overflow: hidden;
 }
 
-.submit-btn:hover {
+.task-picker-scope .submit-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 30px rgba(74, 144, 226, 0.4);
 }
 
-.submit-btn:active {
+.task-picker-scope .submit-btn:active {
     transform: scale(0.98);
 }
 
 /* Responsive Fix */
 @media (max-width: 600px) {
-    .picker-container { width: 95%; }
-    fieldset { padding: 25px; }
-    .radio-group label { width: 100%; justify-content: center; }
+    .task-picker-scope .picker-container {
+        width: 95%;
+    }
+
+    .task-picker-scope fieldset {
+        padding: 25px;
+    }
+
+    .task-picker-scope .radio-group label {
+        width: 100%;
+        justify-content: center;
+    }
 }
