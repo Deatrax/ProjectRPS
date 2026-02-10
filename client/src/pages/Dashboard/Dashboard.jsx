@@ -16,6 +16,16 @@ const Dashboard = () => {
     const [painScore, setPainScore] = useState(0);
     const [loading, setLoading] = useState(true);
 
+    // Mode Configuration
+    const getModeConfig = (score) => {
+        if (score >= 80) return { mode: 'Doom', color: '#ef4444', class: 'mode-doom' }; // Red
+        if (score >= 60) return { mode: 'Panic', color: '#f97316', class: 'mode-panic' }; // Orange
+        if (score >= 30) return { mode: 'Grind', color: '#f59e0b', class: 'mode-grind' }; // Amber/Yellow
+        return { mode: 'Relaxed', color: '#10b981', class: 'mode-relaxed' }; // Green/Teal
+    };
+
+    const currentMode = getModeConfig(painScore);
+
     // Fetch tasks from API
     useEffect(() => {
         const fetchTasks = async () => {
@@ -99,12 +109,12 @@ const Dashboard = () => {
 
     // Dock items
     const dockItems = [
-        { icon: Home, label: 'Dashboard', path: '/' },
-        { icon: BookOpen, label: 'Courses', path: '/courses/new' },
-        { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
-        { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
-        { icon: Award, label: 'Achievements', path: '/achievements' },
-        { icon: Settings, label: 'Settings', path: '/settings' },
+        { icon: Home, label: 'Dashboard', path: '/dashboard' },
+        { icon: BookOpen, label: 'Courses', path: '/courses' },
+        { icon: CheckSquare, label: 'All Tasks', path: '/taskpicker' },
+        { icon: TrendingUp, label: 'Analytics', path: '/dashboard' },
+        { icon: Award, label: 'Achievements', path: '/dashboard' },
+        { icon: Settings, label: 'Settings', path: '/dashboard' },
     ];
 
     // Toggle task completion
@@ -183,11 +193,14 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="dashboard-container" data-theme="dark">
+        <div className={`dashboard-container ${currentMode.class}`} data-theme="dark">
             {/* New Header Section */}
             <header className="dashboard-header">
                 <div className="header-title">
                     <h1>RPS Dashboard</h1>
+                    <span className="mode-badge" style={{ backgroundColor: currentMode.color }}>
+                        {currentMode.mode} Mode
+                    </span>
                 </div>
                 <div className="header-controls">
                     {/* User Badge */}
@@ -202,7 +215,7 @@ const Dashboard = () => {
                 {/* Hero Status - Notion Style */}
                 <div className="hero-section">
                     <div className="pain-score-header">
-                        <h2 className="pain-score-value">
+                        <h2 className="pain-score-value" style={{ color: currentMode.color }}>
                             {painScore}
                         </h2>
                         <span className="pain-score-label">
@@ -215,7 +228,7 @@ const Dashboard = () => {
                             className="progress-bar-fill"
                             style={{
                                 width: `${Math.min(painScore, 100)}%`,
-                                backgroundColor: painScore > 80 ? '#ef4444' : painScore > 50 ? '#f59e0b' : '#10b981'
+                                backgroundColor: currentMode.color
                             }}
                         ></div>
                     </div>
@@ -231,11 +244,11 @@ const Dashboard = () => {
                         <Plus size={16} />
                         New Task
                     </button>
-                    <button className="action-btn secondary" onClick={() => navigate('/courses/new')}>
+                    <button className="action-btn secondary" onClick={() => navigate('/courses/add')}>
                         <BookOpen size={16} />
                         Add Course
                     </button>
-                    <button className="action-btn secondary">
+                    <button className="action-btn secondary" onClick={() => console.log('Calendar clicked')}>
                         <Calendar size={16} />
                         Calendar
                     </button>
@@ -445,9 +458,12 @@ const Dashboard = () => {
 
             {/* Notification-style Bottom Navbar (Notch) */}
             <div className="notch-navbar-container">
-                <nav className="notch-navbar">
+                <nav className="notch-navbar" style={{
+                    borderTop: `2px solid ${currentMode.color}`,
+                    boxShadow: `0 -4px 20px -5px ${currentMode.color}40`
+                }}>
                     {dockItems.map((item, index) => (
-                        <BottomNavItem key={index} {...item} />
+                        <BottomNavItem key={index} {...item} activeColor={currentMode.color} />
                     ))}
                 </nav>
             </div>
@@ -456,20 +472,25 @@ const Dashboard = () => {
 };
 
 // Bottom Nav Item
-const BottomNavItem = ({ icon: Icon, label, path }) => {
+const BottomNavItem = ({ icon: Icon, label, path, activeColor }) => {
     const navigate = useNavigate();
-    // Basic active state simulation (in real app, use useLocation)
     const isActive = window.location.pathname === path;
 
     return (
-        <button
-            className={`nav-item ${isActive ? 'active' : ''}`}
-            onClick={() => navigate(path)}
-        >
-            <div className="nav-item-icon">
-                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-            </div>
-        </button>
+        <div className="nav-item-wrapper group">
+            <button
+                className={`nav-item ${isActive ? 'active' : ''}`}
+                onClick={() => navigate(path)}
+                style={isActive ? { color: activeColor } : {}}
+            >
+                <div className="nav-item-icon">
+                    <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+            </button>
+            <span className="nav-tooltip">
+                {label}
+            </span>
+        </div>
     );
 };
 
