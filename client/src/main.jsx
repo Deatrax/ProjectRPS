@@ -7,6 +7,7 @@ import App from './App.jsx';
 import Login from './pages/Login/Login.jsx';  // Import Login page
 import SignUp from './pages/Signup/Signup.jsx';  // Import SignUp pag
 import Dashboard from './pages/Dashboard/Dashboard.jsx'; // Import Dashboard page
+import AddCourse from './pages/Courses/AddCourse.jsx'; // Import AddCourse page
 import { AuthProvider } from './context/AuthContext.jsx';
 
 createRoot(document.getElementById('root')).render(
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/login" element={<Login />} />  {/* Login Route */}
           <Route path="/signup" element={<SignUp />} />  {/* Sign Up Route */}
           <Route path="/dashboard" element={<Dashboard />} />  {/* Dashboard Route */}
+          <Route path="/courses/new" element={<AddCourse />} /> {/* Add Course Route */}
         </Routes>
       </Router>
     </AuthProvider>

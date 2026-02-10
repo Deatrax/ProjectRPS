@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, User,
     Plus, Calendar, Clock, Moon, Sun
@@ -6,6 +7,7 @@ import {
 import './Dashboard.css';
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     // State management
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [painScore, setPainScore] = useState(45);
@@ -25,7 +27,7 @@ const Dashboard = () => {
     // Dock items
     const dockItems = [
         { icon: Home, label: 'Dashboard', path: '/' },
-        { icon: BookOpen, label: 'Courses', path: '/courses' },
+        { icon: BookOpen, label: 'Courses', path: '/courses/new' },
         { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
         { icon: Award, label: 'Achievements', path: '/achievements' },
@@ -129,7 +131,7 @@ const Dashboard = () => {
                         <Plus size={16} />
                         New Task
                     </button>
-                    <button className="action-btn secondary">
+                    <button className="action-btn secondary" onClick={() => navigate('/courses/new')}>
                         <BookOpen size={16} />
                         Add Course
                     </button>
@@ -345,11 +347,15 @@ const Dashboard = () => {
 
 // Bottom Nav Item
 const BottomNavItem = ({ icon: Icon, label, path }) => {
+    const navigate = useNavigate();
     // Basic active state simulation (in real app, use useLocation)
-    const isActive = path === '/';
+    const isActive = path === '/'; // This logic is simplified, might need update for real highlighting
 
     return (
-        <button className={`nav-item ${isActive ? 'active' : ''}`}>
+        <button
+            className={`nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => navigate(path)}
+        >
             <div className="nav-item-icon">
                 <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
             </div>
