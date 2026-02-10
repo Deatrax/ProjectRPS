@@ -32,12 +32,20 @@ const PandaLogin = ({ onSignupClick, onPasswordFocus, onPasswordBlur }) => {
       <h2>Login</h2>
       <form id="loginForm" onSubmit={handleSubmit}>
         <label>Email
-          <input type="email" placeholder="you@example.com" required />
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </label>
         <label>Password
           <input
             type="password"
             placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             onFocus={onPasswordFocus}
             onBlur={onPasswordBlur}
             required
