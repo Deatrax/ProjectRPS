@@ -21,6 +21,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/signup" element={<SignUp />} />  {/* Sign Up Route */}
           <Route path="/dashboard" element={<Dashboard />} />  {/* Dashboard Route */}
           <Route path="/courses/new" element={<AddCourse />} /> {/* Add Course Route */}
+          <Route path="/taskpicker" element={<TaskPicker />} />  {/* Task Picker Route */}
         </Routes>
       </Router>
     </AuthProvider>

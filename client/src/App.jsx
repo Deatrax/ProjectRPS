@@ -6,6 +6,7 @@ import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './index.css';
 import PandaLamp from './components/PandaLamp';
+import TaskPicker from './components/TaskPicker';
 
 function App() {
   const [count, setCount] = useState(0);
