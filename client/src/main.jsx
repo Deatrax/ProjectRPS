@@ -13,7 +13,6 @@ import CourseDetails from './components/CourseDetails.jsx'; // Import CourseDeta
 import TaskDetails from './components/TaskDetails.jsx'; // Import TaskDetails component
 import Courses from './pages/Courses/Courses.jsx'; // Import Courses page
 import CourseDetail from './pages/CourseDetail/CourseDetail.jsx'; // Import CourseDetail page
-import AddCourse from './pages/AddCourse/AddCourse.jsx'; // Import AddCourse page
 import { AuthProvider } from './context/AuthContext.jsx';
 
 createRoot(document.getElementById('root')).render(
