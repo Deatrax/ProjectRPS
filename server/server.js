@@ -2,7 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/auth');  // Import the authentication routes
+const authRoutes = require('./routes/auth');  
+const courseRoutes = require('./routes/course'); 
+const materialRoutes = require('./routes/material'); 
 
 const app = express();
 
@@ -16,15 +18,21 @@ app.get('/', (req, res) => {
 });
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB Connected'))
     .catch((err) => console.log('Error connecting to MongoDB:', err));
 
 // Use authentication routes
 app.use('/api/auth', authRoutes);
+app.use('/api/courses', require('./routes/courses'));
+app.use('/api/tasks', require('./routes/tasks'));
+
+
+// Use course routes
+app.use('/api/courses', courseRoutes);
+
+// Use material routes
+app.use('/api/materials', materialRoutes);
 
 // Define the port
 const PORT = process.env.PORT || 5000;

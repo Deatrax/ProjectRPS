@@ -1,0 +1,742 @@
+/* Dashboard CSS Variables - Themed to match PandaLamp */
+:root {
+    --bg-primary: #0b1020;
+    --bg-secondary: rgba(255, 255, 255, 0.08);
+    /* Card background */
+    --text-primary: rgba(255, 255, 255, 0.9);
+    --text-secondary: rgba(255, 255, 255, 0.65);
+    --text-muted: rgba(255, 255, 255, 0.45);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --hover-bg: rgba(255, 255, 255, 0.12);
+    --divider-color: rgba(255, 255, 255, 0.1);
+    --nav-bg: rgba(11, 16, 32, 0.85);
+    /* Glassy dark */
+    --card-hover: rgba(255, 255, 255, 0.15);
+    --accent-blue: #3b82f6;
+    --accent-indigo: #6366f1;
+    --light-accent: #ffe9a6;
+    /* PandaLamp light accent */
+}
+
+/* Base Styles */
+.dashboard-container {
+    min-height: 100vh;
+    width: 100%;
+    /* PandaLamp Radial Gradient Background */
+    background: radial-gradient(1200px 700px at 50% 10%, #18224a 0%, #0b1020 60%);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    overflow-x: hidden;
+    padding-bottom: 80px;
+    /* Space for bottom nav */
+}
+
+/* Header Section (Replaces Top Navbar) */
+.dashboard-header {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 2rem 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #fff 0%, var(--light-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* User Badge */
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+}
+
+.user-badge:hover {
+    background: var(--hover-bg);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Content Area */
+.main-content {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1rem 2rem 8rem 2rem;
+}
+
+/* Hero Section */
+.hero-section {
+    margin-bottom: 3rem;
+}
+
+.pain-score-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.pain-score-value {
+    font-size: 2.25rem;
+    /* text-4xl */
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.pain-score-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.progress-bar-container {
+    height: 0.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, #3b82f6, #6366f1);
+    border-radius: 9999px;
+    transition: width 0.7s ease-in-out;
+}
+
+.active-tasks-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    background-color: transparent;
+}
+
+.action-btn.primary {
+    color: var(--text-primary);
+}
+
+.action-btn.secondary {
+    color: var(--text-secondary);
+}
+
+.action-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Section Common */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin: 0;
+}
+
+.section-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Timeline */
+.timeline-section {
+    margin-bottom: 3rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+.timeline-wrapper {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--divider-color);
+    border-bottom: 1px solid var(--divider-color);
+    width: 100%;
+}
+
+.timeline-scroll-area {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    /* Firefox */
+    -ms-overflow-style: auto;
+    /* IE/Edge */
+    padding-bottom: 10px;
+    /* space for scrollbar */
+    padding-top: 20px;
+    /* space for hover cards at top */
+}
+
+/* Optional: Custom scrollbar for Webkit */
+.timeline-scroll-area::-webkit-scrollbar {
+    height: 6px;
+    display: block;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.timeline-scroll-area::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 20px;
+}
+
+.timeline-content {
+    position: relative;
+    height: 320px;
+    /* Significantly increased to fit hover cards */
+    /* min-width set inline */
+}
+
+.timeline-base-line {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.timeline-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    width: 100%;
+}
+
+.timeline-day {
+    position: relative;
+    width: 80px;
+    /* Fixed width per day */
+    flex-shrink: 0;
+}
+
+.today-indicator {
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100%;
+    /* Will span the full height */
+    background-color: rgba(59, 130, 246, 0.2);
+    z-index: 0;
+}
+
+.date-marker {
+    position: absolute;
+    top: 1.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 5;
+}
+
+.marker-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    /* gray-300 default */
+}
+
+[data-theme='dark'] .marker-dot {
+    background-color: #374151;
+    /* gray-700 */
+}
+
+.marker-dot.today {
+    background-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.date-label {
+    margin-top: 0.75rem;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.date-label.today {
+    transform: scale(1.05);
+}
+
+.day-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.today .day-name {
+    color: var(--accent-blue);
+}
+
+.day-num {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.today .day-num {
+    color: var(--text-primary);
+}
+
+.month-name {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.125rem;
+}
+
+/* Timeline Tasks */
+.timeline-tasks-layer {
+    position: absolute;
+    top: 9rem;
+    /* Pushed down significantly to give room for tooltips */
+    left: 0;
+    right: 0;
+    height: 100%;
+}
+
+.timeline-task-marker {
+    position: absolute;
+    /* left and top set inline */
+    z-index: 10;
+    transition: z-index 0.2s;
+    /* delay slightly to keep tooltip on top while transitioning out */
+}
+
+.timeline-task-marker:hover {
+    z-index: 100;
+    /* Bring to front on hover */
+}
+
+.task-connection-line {
+    position: absolute;
+    bottom: 50%;
+    /* Connect from dot upwards */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 7rem;
+    /* Make it reach up to the date line roughly */
+    background-color: var(--border-color);
+    opacity: 0.2;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    transform-origin: bottom center;
+}
+
+.timeline-task-marker:hover .task-connection-line {
+    opacity: 0.6;
+    background-color: var(--accent-blue);
+}
+
+.task-dot {
+    position: relative;
+    width: 0.875rem;
+    /* Slightly larger */
+    height: 0.875rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--bg-primary);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.timeline-task-marker:hover .task-dot {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.task-ping {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Hover Card for Timeline Task */
+.task-hover-card {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 1.5rem;
+    /* Position above the dot */
+    width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    z-index: 100;
+    margin-bottom: 10px;
+}
+
+.timeline-task-marker:hover .task-hover-card {
+    opacity: 1;
+    visibility: visible;
+    bottom: 2rem;
+    /* Slide up slightly */
+    pointer-events: auto;
+    /* Allow interaction if needed */
+}
+
+.card-content {
+    background-color: var(--bg-primary);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px var(--border-color);
+    position: relative;
+}
+
+.card-arrow {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: var(--bg-primary) transparent transparent transparent;
+}
+
+/* Border for arrow requires specific handling or pseudo-element trick, keeping simple for now or using drop-shadow on parent */
+
+.card-body {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.course-stripe {
+    width: 0.25rem;
+    height: 3rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.card-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-course {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.card-meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+}
+
+.meta-item {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+}
+
+.meta-label {
+    color: var(--text-muted);
+}
+
+.meta-value {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.card-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+/* Task List */
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    /* space-y-px equivalent concept, usually needs a background for separators, or use margin */
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.task-item:hover {
+    background-color: var(--card-hover);
+}
+
+.task-item.completed {
+    opacity: 0.5;
+}
+
+.task-checkbox {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+    border: 2px solid #d1d5db;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.task-checkbox:checked {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.task-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.task-course-dot {
+    width: 0.25rem;
+    height: 2rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.task-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+}
+
+.completed .task-title {
+    text-decoration: line-through;
+}
+
+.task-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.task-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+}
+
+/* Notch Bottom Navbar */
+.notch-navbar-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    /* Allow clicks through the empty areas */
+}
+
+.notch-navbar {
+    pointer-events: auto;
+    width: 90%;
+    max-width: 600px;
+    background: rgba(11, 16, 32, 0.85);
+    /* Dark glassy bg */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    /* Merged with bottom */
+
+    /* Variable Rounding: Rounded top corners, square bottom to merge */
+    border-radius: 24px 24px 0 0;
+
+    padding: 1rem 2rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    /* Account for iPhone home bar */
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    box-shadow:
+        0 -10px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    position: relative;
+}
+
+/* Optional: "Liquid" connector effect using pseudo-elements if desired - keeping simple for now to ensure robustness across browsers */
+
+.nav-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0.5rem;
+}
+
+.nav-item:hover {
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.nav-item.active {
+    color: var(--accent-blue);
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--accent-blue);
+    box-shadow: 0 0 8px var(--accent-blue);
+}
+
+.nav-item-icon {
+    transition: transform 0.3s;
+}
+
+.nav-item:hover .nav-item-icon {
+    transform: scale(1.1);
+}
+
+.nav-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* Add a subtle glow at the top edge of the notch */
+.notch-navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes ping {
+
+    75%,
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}

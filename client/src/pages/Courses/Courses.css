@@ -1,0 +1,222 @@
+:root {
+  --bg-dark: #0b1020;
+  --glow-color: #18224a;
+}
+
+.courses-page-wrapper {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: radial-gradient(1200px 700px at 50% 10%, var(--glow-color) 0%, var(--bg-dark) 60%) no-repeat fixed;
+  background-color: var(--bg-dark);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #ffffff;
+}
+
+.courses-page-wrapper .container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 3rem 1rem;
+  box-sizing: border-box;
+  background: transparent !important;
+}
+
+.courses-page-wrapper .content-limit {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Header & Animated Buttons */
+.courses-page-wrapper .header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.courses-page-wrapper .header-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+}
+
+.courses-page-wrapper .header-description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+}
+
+.courses-page-wrapper .floating-button-wrapper {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.courses-page-wrapper .add-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe9a6 0%, #e6d08f 100%);
+  border: none;
+  color: #0b1020;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: 0 8px 25px rgba(255, 233, 166, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Centering the icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 0;
+}
+
+.courses-page-wrapper .add-button svg {
+  display: block;
+  margin: 0;
+}
+
+.courses-page-wrapper .add-button.plus-active {
+  transform: rotate(45deg);
+  background: #cccccc;
+}
+
+.courses-page-wrapper .action-btn {
+  position: absolute;
+  padding: 0.8rem 1.4rem;
+  border-radius: 50px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 40;
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.courses-page-wrapper .btn-left {
+  right: 80px;
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+}
+
+.courses-page-wrapper .btn-bottom {
+  top: 80px;
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+}
+
+.courses-page-wrapper .btn-right {
+  left: 80px;
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+}
+
+@keyframes bounceIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Course Rows */
+.courses-page-wrapper .thin-line {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 233, 166, 0.3), transparent);
+  margin-bottom: 3rem;
+}
+
+.courses-page-wrapper .course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.courses-page-wrapper .course-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.courses-page-wrapper .course-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 233, 166, 0.3);
+  transform: translateX(10px);
+}
+
+.courses-page-wrapper .course-code {
+  color: #ffe9a6;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.courses-page-wrapper .course-title {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.courses-page-wrapper .icon-group-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.courses-page-wrapper .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.courses-page-wrapper .stat-icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.courses-page-wrapper .task-bg {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.courses-page-wrapper .assignment-bg {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.courses-page-wrapper .material-bg {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.courses-page-wrapper .delete-row-btn {
+  background: none;
+  border: none;
+  color: rgba(239, 68, 68, 0.4);
+  cursor: pointer;
+}
+
+.courses-page-wrapper .delete-row-btn:hover {
+  color: #ef4444;
+  transform: scale(1.2);
+}
