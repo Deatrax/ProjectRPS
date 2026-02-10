@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CourseDetails.css'; // Make sure your CSS file is imported here
 
 const CourseDetails = () => {
+    const navigate = useNavigate();
     // State for the active tab ('tasks' or 'materials')
     const [activeTab, setActiveTab] = useState('tasks');
 
@@ -94,9 +96,15 @@ const CourseDetails = () => {
                                 <div
                                     key={task.id}
                                     className={`list-item task-item ${task.completed ? 'is-completed' : ''}`}
-                                    onClick={() => toggleTask(task.id)}
+                                    onClick={() => navigate(`/tasks/${task.id}`)}
                                 >
-                                    <div className="custom-checkbox">
+                                    <div
+                                        className="custom-checkbox"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleTask(task.id);
+                                        }}
+                                    >
                                         <svg viewBox="0 0 24 24" className="check-icon">
                                             <polyline points="20 6 9 17 4 12"></polyline>
                                         </svg>

@@ -287,12 +287,17 @@ const Dashboard = () => {
                             <div
                                 key={task.id}
                                 className={`task-item ${task.completed ? 'completed' : ''}`}
+                                onClick={() => window.location.href = `/tasks/${task.id}`}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {/* Checkbox */}
                                 <input
                                     type="checkbox"
                                     checked={task.completed}
-                                    onChange={() => toggleTask(task.id)}
+                                    onChange={(e) => {
+                                        e.stopPropagation();
+                                        toggleTask(task.id);
+                                    }}
                                     className="task-checkbox"
                                 />
 
