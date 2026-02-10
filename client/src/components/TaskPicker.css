@@ -1,0 +1,322 @@
+/* --- Global Resets & React Root Setup --- */
+:root {
+    --wheel-height: 150px;
+    --item-height: 50px;
+    --primary-color: #4a90e2; 
+    --primary-dark: #357abd;
+    --accent-glow: rgba(74, 144, 226, 0.4);
+    --bg-dark: #18224a;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* Prevent horizontal scrollbar */
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    /* Deep Space Gradient */
+    background: radial-gradient(circle at 50% 10%, #1f2c5c 0%, #0b1020 80%);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* 
+   Target the React Root element (id="root") specifically.
+   React apps wrap everything in this div. We need to make sure 
+   IT is full width, or the children won't expand.
+*/
+#root {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Centers the .picker-container horizontally */
+    padding-top: 40px;
+    padding-bottom: 40px;
+    box-sizing: border-box;
+}
+
+/* --- Main Container --- */
+.picker-container {
+    /* STRICTLY 80% WIDTH */
+    width: 80%; 
+    max-width: 1000px; /* Optional cap so it's not too wide on huge monitors */
+    min-width: 350px;  /* Prevents it from crushing on mobile */
+    
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 25px; 
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Page Title --- */
+.page-title {
+    color: #fff;
+    font-size: 36px;
+    font-weight: 600;
+    margin: 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
+    position: relative;
+    text-align: left; /* Ensure title aligns with content */
+}
+
+.page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* --- Date Picker Section (Glassmorphism) --- */
+.date-picker-section {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px 0;
+    height: var(--wheel-height);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    width: 100%; /* Ensure picker spans full container width */
+}
+
+.date-picker-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    width: 90%;
+    height: var(--item-height);
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, transparent, rgba(74, 144, 226, 0.1), transparent);
+    border-top: 1px solid rgba(74, 144, 226, 0.3);
+    border-bottom: 1px solid rgba(74, 144, 226, 0.3);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.wheel {
+    height: var(--wheel-height);
+    width: 30%; /* 3 columns taking up 30% each roughly */
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    text-align: center;
+    scrollbar-width: none;
+    z-index: 2;
+}
+.wheel::-webkit-scrollbar { display: none; }
+
+.wheel-item {
+    height: var(--item-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: center;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.wheel-spacer { height: var(--item-height); }
+
+.wheel:hover .wheel-item:hover {
+    color: #fff;
+    transform: scale(1.1);
+    text-shadow: 0 0 12px var(--primary-color);
+}
+
+/* --- Form Section --- */
+fieldset {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    padding: 40px;
+    margin: 0;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    position: relative;
+    width: 100%; /* Ensure form spans full container width */
+    box-sizing: border-box; /* Includes padding in width calculation */
+}
+
+legend {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-align: left;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background-color: #f4f6f9;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    color: #333;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    background-color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+}
+
+/* --- Fancy Radio Chips --- */
+.radio-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: flex-start; /* Align to left */
+}
+
+.radio-group input[type="radio"] {
+    display: none;
+}
+
+.radio-group label {
+    background-color: #f4f6f9;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    text-transform: capitalize; 
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.radio-group label:hover {
+    background-color: #e2e6ea;
+    transform: translateY(-2px);
+}
+
+.radio-group input[type="radio"]:checked + label {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 15px var(--accent-glow);
+    border-color: var(--primary-color);
+}
+
+/* --- Upload Box --- */
+.upload-box {
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #718096;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-box:hover {
+    border-color: var(--primary-color);
+    background: #ebf8ff;
+    color: var(--primary-color);
+}
+
+.plus-icon { 
+    font-size: 28px; 
+    margin-right: 12px; 
+    font-weight: 300;
+}
+
+/* --- Submit Button --- */
+.submit-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 16px;
+    width: 100%;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 20px rgba(74, 144, 226, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(74, 144, 226, 0.4);
+}
+
+.submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* Responsive Fix */
+@media (max-width: 600px) {
+    .picker-container { width: 95%; }
+    fieldset { padding: 25px; }
+    .radio-group label { width: 100%; justify-content: center; }
+}
