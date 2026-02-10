@@ -8,6 +8,7 @@ import Login from './pages/Login/Login.jsx';  // Import Login page
 import SignUp from './pages/Signup/Signup.jsx';  // Import SignUp pag
 import Dashboard from './pages/Dashboard/Dashboard.jsx'; // Import Dashboard page
 import AddCourse from './pages/Courses/AddCourse.jsx'; // Import AddCourse page
+import TaskPicker from './components/TaskPicker.jsx'; // Import TaskPicker component
 import { AuthProvider } from './context/AuthContext.jsx';
 import TaskPicker from './components/TaskPicker.jsx';
 

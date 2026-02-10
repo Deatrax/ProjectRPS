@@ -24,8 +24,16 @@ const TaskSchema = new mongoose.Schema({
     },
     difficulty: {
         type: Number,
+        required: true,
         min: 1,
         max: 10,
+        default: 5
+    },
+    weight: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 100,
         default: 5
     },
     materials: {
