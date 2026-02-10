@@ -4,25 +4,98 @@ import {
     Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, User,
     Plus, Calendar, Clock, Moon, Sun
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+
     // State management
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    const [painScore, setPainScore] = useState(45);
-    const [tasks, setTasks] = useState([
-        { id: 1, name: 'Database Lab Report', deadline: '2026-02-10', difficulty: 8, weight: 15, course: 'CSE 4541', courseColor: '#3b82f6', completed: false },
-        { id: 2, name: 'Web Programming Midterm Prep', deadline: '2026-02-12', difficulty: 7, weight: 20, course: 'CSE 4540', courseColor: '#8b5cf6', completed: false },
-        { id: 3, name: 'Algorithm Assignment 3', deadline: '2026-02-09', difficulty: 9, weight: 10, course: 'CSE 3501', courseColor: '#06b6d4', completed: false },
-        { id: 4, name: 'Software Engineering UML Diagrams', deadline: '2026-02-14', difficulty: 5, weight: 8, course: 'CSE 4503', courseColor: '#10b981', completed: false },
-        { id: 5, name: 'Computer Networks Quiz Study', deadline: '2026-02-11', difficulty: 6, weight: 5, course: 'CSE 4561', courseColor: '#f59e0b', completed: false },
-        { id: 6, name: 'Machine Learning Lab 4', deadline: '2026-02-15', difficulty: 8, weight: 12, course: 'CSE 4643', courseColor: '#ec4899', completed: false },
-        { id: 7, name: 'Read Chapter 8 - OS Concepts', deadline: '2026-02-13', difficulty: 4, weight: 3, course: 'CSE 4521', courseColor: '#6366f1', completed: false },
-        { id: 8, name: 'Project Proposal Presentation', deadline: '2026-02-18', difficulty: 7, weight: 15, course: 'CSE 4540', courseColor: '#8b5cf6', completed: false },
-        { id: 9, name: 'Compiler Design Assignment', deadline: '2026-02-16', difficulty: 9, weight: 12, course: 'CSE 4641', courseColor: '#14b8a6', completed: false },
-        { id: 10, name: 'Weekly Problem Set', deadline: '2026-02-10', difficulty: 5, weight: 5, course: 'CSE 3501', courseColor: '#06b6d4', completed: false },
-    ]);
+    const [tasks, setTasks] = useState([]);
+    const [painScore, setPainScore] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch tasks from API
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch('http://localhost:5000/api/tasks', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Transform data to match UI needs
+                    const formattedTasks = data.map(task => ({
+                        id: task._id,
+                        name: task.title,
+                        deadline: task.deadline ? task.deadline.split('T')[0] : '', // Format date string
+                        difficulty: task.difficulty,
+                        weight: task.weight,
+                        course: task.course ? task.course.courseCode : task.category || 'General',
+                        courseColor: task.course ? task.course.color : '#6b7280', // Default gray for general
+                        completed: task.status === 'completed',
+                        createdAt: task.createdAt
+                    }));
+
+                    setTasks(formattedTasks);
+                    calculatePainScore(formattedTasks);
+                }
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTasks();
+    }, []);
+
+    // Pain Score Formula:
+    // (Task Count * Avg Difficulty) + Sum((Weight * Difficulty) / Days Remaining) + Procrastination Score
+    const calculatePainScore = (taskList) => {
+        const activeTasks = taskList.filter(t => !t.completed);
+        if (activeTasks.length === 0) {
+            setPainScore(0);
+            return;
+        }
+
+        const taskCount = activeTasks.length;
+        const totalDifficulty = activeTasks.reduce((acc, t) => acc + t.difficulty, 0);
+        const avgDifficulty = totalDifficulty / taskCount;
+
+        let weightedSum = 0;
+        let procrastinationScore = 0;
+        const now = new Date();
+
+        activeTasks.forEach(task => {
+            // Calculate days remaining (min 1 to avoid division by zero)
+            const deadlineDate = new Date(task.deadline || now);
+            const timeDiff = deadlineDate - now;
+            const daysRemaining = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24))); // Min 1 day
+
+            // Weighted Component: (Weight * Difficulty) / Days Remaining
+            weightedSum += (task.weight * task.difficulty) / daysRemaining;
+
+            // Procrastination Score (Approximation)
+            // Logic: If close to deadline (e.g. < 3 days) and difficulty is high, add penalty
+            if (daysRemaining <= 3) {
+                procrastinationScore += (10 / daysRemaining) * (task.difficulty / 5);
+            }
+        });
+
+        const score = (taskCount * avgDifficulty) + weightedSum + procrastinationScore;
+
+        // Normalize/Cap score to 100 for display (though it can technically exceed, we cap UI bar)
+        setPainScore(Math.round(score));
+    };
 
     // Dock items
     const dockItems = [
@@ -35,10 +108,29 @@ const Dashboard = () => {
     ];
 
     // Toggle task completion
-    const toggleTask = (taskId) => {
-        setTasks(tasks.map(task =>
-            task.id === taskId ? { ...task, completed: !task.completed } : task
-        ));
+    const toggleTask = async (taskId, currentStatus) => {
+        // Optimistic UI update
+        const updatedTasks = tasks.map(task =>
+            task.id === taskId ? { ...task, completed: !currentStatus } : task
+        );
+        setTasks(updatedTasks);
+        calculatePainScore(updatedTasks);
+
+        // API Call
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ completed: !currentStatus })
+            });
+        } catch (error) {
+            console.error("Error updating task:", error);
+            // Revert on error (optional, for now simple log)
+        }
     };
 
     // Get timeline data
@@ -71,6 +163,7 @@ const Dashboard = () => {
         const tasksWithPosition = [];
 
         tasks.filter(t => !t.completed).forEach(task => {
+            if (!task.deadline) return;
             const deadlineIndex = timeline.findIndex(day => day.date === task.deadline);
             if (deadlineIndex !== -1) {
                 tasksWithPosition.push({
@@ -85,6 +178,10 @@ const Dashboard = () => {
 
     const timelineTasks = getTasksOnTimeline();
 
+    if (loading) {
+        return <div className="dashboard-container center-content">Loading your pain...</div>;
+    }
+
     return (
         <div className="dashboard-container" data-theme="dark">
             {/* New Header Section */}
@@ -95,8 +192,8 @@ const Dashboard = () => {
                 <div className="header-controls">
                     {/* User Badge */}
                     <div className="user-badge">
-                        <div className="user-avatar">SM</div>
-                        <span className="user-name">Sadman</span>
+                        <div className="user-avatar">{user?.name ? user.name.substring(0, 2).toUpperCase() : 'U'}</div>
+                        <span className="user-name">{user?.name || 'User'}</span>
                     </div>
                 </div>
             </header>
@@ -116,7 +213,10 @@ const Dashboard = () => {
                     <div className="progress-bar-container">
                         <div
                             className="progress-bar-fill"
-                            style={{ width: `${painScore}%` }}
+                            style={{
+                                width: `${Math.min(painScore, 100)}%`,
+                                backgroundColor: painScore > 80 ? '#ef4444' : painScore > 50 ? '#f59e0b' : '#10b981'
+                            }}
                         ></div>
                     </div>
 
@@ -127,7 +227,7 @@ const Dashboard = () => {
 
                 {/* Quick Actions - Minimal Style */}
                 <div className="quick-actions">
-                    <button className="action-btn primary">
+                    <button className="action-btn primary" onClick={() => navigate('/taskpicker')}>
                         <Plus size={16} />
                         New Task
                     </button>
@@ -289,7 +389,7 @@ const Dashboard = () => {
                             <div
                                 key={task.id}
                                 className={`task-item ${task.completed ? 'completed' : ''}`}
-                                onClick={() => window.location.href = `/tasks/${task.id}`}
+                                onClick={() => navigate(`/tasks/${task.id}`)}
                                 style={{ cursor: 'pointer' }}
                             >
                                 {/* Checkbox */}
@@ -298,7 +398,7 @@ const Dashboard = () => {
                                     checked={task.completed}
                                     onChange={(e) => {
                                         e.stopPropagation();
-                                        toggleTask(task.id);
+                                        toggleTask(task.id, task.completed);
                                     }}
                                     className="task-checkbox"
                                 />
@@ -334,6 +434,11 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         ))}
+                        {tasks.length === 0 && (
+                            <div className="empty-state">
+                                No tasks found. Create one to get started!
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -354,7 +459,7 @@ const Dashboard = () => {
 const BottomNavItem = ({ icon: Icon, label, path }) => {
     const navigate = useNavigate();
     // Basic active state simulation (in real app, use useLocation)
-    const isActive = path === '/'; // This logic is simplified, might need update for real highlighting
+    const isActive = window.location.pathname === path;
 
     return (
         <button
@@ -364,9 +469,6 @@ const BottomNavItem = ({ icon: Icon, label, path }) => {
             <div className="nav-item-icon">
                 <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
             </div>
-            {/* Optional label if space permits, or just icon for cleanliness 
-            <span className="nav-label">{label}</span>
-            */}
         </button>
     );
 };
