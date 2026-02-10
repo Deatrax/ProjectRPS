@@ -7,6 +7,8 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+const debug = true;
+
 // Sign Up Route
 router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
@@ -47,16 +49,28 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
+
+    if (debug) {
+      console.log("DEBUG: Received login request");
+      console.log("DEBUG: Login attempt with email:", email);
+      console.log("DEBUG: Login attempt with password:", password);
+    }
     // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
+      if (debug) {
+        console.log("DEBUG: User not found");
+      }
     }
 
     // Check if the password matches
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
+      if (debug) {
+        console.log("DEBUG: Password does not match");
+      }
     }
 
     // Create JWT token after successful login
@@ -68,8 +82,14 @@ router.post("/login", async (req, res) => {
 
     // Send response with JWT
     res.status(200).json({ token });
+    if (debug) {
+      console.log("DEBUG: Login successful");
+    }
   } catch (error) {
     res.status(500).json({ message: "Server error during login" });
+    if (debug) {
+      console.log("DEBUG: Server error during login");
+    }
   }
 });
 
