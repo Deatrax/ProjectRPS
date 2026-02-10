@@ -7,6 +7,7 @@ import App from './App.jsx';
 import Login from './pages/Login/Login.jsx';  // Import Login page
 import SignUp from './pages/Signup/Signup.jsx';  // Import SignUp pag
 import Dashboard from './pages/Dashboard/Dashboard.jsx'; // Import Dashboard page
+import TaskPicker from './components/TaskPicker.jsx'; // Import TaskPicker component
 import { AuthProvider } from './context/AuthContext.jsx';
 
 createRoot(document.getElementById('root')).render(

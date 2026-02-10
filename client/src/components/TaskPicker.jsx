@@ -9,7 +9,8 @@ const TaskPicker = () => {
     title: '',
     description: '',
     category: 'lab',
-    difficulty: 5
+    difficulty: 5,
+    weight: 10
   });
 
   // Date state (indexes)
@@ -91,7 +92,8 @@ const TaskPicker = () => {
         title: '',
         description: '',
         category: 'lab',
-        difficulty: 5
+        difficulty: 5,
+        weight: 10
       });
     } catch (err) {
       console.error('Error creating task:', err);
@@ -218,12 +220,25 @@ const TaskPicker = () => {
               value={formData.difficulty}
               onChange={handleChange}
             >
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                <option key={num} value={num}>{num}</option>
+              {[1, 2, 3, 4, 5].map((num, index) => (
+                <option key={num} value={num}>
+                  {['Auto-pilot Task', 'Ugh, Okay!', 'Time To Be Thoughtful', 'Deep Focus Mode', 'Why Does This Exist!?'][index]}
+                </option>
               ))}
             </select>
           </div>
 
+          <div className="form-group">
+            <label>Weight</label>
+            <input
+              type="text"
+              name="weight"
+              value={formData.weight}
+              onChange={handleChange}
+              placeholder="The value should be within 1-100"
+              required
+            />
+          </div>
           <div className="form-group">
             <label>Materials</label>
             <div className="upload-box" onClick={() => document.getElementById('file-input').click()}>
