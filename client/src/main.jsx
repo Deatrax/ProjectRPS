@@ -8,6 +8,7 @@ import Login from './pages/Login/Login.jsx';  // Import Login page
 import SignUp from './pages/Signup/Signup.jsx';  // Import SignUp pag
 import Dashboard from './pages/Dashboard/Dashboard.jsx'; // Import Dashboard page
 import TaskPicker from './components/TaskPicker.jsx'; // Import TaskPicker component
+import CourseDetails from './components/CourseDetails.jsx'; // Import CourseDetails component
 import { AuthProvider } from './context/AuthContext.jsx';
 
 createRoot(document.getElementById('root')).render(
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/signup" element={<SignUp />} />  {/* Sign Up Route */}
           <Route path="/dashboard" element={<Dashboard />} />  {/* Dashboard Route */}
           <Route path="/taskpicker" element={<TaskPicker />} />  {/* Task Picker Route */}
+          <Route path="/coursedetails" element={<CourseDetails />} /> {/* Course Details Route */}
         </Routes>
       </Router>
     </AuthProvider>
