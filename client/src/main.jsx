@@ -8,6 +8,7 @@ import Login from './pages/Login/Login.jsx';  // Import Login page
 import SignUp from './pages/Signup/Signup.jsx';  // Import SignUp pag
 import Dashboard from './pages/Dashboard/Dashboard.jsx'; // Import Dashboard page
 import AddCourse from './pages/Courses/AddCourse.jsx'; // Import AddCourse page
+import AddCourse2 from './pages/AddCourse/AddCourse.jsx'; // Import AddCourse page
 import TaskPicker from './components/TaskPicker.jsx'; // Import TaskPicker component
 import CourseDetails from './components/CourseDetails.jsx'; // Import CourseDetails component
 import TaskDetails from './components/TaskDetails.jsx'; // Import TaskDetails component
@@ -37,7 +38,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:id" element={<CourseDetail />} />
             {/* Removed duplicate /courses/add as /courses/new exists, but keeping if user uses both */}
-            <Route path="/courses/add" element={<AddCourse />} />
+            <Route path="/courses/add" element={<AddCourse2 />} />
           </Route>
         </Routes>
       </Router>
