@@ -84,35 +84,20 @@ const Dashboard = () => {
     const timelineTasks = getTasksOnTimeline();
 
     return (
-        <div className="dashboard-container" data-theme={isDarkMode ? 'dark' : 'light'}>
-            {/* Minimal Navbar */}
-            <nav className="dashboard-nav">
-                <div className="nav-content">
-                    <div className="nav-left">
-                        <h1 className="nav-title">
-                            RPS Dashboard
-                        </h1>
-                    </div>
-
-                    <div className="nav-right">
-                        {/* Dark Mode Toggle */}
-                        <button
-                            onClick={() => setIsDarkMode(!isDarkMode)}
-                            className="theme-toggle-btn"
-                        >
-                            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-                        </button>
-
-                        {/* User */}
-                        <div className="user-badge">
-                            <div className="user-avatar">
-                                SM
-                            </div>
-                            <span className="user-name">Sadman</span>
-                        </div>
+        <div className="dashboard-container" data-theme="dark">
+            {/* New Header Section */}
+            <header className="dashboard-header">
+                <div className="header-title">
+                    <h1>RPS Dashboard</h1>
+                </div>
+                <div className="header-controls">
+                    {/* User Badge */}
+                    <div className="user-badge">
+                        <div className="user-avatar">SM</div>
+                        <span className="user-name">Sadman</span>
                     </div>
                 </div>
-            </nav>
+            </header>
 
             <div className="main-content">
                 {/* Hero Status - Notion Style */}
@@ -346,40 +331,32 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Minimal Dock */}
-            <div className="dock-container">
-                <div className="dock-content">
-                    <div className="flex items-center gap-1" style={{ display: 'flex', gap: '0.25rem' }}>
-                        {dockItems.map((item, index) => (
-                            <DockItem key={index} {...item} />
-                        ))}
-                    </div>
-                </div>
+            {/* Notification-style Bottom Navbar (Notch) */}
+            <div className="notch-navbar-container">
+                <nav className="notch-navbar">
+                    {dockItems.map((item, index) => (
+                        <BottomNavItem key={index} {...item} />
+                    ))}
+                </nav>
             </div>
         </div>
     );
 };
 
-// Dock Item
-const DockItem = ({ icon: Icon, label }) => {
-    const [isHovered, setIsHovered] = useState(false);
+// Bottom Nav Item
+const BottomNavItem = ({ icon: Icon, label, path }) => {
+    // Basic active state simulation (in real app, use useLocation)
+    const isActive = path === '/';
 
     return (
-        <div className="dock-item-wrapper">
-            <button
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                className="dock-btn"
-            >
-                <Icon size={20} />
-            </button>
-
-            {isHovered && (
-                <div className="dock-tooltip">
-                    {label}
-                </div>
-            )}
-        </div>
+        <button className={`nav-item ${isActive ? 'active' : ''}`}>
+            <div className="nav-item-icon">
+                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+            </div>
+            {/* Optional label if space permits, or just icon for cleanliness 
+            <span className="nav-label">{label}</span>
+            */}
+        </button>
     );
 };
 

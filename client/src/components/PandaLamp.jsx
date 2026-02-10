@@ -63,31 +63,33 @@ const PandaLamp = () => {
   };
 
   return (
-    <main className={getSceneClasses()} id="scene">
-      <Lamp toggleLamp={toggleLamp} isLampOn={isLampOn} />
+    <div className="panda-wrapper">
+      <main className={getSceneClasses()} id="scene">
+        <Lamp toggleLamp={toggleLamp} isLampOn={isLampOn} />
 
-      {/* 
-          IMPORTANT: We render components without {&&} 
-          so that CSS transitions work correctly. 
-      */}
-      <Panda currentState={getSceneClasses()} />
+        {/* 
+            IMPORTANT: We render components without {&&} 
+            so that CSS transitions work correctly. 
+        */}
+        <Panda currentState={getSceneClasses()} />
 
-      <Card onGetStarted={handleGetStarted} />
+        <Card onGetStarted={handleGetStarted} />
 
-      <PandaLogin
-        onSignupClick={() => setView('signup')}
-        onPasswordFocus={() => setIsCoveringEyes(true)}
-        onPasswordBlur={() => setIsCoveringEyes(false)}
-      />
+        <PandaLogin
+          onSignupClick={() => setView('signup')}
+          onPasswordFocus={() => setIsCoveringEyes(true)}
+          onPasswordBlur={() => setIsCoveringEyes(false)}
+        />
 
-      <PandaSignup
-        onLoginClick={() => setView('login')}
-        onPasswordFocus={() => setIsCoveringEyes(true)}
-        onPasswordBlur={() => setIsCoveringEyes(false)}
-      />
+        <PandaSignup
+          onLoginClick={() => setView('login')}
+          onPasswordFocus={() => setIsCoveringEyes(true)}
+          onPasswordBlur={() => setIsCoveringEyes(false)}
+        />
 
-      {hintVisible && <div className="hint" id="hint">Hint: Click the lamp to get started!</div>}
-    </main>
+        {hintVisible && <div className="hint" id="hint">Hint: Click the lamp to get started!</div>}
+      </main>
+    </div>
   );
 };
 
