@@ -6,6 +6,11 @@ const TaskSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: false // Optional for now to avoid breaking existing tasks, but ideally required
+    },
     title: {
         type: String,
         required: true

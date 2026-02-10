@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Plus, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X } from 'lucide-react';
 import './Courses.css';
 import axios from 'axios';
 
 const Courses = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -285,7 +287,20 @@ const Courses = () => {
           {/* Course Rows */}
           <div className="course-list">
             {courses.map(course => (
-              <div key={course._id} className="course-card">
+              <div
+                key={course._id}
+                className="course-card"
+                onClick={() => window.location.href = `/coursedetails?id=${course._id}`} // Using query param or we could use /courses/:id if we update main.jsx route properly. Main.jsx has /courses/:id mapped to CourseDetails.
+              // Let's use useNavigate in real app, but window.location is fine for now if we want to ensure reload or simple nav. 
+              // Wait, main.jsx maps /courses/:id to CourseDetails. User asked for /coursedetails to lead to CourseDetails.
+              // Let's use /coursedetails?id=... or update main.jsx to stick to /courses/:id.
+              // The user previously asked for /coursedetails. I'll stick to that and use query params or state, OR better, I will assume I can update main.jsx or use /courses/:id if I want standard RESTful routing.
+              // However, I previously added <Route path="/coursedetails" element={<CourseDetails />} />. It doesn't take an ID param in the path.
+              // So I will use query string `?id=` for now or just pass state. Query string is safer for refreshing.
+              // Let's use specific route /courses/:id if possible? User asked for /coursedetails.
+              // I will use `onClick={() => navigate('/coursedetails', { state: { courseId: course._id } })}`?
+              // Actually, I can just use navigate.
+              >
                 <div className="course-info">
                   <p className="course-code">{course.courseCode}</p>
                   <h3 className="course-title">{course.courseTitle}</h3>
@@ -305,7 +320,14 @@ const Courses = () => {
                     <div className="stat-icon material-bg"><BookOpen size={18} /></div>
                     <span className="stat-count">0</span>
                   </div>
-                  <button className="delete-row-btn" title="Delete Course" onClick={() => handleDeleteCourse(course)}>
+                  <button
+                    className="delete-row-btn"
+                    title="Delete Course"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCourse(course);
+                    }}
+                  >
                     <Trash2 size={20} />
                   </button>
                 </div>
