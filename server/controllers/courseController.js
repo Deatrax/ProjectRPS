@@ -1,5 +1,5 @@
 const Course = require('../models/Course');
-const asyncHandler = require('express-async-handler'); 
+const asyncHandler = require('express-async-handler');
 
 // Get all courses
 const getCourses = asyncHandler(async (req, res) => {
@@ -163,7 +163,7 @@ const deleteTask = asyncHandler(async (req, res) => {
         throw new Error('Task not found');
     }
 
-    task.deleteOne(); 
+    task.deleteOne();
     await course.save();
 
     res.json({ message: 'Task removed' });
@@ -234,7 +234,7 @@ const deleteAssignment = asyncHandler(async (req, res) => {
         throw new Error('Assignment not found');
     }
 
-    assignment.deleteOne(); 
+    assignment.deleteOne();
     await course.save();
 
     res.json({ message: 'Assignment removed' });

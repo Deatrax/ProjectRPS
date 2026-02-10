@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, User,
     Plus, Calendar, Clock, Moon, Sun
@@ -7,6 +7,7 @@ import {
 import './Dashboard.css';
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     // State management
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [painScore, setPainScore] = useState(45);
@@ -26,7 +27,7 @@ const Dashboard = () => {
     // Dock items
     const dockItems = [
         { icon: Home, label: 'Dashboard', path: '/' },
-        { icon: BookOpen, label: 'Courses', path: '/courses' },
+        { icon: BookOpen, label: 'Courses', path: '/courses/new' },
         { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
         { icon: Award, label: 'Achievements', path: '/achievements' },
@@ -85,35 +86,20 @@ const Dashboard = () => {
     const timelineTasks = getTasksOnTimeline();
 
     return (
-        <div className="dashboard-container" data-theme={isDarkMode ? 'dark' : 'light'}>
-            {/* Minimal Navbar */}
-            <nav className="dashboard-nav">
-                <div className="nav-content">
-                    <div className="nav-left">
-                        <h1 className="nav-title">
-                            RPS Dashboard
-                        </h1>
-                    </div>
-
-                    <div className="nav-right">
-                        {/* Dark Mode Toggle */}
-                        <button
-                            onClick={() => setIsDarkMode(!isDarkMode)}
-                            className="theme-toggle-btn"
-                        >
-                            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-                        </button>
-
-                        {/* User */}
-                        <div className="user-badge">
-                            <div className="user-avatar">
-                                SM
-                            </div>
-                            <span className="user-name">Sadman</span>
-                        </div>
+        <div className="dashboard-container" data-theme="dark">
+            {/* New Header Section */}
+            <header className="dashboard-header">
+                <div className="header-title">
+                    <h1>RPS Dashboard</h1>
+                </div>
+                <div className="header-controls">
+                    {/* User Badge */}
+                    <div className="user-badge">
+                        <div className="user-avatar">SM</div>
+                        <span className="user-name">Sadman</span>
                     </div>
                 </div>
-            </nav>
+            </header>
 
             <div className="main-content">
                 {/* Hero Status - Notion Style */}
@@ -145,7 +131,7 @@ const Dashboard = () => {
                         <Plus size={16} />
                         New Task
                     </button>
-                    <button className="action-btn secondary">
+                    <button className="action-btn secondary" onClick={() => navigate('/courses/new')}>
                         <BookOpen size={16} />
                         Add Course
                     </button>
@@ -303,12 +289,17 @@ const Dashboard = () => {
                             <div
                                 key={task.id}
                                 className={`task-item ${task.completed ? 'completed' : ''}`}
+                                onClick={() => window.location.href = `/tasks/${task.id}`}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {/* Checkbox */}
                                 <input
                                     type="checkbox"
                                     checked={task.completed}
-                                    onChange={() => toggleTask(task.id)}
+                                    onChange={(e) => {
+                                        e.stopPropagation();
+                                        toggleTask(task.id);
+                                    }}
                                     className="task-checkbox"
                                 />
 
@@ -347,41 +338,36 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Minimal Dock */}
-            <div className="dock-container">
-                <div className="dock-content">
-                    <div className="flex items-center gap-1" style={{ display: 'flex', gap: '0.25rem' }}>
-                        {dockItems.map((item, index) => (
-                            <DockItem key={index} {...item} />
-                        ))}
-                    </div>
-                </div>
+            {/* Notification-style Bottom Navbar (Notch) */}
+            <div className="notch-navbar-container">
+                <nav className="notch-navbar">
+                    {dockItems.map((item, index) => (
+                        <BottomNavItem key={index} {...item} />
+                    ))}
+                </nav>
             </div>
         </div>
     );
 };
 
-// Dock Item
-const DockItem = ({ icon: Icon, label, path }) => {
-    const [isHovered, setIsHovered] = useState(false);
+// Bottom Nav Item
+const BottomNavItem = ({ icon: Icon, label, path }) => {
+    const navigate = useNavigate();
+    // Basic active state simulation (in real app, use useLocation)
+    const isActive = path === '/'; // This logic is simplified, might need update for real highlighting
 
     return (
-        <div className="dock-item-wrapper">
-            <Link
-                to={path}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                className="dock-btn"
-            >
-                <Icon size={20} />
-            </Link>
-
-            {isHovered && (
-                <div className="dock-tooltip">
-                    {label}
-                </div>
-            )}
-        </div>
+        <button
+            className={`nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => navigate(path)}
+        >
+            <div className="nav-item-icon">
+                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+            </div>
+            {/* Optional label if space permits, or just icon for cleanliness 
+            <span className="nav-label">{label}</span>
+            */}
+        </button>
     );
 };
 

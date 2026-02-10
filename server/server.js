@@ -24,6 +24,9 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Use authentication routes
 app.use('/api/auth', authRoutes);
+app.use('/api/courses', require('./routes/courses'));
+app.use('/api/tasks', require('./routes/tasks'));
+
 
 // Use course routes
 app.use('/api/courses', courseRoutes);

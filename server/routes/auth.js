@@ -7,14 +7,21 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+const debug = true;
+
 // Sign Up Route
 router.post("/signup", async (req, res) => {
-  const { name, email, password } = req.body;
+  let { name, email, password } = req.body;
+
+  if (email) email = email.toLowerCase().trim();
 
   try {
     // Check if the user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
+      if (debug) {
+        console.log("DEBUG: User already exists");
+      }
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -40,18 +47,32 @@ router.post("/signup", async (req, res) => {
 
 // Login Route
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+
+  if (email) email = email.toLowerCase().trim();
 
   try {
+
+    if (debug) {
+      console.log("DEBUG: Received login request");
+      console.log("DEBUG: Login attempt with email:", email);
+      console.log("DEBUG: Login attempt with password:", password);
+    }
     // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) {
+      if (debug) {
+        console.log("DEBUG: User not found");
+      }
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Check if the password matches
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
+      if (debug) {
+        console.log("DEBUG: Password does not match");
+      }
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -64,7 +85,13 @@ router.post("/login", async (req, res) => {
 
     // Send response with JWT
     res.status(200).json({ token });
+    if (debug) {
+      console.log("DEBUG: Login successful");
+    }
   } catch (error) {
+    if (debug) {
+      console.log("DEBUG: Server error during login");
+    }
     res.status(500).json({ message: "Server error during login" });
   }
 });
