@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen } from 'lucide-react';
-// import './Courses.css';
+import './AddCourse.css';
 
 const AddCourse = () => {
     const navigate = useNavigate();
