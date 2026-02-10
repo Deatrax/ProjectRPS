@@ -1,44 +1,27 @@
 const mongoose = require('mongoose');
 
-const TaskSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    description: { type: String },
-    completed: { type: Boolean, default: false },
-}, { timestamps: true });
-
-const AssignmentSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    description: { type: String },
-}, { timestamps: true });
-
-const CourseSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    code: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-    },
-    description: {
-        type: String,
-        required: false,
-        trim: true,
-    },
+const courseSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'User',
+        required: true
     },
-    tasks: [TaskSchema], 
-    assignments: [AssignmentSchema], 
-}, {
-    timestamps: true, 
-});
+    courseTitle: {
+        type: String,
+        required: [true, 'Please add a course title'] // e.g., "Web Programming"
+    },
+    courseCode: {
+        type: String,
+        required: [true, 'Please add a course code'] // e.g., "CSE 4540"
+    },
+    color: {
+        type: String,
+        default: '#3b82f6' // Default blue if user doesn't pick one
+    },
+    semester: {
+        type: String,
+        default: 'Current'
+    }
+}, { timestamps: true });
 
-const Course = mongoose.model('Course', CourseSchema);
-
-module.exports = Course;
+module.exports = mongoose.model('Course', courseSchema);

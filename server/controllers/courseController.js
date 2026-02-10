@@ -9,18 +9,19 @@ const getCourses = asyncHandler(async (req, res) => {
 
 
 const createCourse = asyncHandler(async (req, res) => {
-    const { name, code, description } = req.body;
+    const { courseTitle, courseCode, color, semester } = req.body;
 
     // Check if course with this code already exists for the user
-    const existingCourse = await Course.findOne({ user: req.user.id, code: code });
+    const existingCourse = await Course.findOne({ user: req.user.id, courseCode: courseCode });
     if (existingCourse) {
         return res.status(400).json({ message: 'Course with this code already exists for this user.' });
     }
 
     const newCourse = new Course({
-        name,
-        code,
-        description,
+        courseTitle,
+        courseCode,
+        color,
+        semester,
         user: req.user.id,
     });
 

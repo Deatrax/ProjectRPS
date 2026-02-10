@@ -1,37 +1,28 @@
 const mongoose = require('mongoose');
 
-const MaterialSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    description: {
-        type: String,
-        trim: true,
-    },
-    fileUrl: {
-        type: String,
-        required: true,
-    },
-    publicId: {
-        type: String,
-        required: true,
+const materialSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', 
+        required: true
     },
     course: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'Course',
+        required: true
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User',
+    title: {
+        type: String,
+        required: true
     },
-}, {
-    timestamps: true,
-});
+    fileUrl: {
+        type: String, // This will store the path/URL to the uploaded file
+        required: true
+    },
+    fileType: {
+        type: String,
+        default: 'pdf'
+    }
+}, { timestamps: true });
 
-const Material = mongoose.model('Material', MaterialSchema);
-
-module.exports = Material;
+module.exports = mongoose.model('Material', materialSchema);
