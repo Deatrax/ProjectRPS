@@ -9,6 +9,8 @@ import SignUp from './pages/Signup/Signup.jsx';  // Import SignUp pag
 import Dashboard from './pages/Dashboard/Dashboard.jsx'; // Import Dashboard page
 import AddCourse from './pages/Courses/AddCourse.jsx'; // Import AddCourse page
 import TaskPicker from './components/TaskPicker.jsx'; // Import TaskPicker component
+import CourseDetails from './components/CourseDetails.jsx'; // Import CourseDetails component
+import TaskDetails from './components/TaskDetails.jsx'; // Import TaskDetails component
 import { AuthProvider } from './context/AuthContext.jsx';
 
 createRoot(document.getElementById('root')).render(
@@ -23,6 +25,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="/dashboard" element={<Dashboard />} />  {/* Dashboard Route */}
           <Route path="/courses/new" element={<AddCourse />} /> {/* Add Course Route */}
           <Route path="/taskpicker" element={<TaskPicker />} />  {/* Task Picker Route */}
+          <Route path="/coursedetails" element={<CourseDetails />} /> {/* Course Details Route */}
+          <Route path="/tasks/:id" element={<TaskDetails />} /> {/* Task Details Route */}
         </Routes>
       </Router>
     </AuthProvider>
