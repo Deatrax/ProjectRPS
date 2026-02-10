@@ -12,11 +12,12 @@ const Courses = () => {
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [newCourseName, setNewCourseName] = useState('');
   const [newCourseCode, setNewCourseCode] = useState('');
-  const [newCourseColor, setNewCourseColor] = useState(''); // New state for color
-  const [newCourseSemester, setNewCourseSemester] = useState(''); // New state for semester
+  const [newCourseColor, setNewCourseColor] = useState(''); 
+  const [newCourseSemester, setNewCourseSemester] = useState(''); 
   const [addingCourse, setAddingCourse] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); 
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -93,7 +94,7 @@ const Courses = () => {
   };
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [courseToDelete, setCourseToDelete] = useState(null); // Stores the course object to be deleted
+  const [courseToDelete, setCourseToDelete] = useState(null); 
 
   const handleDeleteCourse = (course) => {
     setCourseToDelete(course);
@@ -107,7 +108,7 @@ const Courses = () => {
       return;
     }
 
-    setLoading(true); // Can reuse loading for delete operation
+    setLoading(true); 
     setError(null);
 
     try {
@@ -129,6 +130,24 @@ const Courses = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMenuOpen && !event.target.closest('.floating-button-wrapper')) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
 
   return (
@@ -152,16 +171,21 @@ const Courses = () => {
                   setHoveredButton(null);
                 }}
               >
-                <button className={`add-button ${isHovered ? 'plus-active' : ''}`}>
+                {/* on click + button toggles menu open/closed */}
+                <button 
+                  className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`} 
+                  onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                >
                   <Plus size={28} />
                 </button>
 
-                {isHovered && (
+                {/* Floating action buttons are shown if menu is open */}
+                {isHovered || isMenuOpen ? (
                   <>
                     <button 
                       className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
                       onMouseEnter={() => setHoveredButton(1)}
-                      onClick={() => setShowAddCourse(true)} // Added onClick
+                      onClick={() => setShowAddCourse(true)} 
                     >
                       <BookOpen size={18} /> Add Course
                     </button>
@@ -180,7 +204,7 @@ const Courses = () => {
                       <FileQuestion size={18} />
                     </button>
                   </>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -212,14 +236,14 @@ const Courses = () => {
                   onChange={(e) => setNewCourseCode(e.target.value)}
                   className="input-field"
                 />
-                <input // New input for color
+                <input 
                   type="text"
                   placeholder="Course Color (e.g., #3b82f6)"
                   value={newCourseColor}
                   onChange={(e) => setNewCourseColor(e.target.value)}
                   className="input-field"
                 />
-                <input // New input for semester
+                <input 
                   type="text"
                   placeholder="Semester (e.g., Fall 2023)"
                   value={newCourseSemester}

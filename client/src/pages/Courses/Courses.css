@@ -3,7 +3,6 @@
   --glow-color: #18224a;
 }
 
-/* Scoped Page Styles */
 .courses-page-wrapper {
   margin: 0;
   padding: 0;
@@ -83,7 +82,7 @@
 
 .courses-page-wrapper .add-button.plus-active {
   transform: rotate(45deg);
-  background: #ffffff;
+  background: #cccccc; 
 }
 
 .courses-page-wrapper .action-btn {
