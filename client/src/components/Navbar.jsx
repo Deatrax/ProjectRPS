@@ -13,7 +13,7 @@ const Navbar = () => {
     const dockItems = [
         { icon: Home, label: 'Dashboard', path: '/dashboard' },
         { icon: BookOpen, label: 'Courses', path: '/courses' },
-        { icon: CheckSquare, label: 'All Tasks', path: '/taskpicker' },
+        { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
         { icon: TrendingUp, label: 'Analytics', path: '/dashboard' }, // Placeholder paths as in original
         { icon: Award, label: 'Achievements', path: '/dashboard' },   // Placeholder paths as in original
         { icon: Settings, label: 'Settings', path: '/dashboard' },    // Placeholder paths as in original
