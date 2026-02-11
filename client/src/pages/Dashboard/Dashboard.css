@@ -29,6 +29,63 @@
     overflow-x: hidden;
     padding-bottom: 80px;
     /* Space for bottom nav */
+    transition: background 0.5s ease;
+}
+
+/* Visual Modes */
+.dashboard-container.mode-doom {
+    background: radial-gradient(1200px 700px at 50% 10%, #450a0a 0%, #1a0505 60%);
+}
+
+.dashboard-container.mode-panic {
+    background: radial-gradient(1200px 700px at 50% 10%, #431407 0%, #1a0a05 60%);
+}
+
+.dashboard-container.mode-grind {
+    background: radial-gradient(1200px 700px at 50% 10%, #3f2c06 0%, #151004 60%);
+}
+
+/* Tooltips & Badges */
+.mode-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.nav-item-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-tooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.nav-item-wrapper:hover .nav-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 /* Header Section (Replaces Top Navbar) */
