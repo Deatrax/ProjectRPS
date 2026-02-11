@@ -31,6 +31,29 @@ const TaskPicker = () => {
   const yearRef = useRef(null);
   const ITEM_HEIGHT = 50;
 
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    // Fetch courses on mount
+    const fetchCourses = async () => {
+      try {
+        if (user && user.token) {
+          const res = await axios.get('http://localhost:5000/api/courses', {
+            headers: { Authorization: `Bearer ${user.token}` }
+          });
+          setCourses(res.data);
+          if (res.data.length > 0) {
+            setFormData(prev => ({ ...prev, course: res.data[0]._id }));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+      }
+    };
+
+    fetchCourses();
+  }, [user]);
+
   useEffect(() => {
     // Initial scroll
     if (dayRef.current) dayRef.current.scrollTop = dateState.dayIndex * ITEM_HEIGHT;
@@ -74,7 +97,8 @@ const TaskPicker = () => {
       category: formData.category,
       difficulty: Number(formData.difficulty),
       weight: Number(formData.weight),
-      deadline: taskDate  // Backend expects 'deadline'
+      deadline: taskDate,
+      course: formData.course
     };
 
     try {
@@ -96,7 +120,8 @@ const TaskPicker = () => {
         description: '',
         category: 'General',
         difficulty: 5,
-        weight: 10
+        weight: 10,
+        course: courses.length > 0 ? courses[0]._id : ''
       });
     } catch (err) {
       console.error('Error creating task:', err);
@@ -161,6 +186,23 @@ const TaskPicker = () => {
         <form onSubmit={handleSubmit}>
           <fieldset>
             <legend>Task Details</legend>
+
+            <div className="form-group">
+              <label>Course</label>
+              <select
+                name="course"
+                value={formData.course}
+                onChange={handleChange}
+                required
+              >
+                <option value="" disabled>Select a Course</option>
+                {courses.map(course => (
+                  <option key={course._id} value={course._id}>
+                    {course.courseCode} - {course.courseTitle}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="form-group">
               <label>Task Name</label>

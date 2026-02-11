@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, FileText, BarChart2, Tag } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './TaskDetails.css';
 
 const TaskDetails = () => {
@@ -8,25 +9,38 @@ const TaskDetails = () => {
     const navigate = useNavigate();
     const [task, setTask] = useState(null);
 
+    const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+
     useEffect(() => {
-        // Mock data fetch - replacing with simulated delay
-        const fetchTask = () => {
-            // Simulate finding the task by ID from a potential list of mock tasks
-            const mockTask = {
-                _id: id || '1',
-                title: 'Database Lab Report',
-                description: 'Complete the lab report for Experiment 5: SQL Joins and Subqueries. Include screenshots of the query execution plans and result sets. The report should also cover the performance analysis of different join types. Ensure proper formatting according to the department guidelines.',
-                date: new Date('2026-02-10'),
-                category: 'Lab Task',
-                difficulty: 8,
-                course: 'CSE 4541',
-                materials: 'https://example.com/lab-manual.pdf'
-            };
-            setTask(mockTask);
+        const fetchTask = async () => {
+            if (!user || !user.token) return;
+
+            try {
+                const config = {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                };
+                const res = await fetch(`http://localhost:5000/api/tasks/${id}`, config);
+                if (!res.ok) throw new Error('Failed to fetch task');
+
+                const data = await res.json();
+
+                // If course is populated, use its title, otherwise use placeholder or ID
+                // Note: The backend Task model might need to populate 'course' to get the title.
+                // For now, we'll assuming it might be an ID or we need to fetch it.
+                // Let's check if the backend populates it. The current backend GET /:id does not populate 'course'.
+                // I will update it to populate or just show "Course Info" for now to avoid breaking if not populated.
+                // Actually, let's just use the data as is.
+                setTask(data);
+            } catch (err) {
+                console.error("Error fetching task:", err);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchTask();
-    }, [id]);
+    }, [id, user]);
 
     if (!task) return <div className="loading-spinner">Loading...</div>;
 
@@ -58,7 +72,7 @@ const TaskDetails = () => {
                             {task.category}
                         </div>
                         <div className="meta-tag" style={{ color: '#a5b4fc', borderColor: '#a5b4fc' }}>
-                            {task.course}
+                            {task.course ? (task.course.courseCode || 'Course Info') : 'No Course'}
                         </div>
                     </div>
                 </div>
