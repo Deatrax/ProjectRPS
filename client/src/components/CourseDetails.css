@@ -1,20 +1,19 @@
-/* Basic resets and body styling */
-/* * {
+.course-details-root * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
+.course-details-root {
     font-family: 'Poppins', sans-serif;
     background: #0b1020;
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     padding: 20px;
-} */
+}
 
 .picker-container {
     width: 80%;
