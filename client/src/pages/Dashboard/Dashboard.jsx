@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, User,
+    BookOpen, CheckSquare,
     Plus, Calendar, Clock, Moon, Sun
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -107,15 +107,7 @@ const Dashboard = () => {
         setPainScore(Math.round(score));
     };
 
-    // Dock items
-    const dockItems = [
-        { icon: Home, label: 'Dashboard', path: '/dashboard' },
-        { icon: BookOpen, label: 'Courses', path: '/courses' },
-        { icon: CheckSquare, label: 'All Tasks', path: '/taskpicker' },
-        { icon: TrendingUp, label: 'Analytics', path: '/dashboard' },
-        { icon: Award, label: 'Achievements', path: '/dashboard' },
-        { icon: Settings, label: 'Settings', path: '/dashboard' },
-    ];
+
 
     // Toggle task completion
     const toggleTask = async (taskId, currentStatus) => {
@@ -456,42 +448,10 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Notification-style Bottom Navbar (Notch) */}
-            <div className="notch-navbar-container">
-                <nav className="notch-navbar" style={{
-                    borderTop: `2px solid ${currentMode.color}`,
-                    boxShadow: `0 -4px 20px -5px ${currentMode.color}40`
-                }}>
-                    {dockItems.map((item, index) => (
-                        <BottomNavItem key={index} {...item} activeColor={currentMode.color} />
-                    ))}
-                </nav>
-            </div>
         </div>
     );
 };
 
-// Bottom Nav Item
-const BottomNavItem = ({ icon: Icon, label, path, activeColor }) => {
-    const navigate = useNavigate();
-    const isActive = window.location.pathname === path;
 
-    return (
-        <div className="nav-item-wrapper group">
-            <button
-                className={`nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => navigate(path)}
-                style={isActive ? { color: activeColor } : {}}
-            >
-                <div className="nav-item-icon">
-                    <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                </div>
-            </button>
-            <span className="nav-tooltip">
-                {label}
-            </span>
-        </div>
-    );
-};
 
 export default Dashboard;
