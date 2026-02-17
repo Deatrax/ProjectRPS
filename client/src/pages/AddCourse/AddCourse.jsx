@@ -46,8 +46,7 @@ const AddCourse = () => {
         try {
             const token = localStorage.getItem('token'); // Assuming token is stored here
             if (!token) {
-                // If using Context, might need to get token from there, but for now try localStorage
-                // Or assume AuthContext handles it. Let's try fetching with header.
+
                 console.error("No token found");
                 setError("You must be logged in to add a course.");
                 setLoading(false);

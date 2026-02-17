@@ -20,12 +20,12 @@ const Navbar = () => {
     ];
 
     // Determine active color based on some global state or default
-    // For now, we can use a default accent color, or maybe pass it as a prop if we want dynamic coloring.
-    // If the requirement is "universal", sticking to a theme color or allowing context overrides is best.
+    // For now we  use  default accent color or maybe pass it as a prop coz we want dynamic coloring.
+    // If the requirement is "universal" sticking to a theme color or allowing context overrides is best.
     // Let's us a default blue accent for now.
     const defaultColor = '#3b82f6';
 
-    // If you wanted to support the dynamic "Pain Score" color globally, you would need a Context.
+    //  to support the dynamic "Pain Score" color globally, we need a Context.
     // Assuming for now we want a consistent look or a default look for pages outside Dashboard.
 
     return (

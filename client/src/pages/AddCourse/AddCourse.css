@@ -1,10 +1,5 @@
 /* Courses.css */
 
-/* Reusing variables from Dashboard.css where possible, 
-   but defining local scope if needed or relying on global if imported.
-   Since Dashboard.css is imported in Dashboard.jsx, it might not be global.
-   I will redefine the key variables here to be safe and self-contained. */
-
 :root {
     --bg-primary: #0b1020;
     --bg-secondary: rgba(255, 255, 255, 0.08);

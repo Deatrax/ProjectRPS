@@ -290,16 +290,7 @@ const Courses = () => {
               <div
                 key={course._id}
                 className="course-card"
-                onClick={() => window.location.href = `/coursedetails?id=${course._id}`} // Using query param or we could use /courses/:id if we update main.jsx route properly. Main.jsx has /courses/:id mapped to CourseDetails.
-              // Let's use useNavigate in real app, but window.location is fine for now if we want to ensure reload or simple nav. 
-              // Wait, main.jsx maps /courses/:id to CourseDetails. User asked for /coursedetails to lead to CourseDetails.
-              // Let's use /coursedetails?id=... or update main.jsx to stick to /courses/:id.
-              // The user previously asked for /coursedetails. I'll stick to that and use query params or state, OR better, I will assume I can update main.jsx or use /courses/:id if I want standard RESTful routing.
-              // However, I previously added <Route path="/coursedetails" element={<CourseDetails />} />. It doesn't take an ID param in the path.
-              // So I will use query string `?id=` for now or just pass state. Query string is safer for refreshing.
-              // Let's use specific route /courses/:id if possible? User asked for /coursedetails.
-              // I will use `onClick={() => navigate('/coursedetails', { state: { courseId: course._id } })}`?
-              // Actually, I can just use navigate.
+                onClick={() => window.location.href = `/coursedetails?id=${course._id}`}
               >
                 <div className="course-info">
                   <p className="course-code">{course.courseCode}</p>

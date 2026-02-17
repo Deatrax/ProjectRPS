@@ -3,9 +3,7 @@ const router = express.Router();
 const Task = require('../models/Task');
 const { protect } = require('../middleware/authMiddleware');
 
-// @route   GET api/tasks
-// @desc    Get all tasks for the logged-in user
-// @access  Private
+// @route   GET api/tasks  Get all tasks for the logged-in user
 router.get('/', protect, async (req, res) => {
     try {
         const tasks = await Task.find({ user: req.user.id })
@@ -18,9 +16,7 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
-// @route   POST api/tasks
-// @desc    Create a task
-// @access  Private
+// @route   POST api/tasks Create a task
 router.post('/', protect, async (req, res) => {
     const { title, description, deadline, date, category, difficulty, materials, weight, course } = req.body;
 
@@ -50,9 +46,7 @@ router.post('/', protect, async (req, res) => {
     }
 });
 
-// @route   GET api/tasks/course/:courseId
-// @desc    Get all tasks for a specific course
-// @access  Private
+// @route   GET api/tasks/course/:courseId  Get all tasks for a specific course
 router.get('/course/:courseId', protect, async (req, res) => {
     try {
         const tasks = await Task.find({
@@ -66,9 +60,7 @@ router.get('/course/:courseId', protect, async (req, res) => {
     }
 });
 
-// @route   GET api/tasks/:id
-// @desc    Get a single task by ID
-// @access  Private
+// @route   GET api/tasks/:id  Get a single task by ID
 router.get('/:id', protect, async (req, res) => {
     try {
         const task = await Task.findById(req.params.id).populate('course', 'courseCode courseTitle color');
@@ -92,9 +84,7 @@ router.get('/:id', protect, async (req, res) => {
     }
 });
 
-// @route   PUT api/tasks/:id
-// @desc    Update a task
-// @access  Private
+// @route   PUT api/tasks/:id  Update a task
 router.put('/:id', protect, async (req, res) => {
     const { title, description, deadline, category, difficulty, weight, materials, course, status, completed } = req.body;
 
@@ -140,9 +130,7 @@ router.put('/:id', protect, async (req, res) => {
     }
 });
 
-// @route   DELETE api/tasks/:id
-// @desc    Delete a task
-// @access  Private
+// @route   DELETE api/tasks/:id  Delete a task
 router.delete('/:id', protect, async (req, res) => {
     try {
         let task = await Task.findById(req.params.id);
