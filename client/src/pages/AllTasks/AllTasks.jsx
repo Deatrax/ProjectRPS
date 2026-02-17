@@ -2,33 +2,43 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Calendar, Filter, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, Filter, Clock, CheckCircle, BookOpen, Tag } from 'lucide-react';
 import './AllTasks.css';
 
 const AllTasks = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [tasks, setTasks] = useState([]);
+    const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, pending, completed
     const [sortBy, setSortBy] = useState('deadline'); // deadline, priority
+    const [selectedCourse, setSelectedCourse] = useState('all');
+    const [selectedType, setSelectedType] = useState('all');
 
     useEffect(() => {
-        const fetchTasks = async () => {
+        const fetchData = async () => {
             if (!user || !user.token) return;
             try {
-                const res = await axios.get('http://localhost:5000/api/tasks', {
+                // Fetch Tasks
+                const tasksRes = await axios.get('http://localhost:5000/api/tasks', {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
-                setTasks(res.data);
+                setTasks(tasksRes.data);
+
+                // Fetch Courses
+                const coursesRes = await axios.get('http://localhost:5000/api/courses', {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                setCourses(coursesRes.data);
             } catch (err) {
-                console.error("Error fetching tasks:", err);
+                console.error("Error fetching data:", err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchTasks();
+        fetchData();
     }, [user]);
 
     const getPriorityColor = (difficulty) => {
@@ -57,8 +67,21 @@ const AllTasks = () => {
 
     const filteredTasks = tasks
         .filter(task => {
-            if (filter === 'pending') return task.status !== 'completed';
-            if (filter === 'completed') return task.status === 'completed';
+            // Status Filter
+            if (filter === 'pending' && task.status === 'completed') return false;
+            if (filter === 'completed' && task.status !== 'completed') return false;
+
+            // Course Filter
+            if (selectedCourse !== 'all') {
+                const taskCourseId = task.course ? task.course._id : null;
+                if (taskCourseId !== selectedCourse) return false;
+            }
+
+            // Type Filter
+            if (selectedType !== 'all') {
+                if (task.category !== selectedType) return false;
+            }
+
             return true;
         })
         .sort((a, b) => {
@@ -102,6 +125,36 @@ const AllTasks = () => {
                     >
                         <option value="deadline">Sort by Deadline</option>
                         <option value="priority">Sort by Difficulty</option>
+                    </select>
+                </div>
+
+                <div className="filter-group">
+                    <BookOpen size={18} color="#aaa" />
+                    <select
+                        className="filter-select"
+                        value={selectedCourse}
+                        onChange={(e) => setSelectedCourse(e.target.value)}
+                    >
+                        <option value="all">All Courses</option>
+                        {courses.map(course => (
+                            <option key={course._id} value={course._id}>
+                                {course.courseCode}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="filter-group">
+                    <Tag size={18} color="#aaa" />
+                    <select
+                        className="filter-select"
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
+                    >
+                        <option value="all">All Types</option>
+                        {['Exam', 'Assignment', 'Lab Task', 'Presentation', 'Project', 'General'].map(type => (
+                            <option key={type} value={type}>{type}</option>
+                        ))}
                     </select>
                 </div>
             </div>
