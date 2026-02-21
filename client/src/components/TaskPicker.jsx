@@ -8,17 +8,18 @@ const TaskPicker = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'lab',
+    category: 'General',
     difficulty: 5,
     weight: 10
   });
 
   // Date state (indexes)
-  // Defaults: Day 15 (index 14), Sep (index 8), 2025 (index 2)
+  // Defaults: Current Date
+  const today = new Date();
   const [dateState, setDateState] = useState({
-    dayIndex: 14,
-    monthIndex: 8,
-    yearIndex: 2
+    dayIndex: today.getDate() - 1,
+    monthIndex: today.getMonth(),
+    yearIndex: 2 // 2025 (index 2 in years array below) - adjust if needed
   });
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -29,6 +30,29 @@ const TaskPicker = () => {
   const monthRef = useRef(null);
   const yearRef = useRef(null);
   const ITEM_HEIGHT = 50;
+
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    // Fetch courses on mount
+    const fetchCourses = async () => {
+      try {
+        if (user && user.token) {
+          const res = await axios.get('http://localhost:5000/api/courses', {
+            headers: { Authorization: `Bearer ${user.token}` }
+          });
+          setCourses(res.data);
+          if (res.data.length > 0) {
+            setFormData(prev => ({ ...prev, course: res.data[0]._id }));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+      }
+    };
+
+    fetchCourses();
+  }, [user]);
 
   useEffect(() => {
     // Initial scroll
@@ -72,14 +96,17 @@ const TaskPicker = () => {
       description: formData.description,
       category: formData.category,
       difficulty: Number(formData.difficulty),
-      date: taskDate
+      weight: Number(formData.weight),
+      deadline: taskDate,
+      course: formData.course
     };
 
     try {
+      const token = localStorage.getItem('token'); // Use token from localStorage for reliability
       const config = {
         headers: {
           'Content-Type': 'application/json',
-          'x-auth-token': user.token
+          'Authorization': `Bearer ${token}` // Standard Bearer token
         }
       };
 
@@ -87,13 +114,14 @@ const TaskPicker = () => {
       console.log('Task Created:', res.data);
       alert('Task Created Successfully!');
 
-      // Optional: clear form
+      // Reset form
       setFormData({
         title: '',
         description: '',
-        category: 'lab',
+        category: 'General',
         difficulty: 5,
-        weight: 10
+        weight: 10,
+        course: courses.length > 0 ? courses[0]._id : ''
       });
     } catch (err) {
       console.error('Error creating task:', err);
@@ -101,11 +129,13 @@ const TaskPicker = () => {
     }
   };
 
+  const categories = ['Exam', 'Assignment', 'Lab Task', 'Presentation', 'Project', 'General'];
+
   return (
     <div className="task-picker-scope">
       <div className="picker-container">
 
-        <h1 className="page-title">Add Task</h1>
+        <h1 className="page-title">Add New Task</h1>
 
         {/* 1. Date Picker */}
         <div className="date-picker-section">
@@ -158,6 +188,23 @@ const TaskPicker = () => {
             <legend>Task Details</legend>
 
             <div className="form-group">
+              <label>Course</label>
+              <select
+                name="course"
+                value={formData.course}
+                onChange={handleChange}
+                required
+              >
+                <option value="" disabled>Select a Course</option>
+                {courses.map(course => (
+                  <option key={course._id} value={course._id}>
+                    {course.courseCode} - {course.courseTitle}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
               <label>Task Name</label>
               <input
                 type="text"
@@ -181,75 +228,49 @@ const TaskPicker = () => {
 
             <div className="form-group">
               <label>Category</label>
-              <div className="radio-group">
-                <input
-                  type="radio"
-                  id="cat-lab"
-                  name="category"
-                  value="lab"
-                  checked={formData.category === 'lab'}
-                  onChange={handleChange}
-                />
-                <label htmlFor="cat-lab">Lab Task</label>
-
-                <input
-                  type="radio"
-                  id="cat-assign"
-                  name="category"
-                  value="assign"
-                  checked={formData.category === 'assign'}
-                  onChange={handleChange}
-                />
-                <label htmlFor="cat-assign">Assignment</label>
-
-                <input
-                  type="radio"
-                  id="cat-exam"
-                  name="category"
-                  value="exam"
-                  checked={formData.category === 'exam'}
-                  onChange={handleChange}
-                />
-                <label htmlFor="cat-exam">Exam Prep</label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Difficulty</label>
               <select
-                name="difficulty"
-                value={formData.difficulty}
+                name="category"
+                value={formData.category}
                 onChange={handleChange}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: '#333', color: 'white' }}
               >
-                {[1, 2, 3, 4, 5].map((num, index) => (
-                  <option key={num} value={num}>
-                    {['Auto-pilot Task', 'Ugh, Okay!', 'Time To Be Thoughtful', 'Deep Focus Mode', 'Why Does This Exist!?'][index]}
-                  </option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
 
             <div className="form-group">
-              <label>Weight</label>
-              <input
-                type="text"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                placeholder="The value should be within 1-100"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Materials</label>
-              <div className="upload-box" onClick={() => document.getElementById('file-input').click()}>
-                <span className="plus-icon">+</span>
-                <span>Click to Upload Files</span>
-                <input type="file" id="file-input" hidden />
+              <label>Difficulty (1-10)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  name="difficulty"
+                  value={formData.difficulty}
+                  onChange={handleChange}
+                  style={{ flex: 1 }}
+                />
+                <span style={{ fontWeight: 'bold' }}>{formData.difficulty}</span>
               </div>
             </div>
 
-            <button type="submit" className="submit-btn">Create New Task</button>
+            <div className="form-group">
+              <label>Weight (1-100%)</label>
+              <input
+                type="number"
+                name="weight"
+                min="1"
+                max="100"
+                value={formData.weight}
+                onChange={handleChange}
+                placeholder="Importance %"
+                required
+              />
+            </div>
+
+            <button type="submit" className="submit-btn" style={{ marginTop: '20px' }}>Create Task</button>
           </fieldset>
         </form>
 

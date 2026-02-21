@@ -6,21 +6,29 @@ const TaskSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        default: null
+    },
     title: {
         type: String,
         required: true
     },
     description: {
-        type: String
-    },
-    date: {
-        type: Date,
-        required: true
+        type: String,
+        default: ''
     },
     category: {
         type: String,
-        enum: ['lab', 'assign', 'exam'],
-        default: 'assign'
+        enum: ['Exam', 'Assignment', 'Lab Task', 'Presentation', 'Project', 'General'],
+        default: 'General',
+        required: true
+    },
+    // --- PAIN SCORE METRICS ---
+    deadline: {
+        type: Date,
+        required: true
     },
     difficulty: {
         type: Number,
@@ -34,15 +42,19 @@ const TaskSchema = new mongoose.Schema({
         required: true,
         min: 1,
         max: 100,
-        default: 5
+        default: 10
     },
     materials: {
         type: String // URL or file path
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    status: {
+        type: String,
+        enum: ['pending', 'in-progress', 'completed', 'overdue'],
+        default: 'pending'
+    },
+    completedAt: {
+        type: Date
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Task', TaskSchema);
