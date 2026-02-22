@@ -9,18 +9,19 @@ const Courses = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [taskCounts, setTaskCounts] = useState({});
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchCoursesAndTasks = async () => {
       if (!user || !user.token) {
         setLoading(false);
         setError('User not authenticated.');
-        console.log('User not authenticated.');
         return;
       }
 
@@ -33,64 +34,35 @@ const Courses = () => {
             Authorization: `Bearer ${user.token}`,
           },
         };
-        const response = await axios.get('http://localhost:5000/api/courses', config);
-        setCourses(response.data);
+
+        // Fetch courses and tasks in parallel
+        const [coursesResponse, tasksResponse] = await Promise.all([
+          axios.get('http://localhost:5000/api/courses', config),
+          axios.get('http://localhost:5000/api/tasks', config)
+        ]);
+        
+        setCourses(coursesResponse.data);
+
+        // Process tasks to get counts
+        const counts = tasksResponse.data.reduce((acc, task) => {
+          if (task.course) {
+            const courseId = task.course._id || task.course;
+            acc[courseId] = (acc[courseId] || 0) + 1;
+          }
+          return acc;
+        }, {});
+        setTaskCounts(counts);
+
       } catch (err) {
-        console.error('Error fetching courses:', err);
-        setError('Failed to fetch courses.');
+        console.error('Error fetching data:', err);
+        setError('Failed to fetch courses or tasks.');
       } finally {
         setLoading(false);
       }
     };
-    fetchCourses();
+
+    fetchCoursesAndTasks();
   }, [user]);
-
-  /*
-  const addCourse = async () => {
-    if (!newCourseName.trim() || !newCourseCode.trim()) {
-      setError('Course name and code are required.');
-      return;
-    }
-    if (!user || !user.token) {
-      setError('User not authenticated. Please log in.');
-      return;
-    }
-
-    setAddingCourse(true);
-    setError(null);
-
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-
-      const response = await axios.post(
-        'http://localhost:5000/api/courses',
-        { courseTitle: newCourseName, courseCode: newCourseCode, color: newCourseColor, semester: newCourseSemester }, // Map to backend schema
-        config
-      );
-      setCourses([...courses, response.data]);
-      setNewCourseName('');
-      setNewCourseCode('');
-      setNewCourseColor(''); // Reset color
-      setNewCourseSemester(''); // Reset semester
-      setShowAddCourse(false);
-    } catch (err) {
-      console.error('Error adding course:', err);
-      const errorMessage = err.response?.data?.message || 'Failed to add course.';
-      if (errorMessage.includes('Course with this code already exists')) {
-        setError('A course with this code already exists. Please use a different code.');
-      } else {
-        setError(errorMessage);
-      }
-    } finally {
-      setAddingCourse(false);
-    }
-  };
-*/
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
@@ -224,14 +196,16 @@ const Courses = () => {
                     <X size={24} />
                   </button>
                 </div>
-                {error && <p className="error-message">{error}</p>}
-                <p>Are you sure you want to delete the course "{courseToDelete.courseTitle}"?</p>
-                <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); }} className="btn-secondary">
+                <div className="modal-body">
+                  {error && <p className="error-message">{error}</p>}
+                  <p>Are you sure you want to delete the course <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
+                </div>
+                <div className="modal-actions">
+                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); }} className="btn-modal-secondary">
                     Cancel
                   </button>
-                  <button onClick={confirmDelete} className="btn-primary" disabled={loading}>
-                    {loading ? 'Deleting...' : 'Delete'}
+                  <button onClick={confirmDelete} className="btn-modal-danger" disabled={loading}>
+                    {loading ? 'Deleting...' : 'Delete Course'}
                   </button>
                 </div>
               </div>
@@ -245,17 +219,19 @@ const Courses = () => {
                 key={course._id}
                 className="course-card"
                 onClick={() => window.location.href = `/coursedetails?id=${course._id}`}
+                style={{ '--course-color': course.color }}
               >
+                <div className="course-accent" style={{ backgroundColor: course.color }}></div>
                 <div className="course-info">
-                  <p className="course-code">{course.courseCode}</p>
+                  <p className="course-code" style={{ color: course.color }}>{course.courseCode}</p>
                   <h3 className="course-title">{course.courseTitle}</h3>
-                  <p className="course-meta">0 assignments total</p>
+                  <p className="course-meta">{taskCounts[course._id] || 0} tasks total</p>
                 </div>
 
                 <div className="icon-group-container">
                   <div className="stat-item">
                     <div className="stat-icon task-bg"><CheckSquare size={18} /></div>
-                    <span className="stat-count">0</span>
+                    <span className="stat-count">{taskCounts[course._id] || 0}</span>
                   </div>
                   <div className="stat-item">
                     <div className="stat-icon assignment-bg"><FileText size={18} /></div>

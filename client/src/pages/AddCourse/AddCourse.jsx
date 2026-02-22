@@ -44,9 +44,8 @@ const AddCourse = () => {
         setLoading(true);
 
         try {
-            const token = localStorage.getItem('token'); // Assuming token is stored here
+            const token = localStorage.getItem('token'); // token is stored here
             if (!token) {
-
                 console.error("No token found");
                 setError("You must be logged in to add a course.");
                 setLoading(false);
@@ -69,7 +68,7 @@ const AddCourse = () => {
             }
 
             // Success
-            navigate('/dashboard');
+            navigate('/courses');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -80,7 +79,7 @@ const AddCourse = () => {
     return (
         <div className="add-course-container">
             <div className="add-course-header">
-                <Link to="/dashboard" className="back-btn">
+                <Link to="/courses" className="back-btn">
                     <ArrowLeft size={20} />
                 </Link>
                 <h1 className="page-title">Add New Course</h1>
@@ -145,7 +144,7 @@ const AddCourse = () => {
                     </div>
 
                     <div className="form-actions">
-                        <Link to="/dashboard" className="btn-secondary">
+                        <Link to="/courses" className="btn-secondary">
                             Cancel
                         </Link>
                         <button type="submit" className="btn-primary" disabled={loading}>

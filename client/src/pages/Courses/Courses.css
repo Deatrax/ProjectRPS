@@ -16,7 +16,7 @@
 .courses-page-wrapper .container {
   width: 100%;
   min-height: 100vh;
-  padding: 3rem 1rem;
+  padding: 3rem 1rem 120px 1rem;
   box-sizing: border-box;
   background: transparent !important;
 }
@@ -203,19 +203,33 @@
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .courses-page-wrapper .course-card:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 233, 166, 0.3);
+  border-color: var(--course-color, rgba(255, 233, 166, 0.3));
   transform: translateX(10px);
+  box-shadow: -5px 0 20px -5px var(--course-color);
+}
+
+.courses-page-wrapper .course-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  border-radius: 1.5rem 0 0 1.5rem;
 }
 
 .courses-page-wrapper .course-code {
-  color: #ffe9a6;
+  color: #ffe9a6; /* Default fallback */
   font-weight: 700;
   font-size: 0.85rem;
   margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .courses-page-wrapper .course-title {
@@ -285,4 +299,153 @@
 .courses-page-wrapper .delete-row-btn:hover {
   color: #ef4444;
   transform: scale(1.2);
+}
+
+/* Delete Confirmation Modal - Glassy Dark Theme */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: modalFadeIn 0.3s ease;
+}
+
+.modal {
+  background: radial-gradient(circle at 50% 0%, #18224a 0%, #0b1020 100%) !important;
+  background-color: #0b1020 !important;
+
+  /* Glass effect */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+    /* Border & Shadow */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 2rem;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 480px;
+
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+              0 0 20px rgba(24, 34, 74, 0.6); 
+
+  color: white !important;
+  animation: modalSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.modal-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #ffe9a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.btn-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0.6rem;
+  border-radius: 50%;
+  display: flex;
+  transition: all 0.3s ease;
+}
+
+.btn-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: rotate(90deg) scale(1.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.modal-body {
+  margin-bottom: 2.5rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  font-size: 1.1rem;
+}
+
+.highlight-text {
+  color: #ffe9a6;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 233, 166, 0.3);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.25rem;
+}
+
+.btn-modal-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.8rem 1.8rem;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-modal-danger {
+  background: linear-gradient(135deg, #a855f7, #7e22ce); /* Matches your purple action buttons theme */
+  border: none;
+  color: white;
+  padding: 0.8rem 1.8rem;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(126, 34, 206, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-modal-danger:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(126, 34, 206, 0.5),
+              0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.btn-modal-danger:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-modal-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
