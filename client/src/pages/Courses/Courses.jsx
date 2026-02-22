@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X } from 'lucide-react';
+import { Plus, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X, ArrowLeft } from 'lucide-react';
 import './Courses.css';
 import axios from 'axios';
 
@@ -11,12 +11,6 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showAddCourse, setShowAddCourse] = useState(false);
-  const [newCourseName, setNewCourseName] = useState('');
-  const [newCourseCode, setNewCourseCode] = useState('');
-  const [newCourseColor, setNewCourseColor] = useState('');
-  const [newCourseSemester, setNewCourseSemester] = useState('');
-  const [addingCourse, setAddingCourse] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,6 +45,7 @@ const Courses = () => {
     fetchCourses();
   }, [user]);
 
+  /*
   const addCourse = async () => {
     if (!newCourseName.trim() || !newCourseCode.trim()) {
       setError('Course name and code are required.');
@@ -95,6 +90,7 @@ const Courses = () => {
       setAddingCourse(false);
     }
   };
+*/
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
@@ -161,9 +157,12 @@ const Courses = () => {
           {/* Header Section */}
           <div className="header-section">
             <div className="header-content">
+              <Link to="/dashboard" className="back-btn">
+                <ArrowLeft size={20}/>
+              </Link>
               <div className="header-text">
-                <h1 className="header-title">My Courses</h1>
-                <p className="header-description">Manage your courses and learning materials</p>
+                <h1>My Courses</h1>
+                <p>Manage your courses and learning materials</p>
               </div>
 
               <div
