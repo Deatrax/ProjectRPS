@@ -25,7 +25,7 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           {/* Define your routes here */}
           {/* Public Routes */}
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<App />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
 
