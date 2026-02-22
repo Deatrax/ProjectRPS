@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import './TaskPicker.css';
 
 const TaskPicker = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
@@ -135,7 +138,14 @@ const TaskPicker = () => {
     <div className="task-picker-scope">
       <div className="picker-container">
 
-        <h1 className="page-title">Add New Task</h1>
+        <div className="header-section">
+          <button onClick={() => navigate(-1)} className="back-btn">
+            <ArrowLeft size={20}/>
+          </button>
+          <h1 className="page-title">Add New Task</h1>
+        </div>
+
+       <div className="thin-line"></div>
 
         {/* 1. Date Picker */}
         <div className="date-picker-section">
