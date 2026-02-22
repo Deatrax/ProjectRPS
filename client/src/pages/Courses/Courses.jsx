@@ -188,7 +188,7 @@ const Courses = () => {
                     <button
                       className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
                       onMouseEnter={() => setHoveredButton(1)}
-                      onClick={() => setShowAddCourse(true)}
+                      onClick={() => navigate('/courses/add')}
                     >
                       <BookOpen size={18} /> Add Course
                     </button>
@@ -196,6 +196,7 @@ const Courses = () => {
                     <button
                       className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
                       onMouseEnter={() => setHoveredButton(2)}
+                      onClick={() => navigate('/taskpicker')}
                     >
                       <CheckSquare size={18} /> Add Task
                     </button>
@@ -213,52 +214,6 @@ const Courses = () => {
           </div>
 
           <div className="thin-line"></div>
-
-          {/* Add Course Modal */}
-          {showAddCourse && (
-            <div className="modal-overlay">
-              <div className="modal">
-                <div className="modal-header">
-                  <h2>New Course</h2>
-                  <button onClick={() => { setShowAddCourse(false); setError(null); setNewCourseName(''); setNewCourseCode(''); setNewCourseColor(''); setNewCourseSemester(''); }} className="btn-close">
-                    <X size={24} />
-                  </button>
-                </div>
-                {error && <p className="error-message">{error}</p>}
-                <input
-                  type="text"
-                  placeholder="Course name"
-                  value={newCourseName}
-                  onChange={(e) => setNewCourseName(e.target.value)}
-                  className="input-field"
-                />
-                <input
-                  type="text"
-                  placeholder="Course code"
-                  value={newCourseCode}
-                  onChange={(e) => setNewCourseCode(e.target.value)}
-                  className="input-field"
-                />
-                <input
-                  type="text"
-                  placeholder="Course Color (e.g., #3b82f6)"
-                  value={newCourseColor}
-                  onChange={(e) => setNewCourseColor(e.target.value)}
-                  className="input-field"
-                />
-                <input
-                  type="text"
-                  placeholder="Semester (e.g., Fall 2023)"
-                  value={newCourseSemester}
-                  onChange={(e) => setNewCourseSemester(e.target.value)}
-                  className="input-field"
-                />
-                <button onClick={addCourse} className="btn-submit" disabled={addingCourse}>
-                  {addingCourse ? 'Adding...' : 'Create Course'}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Delete Confirmation Modal */}
           {showDeleteConfirm && courseToDelete && (
