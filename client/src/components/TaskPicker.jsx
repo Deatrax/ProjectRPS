@@ -251,12 +251,12 @@ const TaskPicker = () => {
             </div>
 
             <div className="form-group">
-              <label>Difficulty (1-10)</label>
+              <label>Difficulty (1-5)</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input
                   type="range"
                   min="1"
-                  max="10"
+                  max="5"
                   name="difficulty"
                   value={formData.difficulty}
                   onChange={handleChange}
