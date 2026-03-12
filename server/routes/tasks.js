@@ -98,9 +98,16 @@ router.put('/:id', protect, async (req, res) => {
     if (weight) taskFields.weight = weight;
     if (materials) taskFields.materials = materials;
     if (course !== undefined) taskFields.course = course; // allow clearing course
-    if (status) taskFields.status = status;
+    if (status) {
+        taskFields.status = status;
+        if (status === 'completed') {
+            taskFields.completedAt = Date.now();
+        } else {
+            taskFields.completedAt = null;
+        }
+    }
 
-    // Handle 'completed' boolean from frontend toggle
+    // Handle 'completed' boolean from frontend toggle (legacy/teammate support)
     if (completed !== undefined) {
         taskFields.status = completed ? 'completed' : 'pending';
         if (completed) taskFields.completedAt = Date.now();
