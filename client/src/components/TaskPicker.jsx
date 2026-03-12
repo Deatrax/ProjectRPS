@@ -262,7 +262,7 @@ const TaskPicker = () => {
                   onChange={handleChange}
                   style={{ flex: 1 }}
                 />
-                <span style={{ fontWeight: 'bold' }}>{formData.difficulty}</span>
+                <span style={{ fontWeight: 'bold', color:'white' }}>{formData.difficulty}</span>
               </div>
             </div>
 
