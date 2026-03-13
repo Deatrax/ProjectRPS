@@ -245,7 +245,13 @@ const CourseDetails = () => {
                                                     <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>Shared {new Date(material.createdAt).toLocaleDateString()}</span>
                                                 </div>
                                                 <div style={{display: 'flex', gap: '0.5rem'}}>
-                                                    <a href={material.fileUrl} target="_blank" rel="noopener noreferrer" className="download-btn">
+                                                    <a 
+                                                        href={material.fileUrl.replace('/upload/', '/upload/fl_attachment/')} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer" 
+                                                        className="download-btn"
+                                                        download={material.title}
+                                                    >
                                                         <Download size={18} />
                                                     </a>
                                                     <button onClick={() => handleDeleteMaterial(material._id)} className="download-btn" style={{color: '#ef4444'}}>
