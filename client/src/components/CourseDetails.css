@@ -1,0 +1,169 @@
+.course-details-root {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+}
+
+.course-details-root .container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 3rem 1rem 120px 1rem;
+    box-sizing: border-box;
+    background: transparent !important;
+}
+
+.course-details-root .content-limit {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.course-details-root .back-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.8rem;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 60;
+    text-decoration: none;
+}
+
+.course-details-root .back-btn:hover {
+    background: var(--hover-bg);
+    transform: translateX(-5px);
+}
+
+.course-details-root .thin-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 233, 166, 0.3), transparent);
+    margin-bottom: 3rem;
+}
+
+/* Stats Overview Grid */
+.course-details-root .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.course-details-root .stat-card {
+    background: var(--bg-secondary);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.course-details-root .stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 233, 166, 0.3);
+}
+
+/* Main glass panel */
+.course-details-root .glass-panel {
+    background: var(--bg-secondary);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Tab Switcher */
+.course-details-root .toggle-container {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 1.25rem;
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.course-details-root .toggle-btn {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 0.85rem;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.course-details-root .toggle-btn.active {
+    color: white;
+    background: var(--accent-blue);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.course-details-root .toggle-btn:not(.active):hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Data List Items */
+.course-details-root .list-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.course-details-root .list-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(5px);
+    border-color: var(--accent-blue);
+}
+
+.course-details-root .download-btn {
+    padding: 0.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.course-details-root .download-btn:hover {
+    background: var(--accent-blue);
+    color: white;
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .course-details-root .glass-panel {
+        padding: 1.5rem;
+    }
+    
+    .course-details-root .header-title {
+        font-size: 2.2rem !important;
+    }
+}

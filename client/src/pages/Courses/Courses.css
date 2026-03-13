@@ -1,0 +1,449 @@
+:root {
+  --bg-dark: #0b1020;
+  --glow-color: #18224a;
+}
+
+.courses-page-wrapper {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #ffffff;
+}
+
+.courses-page-wrapper .container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 3rem 1rem 120px 1rem;
+  box-sizing: border-box;
+  background: transparent !important;
+}
+
+.courses-page-wrapper .content-limit {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.back-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--hover-bg);
+    transform: translateX(-2px);
+}
+
+/* Header & Animated Buttons */
+.courses-page-wrapper .header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 2rem;
+  width: 100%;
+  min-height: 80px;
+}
+
+.courses-page-wrapper .header-text {
+  text-align: center;
+}
+
+.courses-page-wrapper .back-btn {
+  position: absolute;
+  left: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.8rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 60;
+}
+
+.courses-page-wrapper .back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-5px);
+}
+
+.courses-page-wrapper .floating-button-wrapper {
+  position: absolute;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.courses-page-wrapper .add-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe9a6 0%, #e6d08f 100%);
+  border: none;
+  color: #0b1020;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: 0 8px 25px rgba(255, 233, 166, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Centering the icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 0;
+}
+
+.courses-page-wrapper .add-button svg {
+  display: block;
+  margin: 0;
+}
+
+.courses-page-wrapper .add-button.plus-active {
+  transform: rotate(45deg);
+  background: #cccccc;
+}
+
+.courses-page-wrapper .action-btn {
+  position: absolute;
+  padding: 0.8rem 1.4rem;
+  border-radius: 50px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 40;
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  transition: all 0.3s ease;
+}
+
+.courses-page-wrapper .btn-left {
+  right: 80px;
+  /*background: linear-gradient(135deg, #a855f7, #4f46e5);*/
+  /*background: linear-gradient(135deg, #c084fc, #9333ea);*/
+  background: linear-gradient(135deg, #a855f7, #7e22ce, #581c87);
+}
+
+.courses-page-wrapper .btn-bottom {
+  top: 80px;
+  /*background: linear-gradient(135deg, #a855f7, #4f46e5);*/
+  /*background: linear-gradient(135deg, #c084fc, #9333ea);*/
+  background: linear-gradient(135deg, #a855f7, #7e22ce, #581c87);
+}
+
+.courses-page-wrapper .btn-right {
+  left: 80px;
+  /*background: linear-gradient(135deg, #a855f7, #4f46e5);*/
+  /*background: linear-gradient(135deg, #c084fc, #9333ea);*/
+  background: linear-gradient(135deg, #a855f7, #7e22ce, #581c87);
+}
+
+.courses-page-wrapper .btn-left:hover,
+.courses-page-wrapper .btn-bottom:hover,
+.courses-page-wrapper .btn-right:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.6), 
+              0 0 25px rgba(168, 85, 247, 0.4);
+  color: white;
+}
+
+@keyframes bounceIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Course Rows */
+.courses-page-wrapper .thin-line {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 233, 166, 0.3), transparent);
+  margin-bottom: 3rem;
+}
+
+.courses-page-wrapper .course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.courses-page-wrapper .course-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.courses-page-wrapper .course-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--course-color, rgba(255, 233, 166, 0.3));
+  transform: translateX(10px);
+  box-shadow: -5px 0 20px -5px var(--course-color);
+}
+
+.courses-page-wrapper .course-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  border-radius: 1.5rem 0 0 1.5rem;
+}
+
+.courses-page-wrapper .course-code {
+  color: #ffe9a6; /* Default fallback */
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.courses-page-wrapper .course-title {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.courses-page-wrapper .icon-group-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.courses-page-wrapper .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.courses-page-wrapper .stat-icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.courses-page-wrapper .task-bg {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.courses-page-wrapper .task-bg:hover {
+  color: #10b981;
+  transform: scale(1.2);
+}
+
+.courses-page-wrapper .assignment-bg {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.courses-page-wrapper .assignment-bg:hover {
+  color: #f59e0b;
+  transform: scale(1.2);
+}
+
+.courses-page-wrapper .material-bg {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.courses-page-wrapper .material-bg:hover {
+  color: #3b82f6;
+  transform: scale(1.2);
+}
+
+.courses-page-wrapper .delete-row-btn {
+  background: none;
+  border: none;
+  color: rgba(239, 68, 68, 0.4);
+  cursor: pointer;
+}
+
+.courses-page-wrapper .delete-row-btn:hover {
+  color: #ef4444;
+  transform: scale(1.2);
+}
+
+/* Delete Confirmation Modal - Glassy Dark Theme */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: modalFadeIn 0.3s ease;
+}
+
+.modal {
+  background: radial-gradient(circle at 50% 0%, #18224a 0%, #0b1020 100%) !important;
+  background-color: #0b1020 !important;
+
+  /* Glass effect */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+    /* Border & Shadow */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 2rem;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 480px;
+
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+              0 0 20px rgba(24, 34, 74, 0.6); 
+
+  color: white !important;
+  animation: modalSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.modal-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #ffe9a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.btn-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0.6rem;
+  border-radius: 50%;
+  display: flex;
+  transition: all 0.3s ease;
+}
+
+.btn-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: rotate(90deg) scale(1.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.modal-body {
+  margin-bottom: 2.5rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  font-size: 1.1rem;
+}
+
+.highlight-text {
+  color: #ffe9a6;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 233, 166, 0.3);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.25rem;
+}
+
+.btn-modal-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.8rem 1.8rem;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-modal-danger {
+  background: linear-gradient(135deg, #a855f7, #7e22ce); /* Matches your purple action buttons theme */
+  border: none;
+  color: white;
+  padding: 0.8rem 1.8rem;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(126, 34, 206, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-modal-danger:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(126, 34, 206, 0.5),
+              0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.btn-modal-danger:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-modal-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

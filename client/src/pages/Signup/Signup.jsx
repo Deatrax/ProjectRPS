@@ -1,8 +1,8 @@
-// src/pages/SignUp.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import './Signup.css';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -39,9 +39,9 @@ const SignUp = () => {
   };
 
   return (
-    <div>
+    <div className="signup-page">
       <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="signup-form">
         <input
           type="text"
           placeholder="Name"
