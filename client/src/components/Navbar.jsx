@@ -1,13 +1,21 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    Home, BookOpen, CheckSquare, TrendingUp, Award, Settings
+    Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, LogOut
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    const { logout } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+        // Since useAuth already clears localStorage and updates state, App.jsx will rerender and handle redirection
+    };
 
     // Dock items configuration
     const dockItems = [
@@ -16,7 +24,7 @@ const Navbar = () => {
         { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
         { icon: Award, label: 'Achievements', path: '/dashboard' },   // Placeholder paths as in original
-        { icon: Settings, label: 'Settings', path: '/dashboard' },    // Placeholder paths as in original
+        { icon: LogOut, label: 'Logout', action: handleLogout },
     ];
 
     // Determine active color based on some global state or default
@@ -48,14 +56,22 @@ const Navbar = () => {
 };
 
 // Bottom Nav Item Helper Component
-const BottomNavItem = ({ icon: Icon, label, path, isActive, activeColor }) => {
+const BottomNavItem = ({ icon: Icon, label, path, action, isActive, activeColor }) => {
     const navigate = useNavigate();
+
+    const handleClick = () => {
+        if (action) {
+            action();
+        } else if (path) {
+            navigate(path);
+        }
+    };
 
     return (
         <div className="nav-item-wrapper group">
             <button
                 className={`nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => navigate(path)}
+                onClick={handleClick}
                 style={isActive ? { color: activeColor } : {}}
             >
                 <div className="nav-item-icon">
