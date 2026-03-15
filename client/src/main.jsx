@@ -14,6 +14,8 @@ import CourseDetails from './components/CourseDetails.jsx'; // Import CourseDeta
 import TaskDetails from './components/TaskDetails.jsx'; // Import TaskDetails component
 import Courses from './pages/Courses/Courses.jsx'; // Import Courses page
 import CourseDetail from './pages/CourseDetail/CourseDetail.jsx'; // Import CourseDetail page
+import AllTasks from './pages/AllTasks/AllTasks.jsx'; // Import AllTasks page
+import Analytics from './pages/Analytics/Analytics.jsx'; // Import Analytics page
 import { AuthProvider } from './context/AuthContext.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 
@@ -32,11 +34,13 @@ createRoot(document.getElementById('root')).render(
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/courses/new" element={<AddCourse />} />
+            <Route path="/tasks" element={<AllTasks />} />
             <Route path="/taskpicker" element={<TaskPicker />} />
             <Route path="/coursedetails" element={<CourseDetails />} />
             <Route path="/tasks/:id" element={<TaskDetails />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:id" element={<CourseDetail />} />
+            <Route path="/analytics" element={<Analytics />} />
             {/* Removed duplicate /courses/add as /courses/new exists, but keeping if user uses both */}
             <Route path="/courses/add" element={<AddCourse />} />
           </Route>

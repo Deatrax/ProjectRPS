@@ -10,9 +10,8 @@ export const AuthProvider = ({ children }) => {
         // Check if user is logged in
         const token = localStorage.getItem('token');
         if (token) {
-            // Ideally you would verify the token with the backend here
-            // For now, we'll just assume if the token exists, the user is logged in.
-            // You might want to decode the token to get user info if it's a JWT.
+            // TODO: verify the token with the backend here
+
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 setUser({ ...payload, token });
