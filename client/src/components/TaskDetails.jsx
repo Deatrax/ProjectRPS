@@ -25,12 +25,7 @@ const TaskDetails = () => {
 
                 const data = await res.json();
 
-                // If course is populated, use its title, otherwise use placeholder or ID
-                // Note: The backend Task model might need to populate 'course' to get the title.
-                // For now, we'll assuming it might be an ID or we need to fetch it.
-                // Let's check if the backend populates it. The current backend GET /:id does not populate 'course'.
-                // I will update it to populate or just show "Course Info" for now to avoid breaking if not populated.
-                // Actually, let's just use the data as is.
+
                 setTask(data);
             } catch (err) {
                 console.error("Error fetching task:", err);

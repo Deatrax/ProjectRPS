@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, User,
+    BookOpen, CheckSquare,
     Plus, Calendar, Clock, Moon, Sun
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -68,58 +68,87 @@ const Dashboard = () => {
         fetchTasks();
     }, []);
 
-    // Pain Score Formula:
-    // (Task Count * Avg Difficulty) + Sum((Weight * Difficulty) / Days Remaining) + Procrastination Score
-    const calculatePainScore = (taskList) => {
-        const activeTasks = taskList.filter(t => !t.completed);
-        if (activeTasks.length === 0) {
-            setPainScore(0);
-            return;
+
+//Pain score formula
+const calculatePainScore = (taskList) => {
+    const activeTasks = taskList.filter(t => !t.completed);
+
+    if (activeTasks.length === 0) {
+        setPainScore(0);
+        return;
+    }
+
+    const MAX_DIFFICULTY = 5;
+    const REFERENCE_TASK_COUNT = 10;
+
+    const taskCount = activeTasks.length;
+
+    let totalDifficulty = 0;
+    let urgencySum = 0;
+    let procrastinationSum = 0;
+
+    const now = new Date();
+
+    activeTasks.forEach(task => {
+
+        const difficultyNorm = (task.difficulty || 1) / MAX_DIFFICULTY;
+        const weightNorm = (task.weight || 1) / 100;  
+
+        totalDifficulty += difficultyNorm;
+
+        const deadlineDate = new Date(task.deadline || now);
+        const timeDiff = deadlineDate - now;
+        const daysRemaining = Math.max(
+            1,
+            Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
+        );
+
+        // Softer urgency growth
+        const urgency =
+            difficultyNorm *
+            weightNorm *
+            (1 / Math.sqrt(daysRemaining));
+
+        urgencySum += urgency;
+
+        // Panic boost when very close
+        if (daysRemaining <= 2) {
+            const procrastination =
+                difficultyNorm *
+                weightNorm *
+                (1 / Math.sqrt(daysRemaining));
+
+            procrastinationSum += procrastination;
         }
+    });
 
-        const taskCount = activeTasks.length;
-        const totalDifficulty = activeTasks.reduce((acc, t) => acc + t.difficulty, 0);
-        const avgDifficulty = totalDifficulty / taskCount;
+    const avgDifficulty = totalDifficulty / taskCount;
+    const avgUrgency = urgencySum / taskCount;
+    const avgProcrastination = procrastinationSum / taskCount;
 
-        let weightedSum = 0;
-        let procrastinationScore = 0;
-        const now = new Date();
+    // Workload grows slowly with more tasks
+    const workloadPressure =
+        Math.log(taskCount + 1) /
+        Math.log(REFERENCE_TASK_COUNT + 1);
 
-        activeTasks.forEach(task => {
-            // Calculate days remaining (min 1 to avoid division by zero)
-            const deadlineDate = new Date(task.deadline || now);
-            const timeDiff = deadlineDate - now;
-            const daysRemaining = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24))); // Min 1 day
+    const combined =
+          (0.30 * avgDifficulty)
+        + (0.35 * avgUrgency)
+        + (0.25 * workloadPressure)
+        + (0.10 * avgProcrastination);
 
-            // Weighted Component: (Weight * Difficulty) / Days Remaining
-            weightedSum += (task.weight * task.difficulty) / daysRemaining;
+    // Compression curve so 100 is rare
+    let finalScore = Math.pow(combined, 0.8) * 100;
 
-            // Procrastination Score (Approximation)
-            // Logic: If close to deadline (e.g. < 3 days) and difficulty is high, add penalty
-            if (daysRemaining <= 3) {
-                procrastinationScore += (10 / daysRemaining) * (task.difficulty / 5);
-            }
-        });
+    finalScore = Math.round(finalScore);
+    finalScore = Math.min(100, Math.max(1, finalScore));
 
-        const score = (taskCount * avgDifficulty) + weightedSum + procrastinationScore;
-
-        // Normalize/Cap score to 100 for display (though it can technically exceed, we cap UI bar)
-        setPainScore(Math.round(score));
-    };
-
-    // Dock items
-    const dockItems = [
-        { icon: Home, label: 'Dashboard', path: '/dashboard' },
-        { icon: BookOpen, label: 'Courses', path: '/courses' },
-        { icon: CheckSquare, label: 'All Tasks', path: '/taskpicker' },
-        { icon: TrendingUp, label: 'Analytics', path: '/dashboard' },
-        { icon: Award, label: 'Achievements', path: '/dashboard' },
-        { icon: Settings, label: 'Settings', path: '/dashboard' },
-    ];
+    setPainScore(finalScore);
+};
 
     // Toggle task completion
     const toggleTask = async (taskId, currentStatus) => {
-        // Optimistic UI update
+       
         const updatedTasks = tasks.map(task =>
             task.id === taskId ? { ...task, completed: !currentStatus } : task
         );
@@ -139,7 +168,6 @@ const Dashboard = () => {
             });
         } catch (error) {
             console.error("Error updating task:", error);
-            // Revert on error (optional, for now simple log)
         }
     };
 
@@ -243,10 +271,6 @@ const Dashboard = () => {
                     <button className="action-btn primary" onClick={() => navigate('/taskpicker')}>
                         <Plus size={16} />
                         New Task
-                    </button>
-                    <button className="action-btn secondary" onClick={() => navigate('/courses/add')}>
-                        <BookOpen size={16} />
-                        Add Course
                     </button>
                     <button className="action-btn secondary" onClick={() => console.log('Calendar clicked')}>
                         <Calendar size={16} />
@@ -456,42 +480,10 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Notification-style Bottom Navbar (Notch) */}
-            <div className="notch-navbar-container">
-                <nav className="notch-navbar" style={{
-                    borderTop: `2px solid ${currentMode.color}`,
-                    boxShadow: `0 -4px 20px -5px ${currentMode.color}40`
-                }}>
-                    {dockItems.map((item, index) => (
-                        <BottomNavItem key={index} {...item} activeColor={currentMode.color} />
-                    ))}
-                </nav>
-            </div>
         </div>
     );
 };
 
-// Bottom Nav Item
-const BottomNavItem = ({ icon: Icon, label, path, activeColor }) => {
-    const navigate = useNavigate();
-    const isActive = window.location.pathname === path;
 
-    return (
-        <div className="nav-item-wrapper group">
-            <button
-                className={`nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => navigate(path)}
-                style={isActive ? { color: activeColor } : {}}
-            >
-                <div className="nav-item-icon">
-                    <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                </div>
-            </button>
-            <span className="nav-tooltip">
-                {label}
-            </span>
-        </div>
-    );
-};
 
 export default Dashboard;
