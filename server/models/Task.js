@@ -54,6 +54,15 @@ const TaskSchema = new mongoose.Schema({
     },
     completedAt: {
         type: Date
+    },
+    // --- POMODORO / PROCRASTINATION TRACKING ---
+    lastAttemptedAt: {
+        type: Date,
+        default: null
+    },
+    pomoDraftSeconds: {
+        type: Number,
+        default: null  // null = no draft saved
     }
 }, { timestamps: true });
 

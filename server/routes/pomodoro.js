@@ -1,0 +1,210 @@
+const express = require('express');
+const router = express.Router();
+const Task = require('../models/Task');
+const PomodoroSession = require('../models/PomodoroSession');
+const { protect } = require('../middleware/authMiddleware');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper: calculate the current speed multiplier for a user
+// Multiplier > 1.0 means the timer ticks faster (penalty for procrastination)
+// ─────────────────────────────────────────────────────────────────────────────
+const calculateMultiplier = async (userId) => {
+    const now = new Date();
+
+    // Count overdue incomplete tasks
+    const overdueCount = await Task.countDocuments({
+        user: userId,
+        deadline: { $lt: now },
+        status: { $nin: ['completed'] }
+    });
+
+    // Count tasks not attempted in the last 7 days (and not completed)
+    const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const untouchedCount = await Task.countDocuments({
+        user: userId,
+        status: { $nin: ['completed'] },
+        $or: [
+            { lastAttemptedAt: null },
+            { lastAttemptedAt: { $lt: sevenDaysAgo } }
+        ]
+    });
+
+    // 5% penalty per overdue task, 3% per untouched task, max 1.5x
+    const multiplier = Math.min(
+        1.5,
+        1.0 + (overdueCount * 0.05) + (untouchedCount * 0.03)
+    );
+
+    return parseFloat(multiplier.toFixed(2));
+};
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/pomodoro/speed-multiplier
+// Returns the user's current penalty speed multiplier
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/speed-multiplier', protect, async (req, res) => {
+    try {
+        const multiplier = await calculateMultiplier(req.user.id);
+        res.json({ multiplier });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/pomodoro/start
+// Start a new Pomodoro session for a specific task
+// Body: { taskId, plannedSeconds }
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/start', protect, async (req, res) => {
+    const { taskId, plannedSeconds } = req.body;
+
+    if (!taskId || !plannedSeconds) {
+        return res.status(400).json({ msg: 'taskId and plannedSeconds are required' });
+    }
+
+    try {
+        // Verify the task belongs to this user
+        const task = await Task.findOne({ _id: taskId, user: req.user.id });
+        if (!task) {
+            return res.status(404).json({ msg: 'Task not found' });
+        }
+
+        const multiplier = await calculateMultiplier(req.user.id);
+
+        // Create the session
+        const session = new PomodoroSession({
+            user: req.user.id,
+            task: taskId,
+            plannedSeconds,
+            speedMultiplier: multiplier,
+            status: 'active'
+        });
+        await session.save();
+
+        // Stamp lastAttemptedAt on the task (and clear any existing draft)
+        await Task.findByIdAndUpdate(taskId, {
+            lastAttemptedAt: new Date(),
+            status: task.status === 'pending' ? 'in-progress' : task.status
+        });
+
+        res.json({ session, multiplier });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH /api/pomodoro/:id/save-draft
+// User quit mid-session — save the remaining time as a draft
+// Body: { remainingSeconds, elapsedSeconds }
+// ─────────────────────────────────────────────────────────────────────────────
+router.patch('/:id/save-draft', protect, async (req, res) => {
+    const { remainingSeconds, elapsedSeconds } = req.body;
+
+    try {
+        const session = await PomodoroSession.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
+
+        if (!session) {
+            return res.status(404).json({ msg: 'Session not found' });
+        }
+
+        // Update session to draft status
+        session.status = 'draft';
+        session.elapsedSeconds = elapsedSeconds || 0;
+        session.finishedAt = new Date();
+        await session.save();
+
+        // Save draft remaining seconds on the task AND update lastAttemptedAt
+        await Task.findByIdAndUpdate(session.task, {
+            pomoDraftSeconds: remainingSeconds,
+            lastAttemptedAt: new Date()
+        });
+
+        res.json({ msg: 'Draft saved', session });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH /api/pomodoro/:id/finish
+// Timer ran to 0 (or user declared done)
+// Body: { elapsedSeconds, markTaskDone (bool) }
+// ─────────────────────────────────────────────────────────────────────────────
+router.patch('/:id/finish', protect, async (req, res) => {
+    const { elapsedSeconds, markTaskDone } = req.body;
+
+    try {
+        const session = await PomodoroSession.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
+
+        if (!session) {
+            return res.status(404).json({ msg: 'Session not found' });
+        }
+
+        // Complete the session
+        session.status = 'completed';
+        session.elapsedSeconds = elapsedSeconds || session.plannedSeconds;
+        session.finishedAt = new Date();
+        await session.save();
+
+        // Update the task: clear draft, stamp lastAttemptedAt, optionally complete task
+        const taskUpdate = {
+            pomoDraftSeconds: null,  // clear draft
+            lastAttemptedAt: new Date()
+        };
+        if (markTaskDone) {
+            taskUpdate.status = 'completed';
+            taskUpdate.completedAt = new Date();
+        }
+        const updatedTask = await Task.findByIdAndUpdate(
+            session.task,
+            taskUpdate,
+            { new: true }
+        ).populate('course', 'courseTitle courseCode color');
+
+        res.json({ session, task: updatedTask });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/pomodoro/task/:taskId/draft
+// Get the current draft remaining seconds for a task (if any)
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/task/:taskId/draft', protect, async (req, res) => {
+    try {
+        const task = await Task.findOne({
+            _id: req.params.taskId,
+            user: req.user.id
+        });
+
+        if (!task) {
+            return res.status(404).json({ msg: 'Task not found' });
+        }
+
+        res.json({ pomoDraftSeconds: task.pomoDraftSeconds || null });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+module.exports = router;

@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const courseRoutes = require('./routes/course');
 const materialRoutes = require('./routes/material');
 const taskRoutes = require('./routes/tasks');
+const pomodoroRoutes = require('./routes/pomodoro');
 
 const app = express();
 
@@ -33,6 +34,9 @@ app.use('/api/tasks', taskRoutes);
 
 // Use material routes
 app.use('/api/materials', materialRoutes);
+
+// Use pomodoro routes
+app.use('/api/pomodoro', pomodoroRoutes);
 
 // Define the port
 const PORT = process.env.PORT || 5000;
