@@ -17,6 +17,8 @@ const Dashboard = () => {
     const [painScore, setPainScore] = useState(0);
     const [loading, setLoading] = useState(true);
     const [multiplier, setMultiplier] = useState(1.0);
+    const [dramaMsg, setDramaMsg] = useState(0);
+    const [dramaFade, setDramaFade] = useState(false);
 
     // Mode Configuration
     const getModeConfig = (score) => {
@@ -85,6 +87,27 @@ const Dashboard = () => {
             .then(d => setMultiplier(d.multiplier ?? 1.0))
             .catch(() => { });
     }, []);
+
+    // Dramatic cycling banner
+    const DRAMA = [
+        '"Your task weeps in your absence…"',
+        '"The database is disappointed in you."',
+        '"Time waits for no one. Especially not you."',
+        '"Your future self is filing a complaint."',
+        '"Even the compiler gave up on you."',
+    ];
+    const overdueCount = tasks.filter(t => t.overdue).length;
+    useEffect(() => {
+        if (overdueCount === 0) return;
+        const id = setInterval(() => {
+            setDramaFade(true);
+            setTimeout(() => {
+                setDramaMsg(i => (i + 1) % DRAMA.length);
+                setDramaFade(false);
+            }, 500);
+        }, 8000);
+        return () => clearInterval(id);
+    }, [overdueCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
     //Pain score formula
@@ -256,6 +279,15 @@ const Dashboard = () => {
                     </div>
                 </div>
             </header>
+
+            {/* Dramatic Alert Banner — visible when overdue tasks exist */}
+            {overdueCount > 0 && (
+                <div className="drama-banner" style={{ opacity: dramaFade ? 0 : 1 }}>
+                    <span className="drama-icon">⚠️</span>
+                    <span className="drama-text">{DRAMA[dramaMsg]}</span>
+                    <span className="drama-count">{overdueCount} overdue task{overdueCount !== 1 ? 's' : ''}</span>
+                </div>
+            )}
 
             <div className="main-content">
                 {/* Hero Status - Notion Style */}
