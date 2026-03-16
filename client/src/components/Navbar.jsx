@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    Home, BookOpen, CheckSquare, TrendingUp, Timer, LogOut
+    Home, BookOpen, CheckSquare, TrendingUp, Timer, LogOut, UserCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
@@ -24,6 +24,7 @@ const Navbar = () => {
         { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
         { icon: Timer, label: 'Pomodoro', path: '/pomodoro' },
+        { icon: UserCircle, label: 'Profile', path: '/profile' },
         { icon: LogOut, label: 'Logout', action: handleLogout },
     ];
 

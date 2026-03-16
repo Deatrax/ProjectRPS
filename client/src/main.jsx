@@ -17,6 +17,7 @@ import CourseDetail from './pages/CourseDetail/CourseDetail.jsx'; // Import Cour
 import AllTasks from './pages/AllTasks/AllTasks.jsx'; // Import AllTasks page
 import Analytics from './pages/Analytics/Analytics.jsx'; // Import Analytics page
 import Pomodoro from './pages/Pomodoro/Pomodoro.jsx'; // Import Pomodoro page
+import Profile from './pages/Profile/Profile.jsx'; // Import Profile page
 import { AuthProvider } from './context/AuthContext.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 
@@ -43,6 +44,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/pomodoro" element={<Pomodoro />} />
+            <Route path="/profile" element={<Profile />} />
             {/* Removed duplicate /courses/add as /courses/new exists, but keeping if user uses both */}
             <Route path="/courses/add" element={<AddCourse />} />
           </Route>
