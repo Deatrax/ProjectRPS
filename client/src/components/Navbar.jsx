@@ -15,7 +15,7 @@ const Navbar = () => {
         { icon: BookOpen, label: 'Courses', path: '/courses' },
         { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
-        { icon: Award, label: 'Achievements', path: '/dashboard' },   // Placeholder paths as in original
+        { icon: Award, label: 'Achievements', path: '/achievements' },   // Updated path
         { icon: Settings, label: 'Settings', path: '/dashboard' },    // Placeholder paths as in original
     ];
 
