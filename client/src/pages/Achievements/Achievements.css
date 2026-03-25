@@ -187,8 +187,7 @@
 }
 
 .achievement-card.locked {
-    opacity: 0.5;
-    filter: grayscale(0.8);
+    border-left: 6px solid rgba(255, 255, 255, 0.1);
 }
 
 .achievement-icon-wrapper {
@@ -207,6 +206,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
 }
 
 .achievement-info h3 {
@@ -243,21 +243,51 @@
     font-weight: 700;
 }
 
-.lock-overlay {
+.lock-indicator {
     position: absolute;
     top: 1.25rem;
     right: 1.25rem;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    cursor: help;
+}
+
+.lock-tooltip {
+    position: absolute;
+    bottom: 110%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
     padding: 0.4rem 0.8rem;
     border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
+
+.lock-indicator:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.lock-indicator:hover .lock-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 @media (max-width: 900px) {

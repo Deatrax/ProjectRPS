@@ -140,7 +140,6 @@ const Achievements = () => {
                                 </div>
                                 <span className="progress-text">{achievement.progress}%</span>
                             </div>
-                            {!achievement.unlocked && <div className="lock-overlay"><Star size={14} /> Locked</div>}
                         </div>
                     ))}
                 </div>
