@@ -1,76 +1,74 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Award, Star, Zap, Flame, Trophy, Target, Shield, Crown, ArrowLeft } from 'lucide-react';
+import { Award, Star, Zap, Flame, Trophy, Target, Shield, Crown, ArrowLeft, Loader2 } from 'lucide-react';
 import './Achievements.css';
 import Navbar from '../../components/Navbar';
+import achievementService from '../../services/achievementService';
+
+const iconMap = {
+    Target,
+    Zap,
+    Flame,
+    Trophy,
+    Shield,
+    Crown
+};
 
 const Achievements = () => {
     const navigate = useNavigate();
+    const [achievements, setAchievements] = useState([]);
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Mock achievements data
-    const achievements = [
-        {
-            id: 1,
-            title: "First Step",
-            description: "Complete your first task",
-            icon: Target,
-            unlocked: true,
-            progress: 100,
-            color: "#4ade80"
-        },
-        {
-            id: 2,
-            title: "Early Bird",
-            description: "Complete a task before its deadline",
-            icon: Zap,
-            unlocked: true,
-            progress: 100,
-            color: "#fbbf24"
-        },
-        {
-            id: 3,
-            title: "On Fire",
-            description: "Maintain a 3-day streak",
-            icon: Flame,
-            unlocked: false,
-            progress: 66,
-            color: "#f87171"
-        },
-        {
-            id: 4,
-            title: "Course Master",
-            description: "Complete all tasks in a course",
-            icon: Trophy,
-            unlocked: false,
-            progress: 25,
-            color: "#60a5fa"
-        },
-        {
-            id: 5,
-            title: "Scholar",
-            description: "Add 5 courses to your dashboard",
-            icon: Shield,
-            unlocked: true,
-            progress: 100,
-            color: "#a78bfa"
-        },
-        {
-            id: 6,
-            title: "Procrastination Slayer",
-            description: "Complete 10 tasks in one day",
-            icon: Crown,
-            unlocked: false,
-            progress: 10,
-            color: "#f472b6"
-        }
-    ];
+    useEffect(() => {
+        const fetchAchievements = async () => {
+            try {
+                const data = await achievementService.getAchievements();
+                setAchievements(data.achievements);
+                setStats(data.stats);
+                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching achievements:', err);
+                setError('Failed to load achievements. Please try again later.');
+                setLoading(false);
+            }
+        };
 
-    const stats = {
-        totalPoints: 450,
-        unlockedCount: 3,
-        totalCount: achievements.length,
-        rank: "Novice Scholar"
-    };
+        fetchAchievements();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="achievements-page">
+                <div className="achievements-container flex items-center justify-center min-h-[60vh]">
+                    <div className="text-center">
+                        <Loader2 className="w-12 h-12 animate-spin text-[#ffe9a6] mx-auto mb-4" />
+                        <p className="text-var(--text-secondary)">Loading your achievements...</p>
+                    </div>
+                </div>
+                <Navbar />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="achievements-page">
+                <div className="achievements-container text-center py-20">
+                    <p className="text-red-400 mb-4">{error}</p>
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="achievements-back-btn mx-auto"
+                        style={{ justifySelf: 'center' }}
+                    >
+                        Retry
+                    </button>
+                </div>
+                <Navbar />
+            </div>
+        );
+    }
 
     return (
         <div className="achievements-page">
@@ -90,58 +88,63 @@ const Achievements = () => {
 
                 <div className="thin-line"></div>
 
-                {/* New Rank Section below header */}
+                {/* Rank Section below header */}
                 <div className="achievements-rank-section">
                     <div className="achievements-rank-badge">
                         <Award size={20} />
-                        <span>{stats.rank}</span>
+                        <span>{stats?.rank || "Novice Scholar"}</span>
                     </div>
                 </div>
 
                 <div className="achievements-stats-grid">
                     <div className="achievement-stat-card">
-                        <span className="achievement-stat-value">{stats.totalPoints}</span>
+                        <span className="achievement-stat-value">{stats?.totalPoints || 0}</span>
                         <span className="achievement-stat-label">Total Points</span>
                     </div>
                     <div className="achievement-stat-card">
-                        <span className="achievement-stat-value">{stats.unlockedCount}/{stats.totalCount}</span>
+                        <span className="achievement-stat-value">{stats?.unlockedCount || 0}/{stats?.totalCount || 0}</span>
                         <span className="achievement-stat-label">Unlocked</span>
                     </div>
                     <div className="achievement-stat-card">
-                        <span className="achievement-stat-value">{Math.round((stats.unlockedCount / stats.totalCount) * 100)}%</span>
+                        <span className="achievement-stat-value">
+                            {stats ? Math.round((stats.unlockedCount / stats.totalCount) * 100) : 0}%
+                        </span>
                         <span className="achievement-stat-label">Completion</span>
                     </div>
                 </div>
 
                 <div className="achievements-grid">
-                    {achievements.map((achievement) => (
-                        <div 
-                            key={achievement.id} 
-                            className={`achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`}
-                            style={{ '--achievement-color': achievement.color }}
-                        >
-                            <div className="achievement-icon-wrapper" style={{ backgroundColor: achievement.unlocked ? `${achievement.color}20` : 'rgba(255,255,255,0.05)' }}>
-                                <achievement.icon 
-                                    size={30} 
-                                    color={achievement.unlocked ? achievement.color : '#6b7280'} 
-                                />
-                            </div>
-                            <div className="achievement-info">
-                                <h3>{achievement.title}</h3>
-                                <p>{achievement.description}</p>
-                                <div className="progress-bar-container">
-                                    <div 
-                                        className="progress-bar" 
-                                        style={{ 
-                                            width: `${achievement.progress}%`,
-                                            backgroundColor: achievement.unlocked ? achievement.color : '#4b5563'
-                                        }}
-                                    ></div>
+                    {achievements.map((achievement) => {
+                        const IconComponent = iconMap[achievement.icon] || Star;
+                        return (
+                            <div 
+                                key={achievement.id} 
+                                className={`achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`}
+                                style={{ '--achievement-color': achievement.color }}
+                            >
+                                <div className="achievement-icon-wrapper" style={{ backgroundColor: achievement.unlocked ? `${achievement.color}20` : 'rgba(255,255,255,0.05)' }}>
+                                    <IconComponent 
+                                        size={30} 
+                                        color={achievement.unlocked ? achievement.color : '#6b7280'} 
+                                    />
                                 </div>
-                                <span className="progress-text">{achievement.progress}%</span>
+                                <div className="achievement-info">
+                                    <h3>{achievement.title}</h3>
+                                    <p>{achievement.description}</p>
+                                    <div className="progress-bar-container">
+                                        <div 
+                                            className="progress-bar" 
+                                            style={{ 
+                                                width: `${achievement.progress}%`,
+                                                backgroundColor: achievement.unlocked ? achievement.color : '#4b5563'
+                                            }}
+                                        ></div>
+                                    </div>
+                                    <span className="progress-text">{achievement.progress}%</span>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
             <Navbar />
