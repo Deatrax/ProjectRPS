@@ -62,7 +62,7 @@ const getUserAchievements = async (req, res) => {
                 }
             }
         }
-        const courseMasterProgress = courseMasterUnlocked ? 100 : 0; // Simplified for now
+        const courseMasterProgress = courseMasterUnlocked ? 100 : 0;
 
         // 5. Scholar: Add 5 courses to your dashboard
         const scholarUnlocked = courses.length >= 5;
@@ -76,6 +76,47 @@ const getUserAchievements = async (req, res) => {
         const maxTasksInOneDay = Math.max(0, ...Object.values(tasksByDate));
         const procrastinationSlayerUnlocked = maxTasksInOneDay >= 10;
         const procrastinationSlayerProgress = Math.min(Math.round((maxTasksInOneDay / 10) * 100), 100);
+
+
+        // 7. Deadline Acrobat: Submit within last 10 minutes
+        const deadlineAcrobatUnlocked = completedTasks.some(t => {
+            if (!t.completedAt || !t.deadline) return false;
+            const diff = new Date(t.deadline) - new Date(t.completedAt);
+            return diff > 0 && diff <= 10 * 60 * 1000; // 10 minutes in ms
+        });
+        const deadlineAcrobatProgress = deadlineAcrobatUnlocked ? 100 : 0;
+
+        // 8. Sleepless Warrior: Submit between 3 AM – 5 AM
+        const sleeplessWarriorUnlocked = completedTasks.some(t => {
+            if (!t.completedAt) return false;
+            const hour = new Date(t.completedAt).getHours();
+            return hour >= 3 && hour < 5;
+        });
+        const sleeplessWarriorProgress = sleeplessWarriorUnlocked ? 100 : 0;
+
+        // 9. Academic Weapon: Maintain avg difficulty ≥ 4
+        const avgDifficulty = tasks.length > 0 
+            ? tasks.reduce((acc, t) => acc + t.difficulty, 0) / tasks.length 
+            : 0;
+        const academicWeaponUnlocked = avgDifficulty >= 4;
+        const academicWeaponProgress = Math.min(Math.round((avgDifficulty / 4) * 100), 100);
+
+        // 10. Chaos Manager: Have tasks across 4+ courses
+        const courseIds = [...new Set(tasks.filter(t => t.course).map(t => t.course.toString()))];
+        const chaosManagerUnlocked = courseIds.length >= 4;
+        const chaosManagerProgress = Math.min(Math.round((courseIds.length / 4) * 100), 100);
+
+        // 11. The Disappointment: Miss a deadline
+        const theDisappointmentUnlocked = tasks.some(t => {
+            if (t.status === 'completed' && t.completedAt && t.deadline) {
+                return new Date(t.completedAt) > new Date(t.deadline);
+            }
+            if (t.status !== 'completed' && t.deadline) {
+                return new Date() > new Date(t.deadline);
+            }
+            return false;
+        });
+        const theDisappointmentProgress = theDisappointmentUnlocked ? 100 : 0;
 
         // Achievement Points Mapping
         const achievementsList = [
@@ -138,11 +179,61 @@ const getUserAchievements = async (req, res) => {
                 progress: procrastinationSlayerProgress,
                 color: "#f472b6",
                 points: 500
+            },
+            {
+                id: 7,
+                title: "Deadline Acrobat",
+                description: "Submit within last 10 minutes",
+                icon: "Clock",
+                unlocked: deadlineAcrobatUnlocked,
+                progress: deadlineAcrobatProgress,
+                color: "#fb923c",
+                points: 150
+            },
+            {
+                id: 8,
+                title: "Sleepless Warrior",
+                description: "Submit between 3 AM – 5 AM",
+                icon: "Moon",
+                unlocked: sleeplessWarriorUnlocked,
+                progress: sleeplessWarriorProgress,
+                color: "#818cf8",
+                points: 250
+            },
+            {
+                id: 9,
+                title: "Academic Weapon",
+                description: "Maintain avg difficulty ≥ 4",
+                icon: "Zap",
+                unlocked: academicWeaponUnlocked,
+                progress: academicWeaponProgress,
+                color: "#ef4444",
+                points: 200
+            },
+            {
+                id: 10,
+                title: "Chaos Manager",
+                description: "Have tasks across 4+ courses",
+                icon: "Layers",
+                unlocked: chaosManagerUnlocked,
+                progress: chaosManagerProgress,
+                color: "#2dd4bf",
+                points: 200
+            },
+            {
+                id: 11,
+                title: "The Disappointment",
+                description: "Miss a deadline",
+                icon: "AlertCircle",
+                unlocked: theDisappointmentUnlocked,
+                progress: theDisappointmentProgress,
+                color: "#6b7280",
+                points: 0
             }
         ];
 
         // Stats Calculation
-        let totalPoints = completedTasks.length * 10; // 10 points per task
+        let totalPoints = completedTasks.length * 10;
         achievementsList.forEach(a => {
             if (a.unlocked) totalPoints += a.points;
         });
