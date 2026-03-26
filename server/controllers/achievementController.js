@@ -32,22 +32,27 @@ const getUserAchievements = async (req, res) => {
         
         const uniqueDates = [...new Set(completionDates)].map(d => new Date(d)).sort((a, b) => a - b);
         
-        let maxStreak = 0;
-        let currentStreak = 0;
-        if (uniqueDates.length > 0) {
-            currentStreak = 1;
-            maxStreak = 1;
-            for (let i = 1; i < uniqueDates.length; i++) {
-                const diffTime = Math.abs(uniqueDates[i] - uniqueDates[i-1]);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if (diffDays === 1) {
-                    currentStreak++;
-                } else {
-                    currentStreak = 1;
+        const calculateMaxStreak = (dates) => {
+            let max = 0;
+            let current = 0;
+            if (dates.length > 0) {
+                current = 1;
+                max = 1;
+                for (let i = 1; i < dates.length; i++) {
+                    const diffTime = Math.abs(dates[i] - dates[i-1]);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays === 1) {
+                        current++;
+                    } else {
+                        current = 1;
+                    }
+                    max = Math.max(max, current);
                 }
-                maxStreak = Math.max(maxStreak, currentStreak);
             }
-        }
+            return max;
+        };
+
+        const maxStreak = calculateMaxStreak(uniqueDates);
         const onFireUnlocked = maxStreak >= 3;
         const onFireProgress = Math.min(Math.round((maxStreak / 3) * 100), 100);
 
@@ -107,7 +112,7 @@ const getUserAchievements = async (req, res) => {
         const chaosManagerProgress = Math.min(Math.round((courseIds.length / 4) * 100), 100);
 
         // 11. The Disappointment: Miss a deadline
-        const theDisappointmentUnlocked = tasks.some(t => {
+        const missedTasks = tasks.filter(t => {
             if (t.status === 'completed' && t.completedAt && t.deadline) {
                 return new Date(t.completedAt) > new Date(t.deadline);
             }
@@ -116,6 +121,7 @@ const getUserAchievements = async (req, res) => {
             }
             return false;
         });
+        const theDisappointmentUnlocked = missedTasks.length > 0;
         const theDisappointmentProgress = theDisappointmentUnlocked ? 100 : 0;
 
         // 12. Overachiever: Add 5 tasks in one day
@@ -158,6 +164,32 @@ const getUserAchievements = async (req, res) => {
             return false;
         });
         const academicCriminalProgress = academicCriminalUnlocked ? 100 : 0;
+
+        // 17. Consistency King: Complete tasks daily for 5 days
+        const fiveDayStreak = calculateMaxStreak(uniqueDates);
+        const consistencyKingUnlocked = fiveDayStreak >= 5;
+        const consistencyKingProgress = Math.min(Math.round((fiveDayStreak / 5) * 100), 100);
+
+        // 18. Certified Slacker: Miss 3 deadlines
+        const certifiedSlackerUnlocked = missedTasks.length >= 3;
+        const certifiedSlackerProgress = Math.min(Math.round((missedTasks.length / 3) * 100), 100);
+
+        // 19. Last-Minute Legend: Complete 5 tasks in final hour
+        const lastMinuteLegendSubmissions = completedTasks.filter(t => {
+            if (!t.completedAt || !t.deadline) return false;
+            const diff = new Date(t.deadline) - new Date(t.completedAt);
+            return diff > 0 && diff <= 60 * 60 * 1000; // 1 hour
+        }).length;
+        const lastMinuteLegendUnlocked = lastMinuteLegendSubmissions >= 5;
+        const lastMinuteLegendProgress = Math.min(Math.round((lastMinuteLegendSubmissions / 5) * 100), 100);
+
+        // 20. Efficient Being: Complete 3 tasks in one day
+        const efficientBeingUnlocked = maxTasksInOneDay >= 3;
+        const efficientBeingProgress = Math.min(Math.round((maxTasksInOneDay / 3) * 100), 100);
+
+        // 21. Syllabus Destroyer: Complete all tasks of a course
+        const syllabusDestroyerUnlocked = courseMasterUnlocked;
+        const syllabusDestroyerProgress = courseMasterProgress;
 
         // Achievement Points Mapping
         const achievementsList = [
@@ -320,6 +352,56 @@ const getUserAchievements = async (req, res) => {
                 progress: academicCriminalProgress,
                 color: "#b91c1c",
                 points: 0
+            },
+            {
+                id: 17,
+                title: "Consistency King",
+                description: "Complete tasks daily for 5 days",
+                icon: "Award",
+                unlocked: consistencyKingUnlocked,
+                progress: consistencyKingProgress,
+                color: "#10b981",
+                points: 300
+            },
+            {
+                id: 18,
+                title: "Certified Slacker",
+                description: "Miss 3 deadlines",
+                icon: "AlertCircle",
+                unlocked: certifiedSlackerUnlocked,
+                progress: certifiedSlackerProgress,
+                color: "#991b1b",
+                points: 0
+            },
+            {
+                id: 19,
+                title: "Last-Minute Legend",
+                description: "Complete 5 tasks in final hour",
+                icon: "Clock",
+                unlocked: lastMinuteLegendUnlocked,
+                progress: lastMinuteLegendProgress,
+                color: "#ea580c",
+                points: 400
+            },
+            {
+                id: 20,
+                title: "Efficient Being",
+                description: "Complete 3 tasks in one day",
+                icon: "Zap",
+                unlocked: efficientBeingUnlocked,
+                progress: efficientBeingProgress,
+                color: "#06b6d4",
+                points: 150
+            },
+            {
+                id: 21,
+                title: "Syllabus Destroyer",
+                description: "Complete all tasks of a course",
+                icon: "Trophy",
+                unlocked: syllabusDestroyerUnlocked,
+                progress: syllabusDestroyerProgress,
+                color: "#3b82f6",
+                points: 300
             }
         ];
 
