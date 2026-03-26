@@ -118,6 +118,47 @@ const getUserAchievements = async (req, res) => {
         });
         const theDisappointmentProgress = theDisappointmentUnlocked ? 100 : 0;
 
+        // 12. Overachiever: Add 5 tasks in one day
+        const tasksByCreatedDate = {};
+        tasks.forEach(t => {
+            const date = new Date(t.createdAt).toDateString();
+            tasksByCreatedDate[date] = (tasksByCreatedDate[date] || 0) + 1;
+        });
+        const maxTasksAddedInOneDay = Math.max(0, ...Object.values(tasksByCreatedDate));
+        const overachieverUnlocked = maxTasksAddedInOneDay >= 5;
+        const overachieverProgress = Math.min(Math.round((maxTasksAddedInOneDay / 5) * 100), 100);
+
+        // 13. Final Boss Approaches: Add a task with ≥40% weight
+        const finalBossUnlocked = tasks.some(t => t.weight >= 40);
+        const finalBossProgress = finalBossUnlocked ? 100 : 0;
+
+        // 14. Night Owl: Work after midnight 5 times
+        const nightOwlSubmissions = completedTasks.filter(t => {
+            if (!t.completedAt) return false;
+            const hour = new Date(t.completedAt).getHours();
+            return hour >= 0 && hour < 3; // Midnight to 3 AM
+        }).length;
+        const nightOwlUnlocked = nightOwlSubmissions >= 5;
+        const nightOwlProgress = Math.min(Math.round((nightOwlSubmissions / 5) * 100), 100);
+
+        // 15. Juggler of Doom: Handle 10+ active tasks
+        const activeTasksCount = tasks.filter(t => t.status === 'pending' || t.status === 'in-progress').length;
+        const jugglerUnlocked = activeTasksCount >= 10;
+        const jugglerProgress = Math.min(Math.round((activeTasksCount / 10) * 100), 100);
+
+        // 16. Academic Criminal: Miss a high-weight task
+        const academicCriminalUnlocked = tasks.some(t => {
+            if (t.weight < 40) return false;
+            if (t.status === 'completed' && t.completedAt && t.deadline) {
+                return new Date(t.completedAt) > new Date(t.deadline);
+            }
+            if (t.status !== 'completed' && t.deadline) {
+                return new Date() > new Date(t.deadline);
+            }
+            return false;
+        });
+        const academicCriminalProgress = academicCriminalUnlocked ? 100 : 0;
+
         // Achievement Points Mapping
         const achievementsList = [
             {
@@ -228,6 +269,56 @@ const getUserAchievements = async (req, res) => {
                 unlocked: theDisappointmentUnlocked,
                 progress: theDisappointmentProgress,
                 color: "#6b7280",
+                points: 0
+            },
+            {
+                id: 12,
+                title: "Overachiever",
+                description: "Add 5 tasks in one day",
+                icon: "Star",
+                unlocked: overachieverUnlocked,
+                progress: overachieverProgress,
+                color: "#facc15",
+                points: 150
+            },
+            {
+                id: 13,
+                title: "Final Boss Approaches",
+                description: "Add a task with ≥40% weight",
+                icon: "Zap",
+                unlocked: finalBossUnlocked,
+                progress: finalBossProgress,
+                color: "#dc2626",
+                points: 200
+            },
+            {
+                id: 14,
+                title: "Night Owl",
+                description: "Work after midnight 5 times",
+                icon: "Moon",
+                unlocked: nightOwlUnlocked,
+                progress: nightOwlProgress,
+                color: "#4338ca",
+                points: 200
+            },
+            {
+                id: 15,
+                title: "Juggler of Doom",
+                description: "Handle 10+ active tasks",
+                icon: "Layers",
+                unlocked: jugglerUnlocked,
+                progress: jugglerProgress,
+                color: "#7c3aed",
+                points: 300
+            },
+            {
+                id: 16,
+                title: "Academic Criminal",
+                description: "Miss a high-weight task",
+                icon: "ShieldAlert",
+                unlocked: academicCriminalUnlocked,
+                progress: academicCriminalProgress,
+                color: "#b91c1c",
                 points: 0
             }
         ];

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Award, Star, Zap, Flame, Trophy, Target, Shield, Crown, ArrowLeft, Loader2, Clock, Moon, Layers, AlertCircle } from 'lucide-react';
+import { Award, Star, Zap, Flame, Trophy, Target, Shield, Crown, ArrowLeft, Loader2, Clock, Moon, Layers, AlertCircle, ShieldAlert } from 'lucide-react';
 import './Achievements.css';
 import Navbar from '../../components/Navbar';
 import achievementService from '../../services/achievementService';
@@ -16,7 +16,9 @@ const iconMap = {
     Moon,
     Layers,
     AlertCircle,
-    Award
+    Award,
+    Star,
+    ShieldAlert
 };
 
 const Achievements = () => {
