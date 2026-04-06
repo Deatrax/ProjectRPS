@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    Home, BookOpen, CheckSquare, TrendingUp, Timer, LogOut, UserCircle
+    Home, BookOpen, CheckSquare, TrendingUp, Timer, LogOut, UserCircle, Award, Settings
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
@@ -24,10 +24,10 @@ const Navbar = () => {
         { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
         { icon: Timer, label: 'Pomodoro', path: '/pomodoro' },
+        { icon: Award, label: 'Achievements', path: '/achievements' },   // Updated path
+        { icon: Settings, label: 'Settings', path: '/dashboard' }, // Placeholder paths as in original
         { icon: UserCircle, label: 'Profile', path: '/profile' },
         { icon: LogOut, label: 'Logout', action: handleLogout },
-        { icon: Award, label: 'Achievements', path: '/achievements' },   // Updated path
-        { icon: Settings, label: 'Settings', path: '/dashboard' },    // Placeholder paths as in original
     ];
 
     // Determine active color based on some global state or default
