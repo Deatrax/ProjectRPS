@@ -26,6 +26,8 @@ const Navbar = () => {
         { icon: Timer, label: 'Pomodoro', path: '/pomodoro' },
         { icon: UserCircle, label: 'Profile', path: '/profile' },
         { icon: LogOut, label: 'Logout', action: handleLogout },
+        { icon: Award, label: 'Achievements', path: '/achievements' },   // Updated path
+        { icon: Settings, label: 'Settings', path: '/dashboard' },    // Placeholder paths as in original
     ];
 
     // Determine active color based on some global state or default
