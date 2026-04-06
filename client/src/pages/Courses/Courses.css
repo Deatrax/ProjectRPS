@@ -57,6 +57,24 @@
   text-align: center;
 }
 
+.courses-page-wrapper .header-text h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #ffe9a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.courses-page-wrapper .header-text p {
+  color: var(--text-secondary);
+  margin: 0.75rem 0 0 0;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
 .courses-page-wrapper .back-btn {
   position: absolute;
   left: 0;

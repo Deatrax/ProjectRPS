@@ -491,10 +491,8 @@ const Dashboard = () => {
                                 <input
                                     type="checkbox"
                                     checked={task.completed}
-                                    onChange={(e) => {
-                                        e.stopPropagation();
-                                        toggleTask(task.id, task.completed);
-                                    }}
+                                    onChange={() => toggleTask(task.id, task.completed)}
+                                    onClick={(e) => e.stopPropagation()}
                                     className="task-checkbox"
                                 />
 
