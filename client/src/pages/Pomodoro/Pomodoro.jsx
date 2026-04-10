@@ -25,16 +25,16 @@ const PRESETS = [
 
 // ── Circular Timer SVG ────────────────────────────────────────────────────────
 function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSeconds, taskTitle }) {
-    const size = 300;
+    const size = 480;
     const cx = size / 2;
     const cy = size / 2;
 
-    const mainR = 118;
+    const mainR = 190;
     const mainCircumference = 2 * Math.PI * mainR;
     const mainOffset = mainCircumference * (1 - Math.min(100, Math.max(0, progress)) / 100);
 
-    const dotRingR = 138;
-    const dotCount = 60;
+    const dotRingR = 218;
+    const dotCount = 72;
     const dots = Array.from({ length: dotCount }, (_, i) => {
         const angle = (i / dotCount) * 2 * Math.PI - Math.PI / 2;
         const x = cx + dotRingR * Math.cos(angle);
@@ -44,12 +44,12 @@ function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSecond
         return { x, y, isFilled };
     });
 
-    const tickRingR = 98;
+    const tickRingR = 158;
     const tickCount = 12;
     const ticks = Array.from({ length: tickCount }, (_, i) => {
         const angle = (i / tickCount) * 2 * Math.PI - Math.PI / 2;
-        const innerR = tickRingR - 6;
-        const outerR = tickRingR + (i % 3 === 0 ? 10 : 5);
+        const innerR = tickRingR - 8;
+        const outerR = tickRingR + (i % 3 === 0 ? 14 : 7);
         return {
             x1: cx + innerR * Math.cos(angle),
             y1: cy + innerR * Math.sin(angle),
@@ -96,15 +96,15 @@ function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSecond
 
                 {dots.map((d, i) => (
                     <circle key={i} cx={d.x} cy={d.y}
-                        r={d.isFilled ? 2.8 : 1.8}
-                        fill={d.isFilled ? glowColor : 'rgba(255,255,255,0.12)'}
-                        opacity={d.isFilled ? 1 : 0.6}
+                        r={d.isFilled ? 3.2 : 2}
+                        fill={d.isFilled ? glowColor : 'rgba(255,255,255,0.1)'}
+                        opacity={d.isFilled ? 1 : 0.55}
                         filter={d.isFilled ? 'url(#glow)' : undefined}
                     />
                 ))}
 
                 <circle cx={cx} cy={cy} r={mainR}
-                    fill="none" stroke="url(#arcGrad)" strokeWidth="10"
+                    fill="none" stroke="url(#arcGrad)" strokeWidth="12"
                     strokeLinecap="round"
                     strokeDasharray={mainCircumference}
                     strokeDashoffset={mainOffset}
@@ -117,36 +117,36 @@ function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSecond
                     const angle = ((progress / 100) * 360 - 90) * (Math.PI / 180);
                     const hx = cx + mainR * Math.cos(angle);
                     const hy = cy + mainR * Math.sin(angle);
-                    return <circle cx={hx} cy={hy} r="7" fill={glowColor} filter="url(#glow-strong)" opacity="0.9" />;
+                    return <circle cx={hx} cy={hy} r="9" fill={glowColor} filter="url(#glow-strong)" opacity="0.9" />;
                 })()}
 
-                <text x={cx} y={cy - 14} textAnchor="middle" dominantBaseline="middle"
-                    fill={isUrgent ? '#f87171' : isRunning ? '#c4b5fd' : 'rgba(255,255,255,0.85)'}
+                <text x={cx} y={cy - 20} textAnchor="middle" dominantBaseline="middle"
+                    fill={isUrgent ? '#f87171' : isRunning ? '#c4b5fd' : 'rgba(255,255,255,0.9)'}
                     style={{
-                        fontSize: totalSeconds >= 3600 ? '36px' : '44px',
+                        fontSize: totalSeconds >= 3600 ? '56px' : '72px',
                         fontWeight: 800,
                         fontFamily: "'Inter', monospace",
-                        letterSpacing: '-1px',
-                        filter: isRunning ? `drop-shadow(0 0 16px ${glowColor})` : 'none',
+                        letterSpacing: '-2px',
+                        filter: isRunning ? `drop-shadow(0 0 20px ${glowColor})` : 'none',
                         transition: 'fill 0.4s ease, filter 0.4s ease',
                     }}
                 >
                     {fmt(secondsLeft)}
                 </text>
 
-                <text x={cx} y={cy + 26} textAnchor="middle"
+                <text x={cx} y={cy + 36} textAnchor="middle"
                     fill="rgba(255,255,255,0.35)"
-                    style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '3px' }}
+                    style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '4px' }}
                 >
                     {statusText}
                 </text>
 
                 {taskTitle && (
-                    <text x={cx} y={cy + 46} textAnchor="middle"
-                        fill="rgba(255,255,255,0.22)"
-                        style={{ fontSize: '10px', fontWeight: 500 }}
+                    <text x={cx} y={cy + 64} textAnchor="middle"
+                        fill="rgba(255,255,255,0.2)"
+                        style={{ fontSize: '12px', fontWeight: 500 }}
                     >
-                        {taskTitle.length > 24 ? taskTitle.slice(0, 22) + '…' : taskTitle}
+                        {taskTitle.length > 28 ? taskTitle.slice(0, 26) + '…' : taskTitle}
                     </text>
                 )}
             </svg>

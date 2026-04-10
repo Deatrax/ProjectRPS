@@ -84,25 +84,27 @@
     padding: 2rem 2.5rem;
     display: flex;
     align-items: center;
-    gap: 3.5rem;
+    justify-content: center;
+    gap: 3rem;
     flex: 1;
 }
 
 /* Left — Clock */
 .pomo-left {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 0;
 }
 
 /* Right — Controls */
 .pomo-right {
-    flex: 1;
+    flex: 0 0 340px;
+    max-width: 340px;
     display: flex;
     flex-direction: column;
     gap: 1.6rem;
-    min-width: 0;
 }
 
 /* Responsive: stack on small screens */
