@@ -13,9 +13,12 @@ const PrivateRoute = () => {
     const [apologyDone, setApologyDone] = useState(true); // start true to avoid flash
     const [tasksChecked, setTasksChecked] = useState(false);
 
+    // deny access if not authenticated
+    if (!user) return <Navigate to="/" replace />;
+
     // Fetch tasks to detect overdue ones (only once, after login)
     useEffect(() => {
-        if (!user) return;
+        if (!user) return <Navigate to="/" replace />;
 
         // Check localStorage first — if already apologised today, skip fetch
         if (hasApologyForToday()) {
