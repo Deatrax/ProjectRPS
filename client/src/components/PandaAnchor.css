@@ -3,7 +3,7 @@
 .panda-dashboard-anchor {
   position: fixed;
   left: 30px;
-  bottom: 20px;
+  bottom: 30px;
   width: 180px; /* Base size (small) */
   height: 220px;
   z-index: 1000;
@@ -128,10 +128,81 @@
 .panda-dashboard-anchor.large .arm.right { right: 12px; }
 
 
+/* ── Speech Bubble styles ── */
+.panda-speech-bubble {
+  position: absolute;
+  top: -80px; /* Pushed UP significantly to clear the head (Anchor Height 220px) */
+  left: 140px;
+  z-index: 1001;
+  pointer-events: auto;
+  animation: bubbleFloat 4s ease-in-out infinite;
+}
+
+.bubble-box {
+  background: white;
+  color: #111;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  border: 3px solid #0d0f12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+}
+
+.bubble-dots {
+  position: absolute;
+  top: 40px; /* Below the box */
+  left: -20px;
+}
+
+.bubble-dots .dot {
+  background: white;
+  border: 1.5px solid #0d0f12;
+  border-radius: 50%;
+  position: absolute;
+}
+
+/* Dots leading from head (bottom) to bubble (top) */
+.dot-1 { width: 8px; height: 8px; top: 45px; left: -10px; }  /* Closest to Head */
+.dot-2 { width: 12px; height: 12px; top: 25px; left: -5px; } /* Middle */
+.dot-3 { width: 18px; height: 18px; top: 5px; left: 0px; }   /* Closest to Box */
+
+/* Scaling for Large Variant */
+.panda-dashboard-anchor.large .panda-speech-bubble {
+  top: -120px; /* Pushed UP even more for the big anchor (320px) */
+  left: 200px;
+}
+
+.panda-dashboard-anchor.large .bubble-box {
+  padding: 12px 24px;
+  font-size: 24px;
+  border-width: 4px;
+  border-radius: 18px;
+}
+
+.panda-dashboard-anchor.large .bubble-dots {
+  top: 60px;
+  left: -30px;
+}
+
+.panda-dashboard-anchor.large .dot-1 { width: 12px; height: 12px; top: 70px; left: -15px; }
+.panda-dashboard-anchor.large .dot-2 { width: 18px; height: 18px; top: 40px; left: -10px; }
+.panda-dashboard-anchor.large .dot-3 { width: 26px; height: 26px; top: 10px; left: 0px; }
+
+
 /* Animations */
 @keyframes dashboardPandaFloat {
   0%, 100% { transform: translate(-50%, 0); }
   50% { transform: translate(-50%, -12px); }
+}
+
+@keyframes bubbleFloat {
+  0%, 100% { transform: translateY(0) rotate(5deg); }
+  50% { transform: translateY(-5px) rotate(8deg); }
 }
 
 @media (max-width: 1200px) {

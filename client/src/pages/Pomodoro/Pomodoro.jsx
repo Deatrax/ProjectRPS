@@ -448,6 +448,14 @@ export default function Pomodoro() {
             )}
             {/* Fixed Panda Character */}
             <div className="panda-dashboard-anchor">
+                <div className="panda-speech-bubble">
+                    <div className="bubble-box">Hi!</div>
+                    <div className="bubble-dots">
+                        <div className="dot dot-3"></div>
+                        <div className="dot dot-2"></div>
+                        <div className="dot dot-1"></div>
+                    </div>
+                </div>
                 <Panda />
             </div>
         </div>

@@ -540,6 +540,14 @@ const Dashboard = () => {
 
             {/* Fixed Panda Character (Large on Dashboard) */}
             <div className="panda-dashboard-anchor large">
+                <div className="panda-speech-bubble">
+                    <div className="bubble-box">Hi!</div>
+                    <div className="bubble-dots">
+                        <div className="dot dot-3"></div>
+                        <div className="dot dot-2"></div>
+                        <div className="dot dot-1"></div>
+                    </div>
+                </div>
                 <Panda />
             </div>
         </div>
