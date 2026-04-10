@@ -1,0 +1,176 @@
+/* Standalone Panda Styles for Dashboard */
+
+.panda-dashboard-anchor {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 180px; /* Scaled down slightly for dashboard */
+  height: 220px;
+  z-index: 1000;
+  pointer-events: none; /* Allow clicking through background area */
+}
+
+.panda-dashboard-anchor .panda-area {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.panda-dashboard-anchor .panda {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 180px;
+  height: 220px;
+  transform: translateX(-50%);
+  opacity: 1;
+  pointer-events: auto; /* Enable clicks on the panda itself */
+}
+
+/* --- REUSED PANDA SCULPTING STYLES --- */
+
+.panda-dashboard-anchor .ear {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  background: #0d0f12;
+  border-radius: 50%;
+  top: 0;
+}
+
+.panda-dashboard-anchor .ear.left {
+  left: 28px;
+}
+
+.panda-dashboard-anchor .ear.right {
+  right: 28px;
+}
+
+.panda-dashboard-anchor .head {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 154px;
+  height: 140px;
+  transform: translateX(-50%);
+  background: #f7f7f7;
+  border-radius: 77px;
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.06);
+}
+
+.panda-dashboard-anchor .eye-patch {
+  position: absolute;
+  width: 49px;
+  height: 56px;
+  top: 38px;
+  background: #0d0f12;
+  border-radius: 50%;
+  opacity: 0.95;
+}
+
+.panda-dashboard-anchor .eye-patch.left {
+  left: 28px;
+  transform: rotate(-10deg);
+}
+
+.panda-dashboard-anchor .eye-patch.right {
+  right: 28px;
+  transform: rotate(10deg);
+}
+
+.panda-dashboard-anchor .eye {
+  position: absolute;
+  left: 50%;
+  top: 25px;
+  width: 13px;
+  height: 13px;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.panda-dashboard-anchor .eye::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  transform: translate(-50%, -50%);
+  background: #0d0f12;
+  border-radius: 50%;
+}
+
+.panda-dashboard-anchor .nose {
+  position: absolute;
+  left: 50%;
+  top: 92px;
+  width: 12px;
+  height: 9px;
+  transform: translateX(-50%);
+  background: #0d0f12;
+  border-radius: 0 0 7px 7px;
+}
+
+.panda-dashboard-anchor .mouth {
+  position: absolute;
+  left: 50%;
+  top: 104px;
+  width: 30px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  border-radius: 0 0 35px 35px;
+  opacity: 0.55;
+}
+
+.panda-dashboard-anchor .body {
+  position: absolute;
+  left: 50%;
+  top: 147px;
+  width: 168px;
+  height: 98px;
+  transform: translateX(-50%);
+  background: #f7f7f7;
+  border-radius: 84px 84px 56px 56px;
+  box-shadow: inset 0 -7px 0 rgba(0, 0, 0, 0.06);
+}
+
+.panda-dashboard-anchor .arm {
+  position: absolute;
+  width: 63px;
+  height: 42px;
+  background: #0d0f12;
+  border-radius: 28px;
+  top: 14px;
+  transition: transform 500ms ease;
+}
+
+.panda-dashboard-anchor .arm.left {
+  left: 8px;
+  transform-origin: 80% 20%;
+}
+
+.panda-dashboard-anchor .arm.right {
+  right: 8px;
+  transform-origin: 20% 20%;
+}
+
+/* Floating animation */
+@keyframes dashboardPandaFloat {
+  0%, 100% { transform: translateY(0) translateX(-50%); }
+  50% { transform: translateY(-8px) translateX(-50%); }
+}
+
+.panda-dashboard-anchor .panda {
+  animation: dashboardPandaFloat 4s ease-in-out infinite;
+}
+
+/* Media query for small screens - hide panda to save space */
+@media (max-width: 1100px) {
+  .panda-dashboard-anchor {
+    display: none;
+  }
+}

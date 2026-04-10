@@ -6,7 +6,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import PomodoroWidget, { timeAgo } from '../../components/PomodoroWidget';
+import Panda from '../../components/Panda';
 import './Dashboard.css';
+import './PandaAnchor.css';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -536,6 +538,10 @@ const Dashboard = () => {
                 </div>
             </div>
 
+            {/* Fixed Panda Character */}
+            <div className="panda-dashboard-anchor">
+                <Panda />
+            </div>
         </div>
     );
 };
