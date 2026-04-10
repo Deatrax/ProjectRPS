@@ -532,8 +532,8 @@ export default function Pomodoro() {
             <div className={`panda-dashboard-anchor ${!showPanda ? `slide-${pandaDir}` : ''}`}>
                 <div className="panda-speech-bubble">
                     <div className="bubble-box">
-                        {isRunning
-                            ? (milestoneMessage || "Good luck! 🐼")
+                        {isRunning 
+                            ? (milestoneMessage || "Good luck! 🐼") 
                             : initialQuote}
                     </div>
                     <div className="bubble-dots">
