@@ -179,10 +179,24 @@ export default function Pomodoro() {
         "Your future self will thank you for this focus."
     ], []);
 
-    // Pick one quote to stay stable until refresh
+    const RELAX_QUOTES = React.useMemo(() => [
+        "Take a deep breath. 🌿",
+        "You deserve this break.",
+        "Time to recharge... 🔋",
+        "Stretch a bit! You're doing great.",
+        "Rest is part of the work. ✨",
+        "Peace of mind is a priority."
+    ], []);
+
+    // Selection of stable quotes for the current session
     const initialQuote = React.useMemo(() =>
         FOCUS_QUOTES[Math.floor(Math.random() * FOCUS_QUOTES.length)],
         [FOCUS_QUOTES]
+    );
+
+    const breakQuote = React.useMemo(() =>
+        RELAX_QUOTES[Math.floor(Math.random() * RELAX_QUOTES.length)],
+        [RELAX_QUOTES]
     );
 
     const [tasks, setTasks] = useState([]);
@@ -222,6 +236,14 @@ export default function Pomodoro() {
 
     // Effect 1: Milestone & Initial Detection (Runs every second)
     useEffect(() => {
+        // BREAK MODE: Stay visible and clear milestones
+        if (mode !== 'work') {
+            setShowPanda(true);
+            setMilestoneMessage("");
+            return;
+        }
+
+        // WORK MODE: Normal visibility logic
         if (!isRunning) {
             setShowPanda(true);
             setMilestoneMessage("");
@@ -250,13 +272,14 @@ export default function Pomodoro() {
                 setShowPanda(true); // Re-trigger visibility
             }
         });
-    }, [isRunning, secondsLeft, totalSeconds, milestoneMessage]);
+    }, [isRunning, secondsLeft, totalSeconds, milestoneMessage, mode, breakQuote]);
 
     // Effect 2: Auto-hide Manager (Only triggers when state transitions)
     useEffect(() => {
         let timer;
         let dirTimer;
-        if (isRunning && showPanda) {
+        // Only auto-hide if we are in WORK mode
+        if (mode === 'work' && isRunning && showPanda) {
             timer = setTimeout(() => {
                 setShowPanda(false);
                 dirTimer = setTimeout(() => {
@@ -604,9 +627,9 @@ export default function Pomodoro() {
             <div className={`panda-dashboard-anchor ${!showPanda ? `slide-${pandaDir}` : ''}`}>
                 <div className="panda-speech-bubble">
                     <div className="bubble-box">
-                        {isRunning 
-                            ? (milestoneMessage || "Good luck! 🐼") 
-                            : initialQuote}
+                        {mode === 'work' 
+                            ? (isRunning ? (milestoneMessage || "Good luck! 🐼") : initialQuote)
+                            : breakQuote}
                     </div>
                     <div className="bubble-dots">
                         <div className="dot dot-3"></div>
