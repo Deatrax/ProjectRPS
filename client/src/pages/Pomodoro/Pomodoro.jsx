@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Pause, Save } from 'lucide-react';
 import { usePomodoroTimer } from '../../hooks/usePomodoroTimer';
+import Panda from '../../components/Panda';
 import './Pomodoro.css';
+import '../../components/PandaAnchor.css';
 
 const API = 'http://localhost:5000/api';
 const FINISH_SOUND = 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
@@ -444,6 +446,10 @@ export default function Pomodoro() {
                     </div>
                 </div>
             )}
+            {/* Fixed Panda Character */}
+            <div className="panda-dashboard-anchor">
+                <Panda />
+            </div>
         </div>
     );
 }

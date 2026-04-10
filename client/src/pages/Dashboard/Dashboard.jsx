@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import PomodoroWidget, { timeAgo } from '../../components/PomodoroWidget';
 import Panda from '../../components/Panda';
 import './Dashboard.css';
-import './PandaAnchor.css';
+import '../../components/PandaAnchor.css';
 
 const Dashboard = () => {
     const navigate = useNavigate();
