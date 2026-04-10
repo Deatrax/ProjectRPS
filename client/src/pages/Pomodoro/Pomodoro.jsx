@@ -199,20 +199,58 @@ export default function Pomodoro() {
 
     // Controls Panda visibility delay
     const [showPanda, setShowPanda] = useState(true);
+    const [milestoneMessage, setMilestoneMessage] = useState("");
+    const milestonesReached = useRef(new Set());
 
+    // Effect 1: Milestone & Initial Detection (Runs every second)
+    useEffect(() => {
+        if (!isRunning) {
+            setShowPanda(true);
+            setMilestoneMessage("");
+            return;
+        }
+
+        // Check if we just started (no milestones yet)
+        if (milestonesReached.current.size === 0 && !milestoneMessage) {
+            // This is the initial "Good luck!" phase
+            // showPanda is already true by default or from paused state
+        }
+
+        // Milestone Tracking
+        const progress = totalSeconds > 0 ? (totalSeconds - secondsLeft) / totalSeconds : 0;
+        const thresholds = [
+            { marker: 0.25, msg: "Great start! 25% done already! 🐼" },
+            { marker: 0.50, msg: "Halfway there! Keep going! ✨" },
+            { marker: 0.75, msg: "Almost there! Only 25% left! 🏁" }
+        ];
+
+        thresholds.forEach(t => {
+            const key = String(t.marker);
+            if (progress >= t.marker && !milestonesReached.current.has(key)) {
+                milestonesReached.current.add(key);
+                setMilestoneMessage(t.msg);
+                setShowPanda(true); // Re-trigger visibility
+            }
+        });
+    }, [isRunning, secondsLeft, totalSeconds, milestoneMessage]);
+
+    // Effect 2: Auto-hide Manager (Only triggers when state transitions)
     useEffect(() => {
         let timer;
-        if (isRunning) {
-            // Wait 5 seconds before sliding out
+        if (isRunning && showPanda) {
+            // When running and visible, start the 5-second countdown to hide
             timer = setTimeout(() => {
                 setShowPanda(false);
             }, 5000);
-        } else {
-            // Instantly return when paused/stopped
-            setShowPanda(true);
         }
         return () => clearTimeout(timer);
-    }, [isRunning]);
+    }, [isRunning, showPanda, milestoneMessage]);
+
+    // Reset milestones when task changes or timer is fully reset
+    useEffect(() => {
+        milestonesReached.current.clear();
+        setMilestoneMessage("");
+    }, [selectedTaskId]);
 
     // ── Load multiplier ──
     useEffect(() => {
@@ -483,7 +521,9 @@ export default function Pomodoro() {
             <div className={`panda-dashboard-anchor ${!showPanda ? 'slide-out' : ''}`}>
                 <div className="panda-speech-bubble">
                     <div className="bubble-box">
-                        {isRunning ? "Good luck! 🐼" : initialQuote}
+                        {isRunning 
+                            ? (milestoneMessage || "Good luck! 🐼") 
+                            : initialQuote}
                     </div>
                     <div className="bubble-dots">
                         <div className="dot dot-3"></div>
