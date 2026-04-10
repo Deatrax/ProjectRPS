@@ -200,6 +200,7 @@ export default function Pomodoro() {
     // Controls Panda visibility delay
     const [showPanda, setShowPanda] = useState(true);
     const [milestoneMessage, setMilestoneMessage] = useState("");
+    const [pandaDir, setPandaDir] = useState("left"); // Options: left, right, bottom
     const milestonesReached = useRef(new Set());
 
     // Effect 1: Milestone & Initial Detection (Runs every second)
@@ -237,13 +238,23 @@ export default function Pomodoro() {
     // Effect 2: Auto-hide Manager (Only triggers when state transitions)
     useEffect(() => {
         let timer;
+        let dirTimer;
         if (isRunning && showPanda) {
             // When running and visible, start the 5-second countdown to hide
             timer = setTimeout(() => {
                 setShowPanda(false);
+                // After it slides out (approx 1s), pick a new random direction for the next entrance
+                dirTimer = setTimeout(() => {
+                    const dirs = ["left", "right", "bottom"];
+                    const nextDir = dirs[Math.floor(Math.random() * dirs.length)];
+                    setPandaDir(nextDir);
+                }, 1000);
             }, 5000);
         }
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(dirTimer);
+        };
     }, [isRunning, showPanda, milestoneMessage]);
 
     // Reset milestones when task changes or timer is fully reset
@@ -518,11 +529,11 @@ export default function Pomodoro() {
                 </div>
             )}
             {/* Fixed Panda Character (Wishes luck then slides out after delay) */}
-            <div className={`panda-dashboard-anchor ${!showPanda ? 'slide-out' : ''}`}>
+            <div className={`panda-dashboard-anchor ${!showPanda ? `slide-${pandaDir}` : ''}`}>
                 <div className="panda-speech-bubble">
                     <div className="bubble-box">
-                        {isRunning 
-                            ? (milestoneMessage || "Good luck! 🐼") 
+                        {isRunning
+                            ? (milestoneMessage || "Good luck! 🐼")
                             : initialQuote}
                     </div>
                     <div className="bubble-dots">

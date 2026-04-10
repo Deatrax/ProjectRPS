@@ -12,10 +12,19 @@
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.panda-dashboard-anchor.slide-out {
-  transform: translateX(-350px) rotate(-10deg);
+.panda-dashboard-anchor.slide-left {
+  transform: translateX(-400px) rotate(-10deg);
   opacity: 0;
-  pointer-events: none;
+}
+
+.panda-dashboard-anchor.slide-right {
+  transform: translateX(100vw) rotate(10deg);
+  opacity: 0;
+}
+
+.panda-dashboard-anchor.slide-bottom {
+  transform: translateY(500px);
+  opacity: 0;
 }
 
 .panda-dashboard-anchor .panda-area {
