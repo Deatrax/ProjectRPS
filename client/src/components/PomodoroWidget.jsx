@@ -33,50 +33,40 @@ const timeAgo = (dateStr) => {
  * PomodoroWidget
  * A compact dashboard card with a mini Pomodoro timer.
  * Clicking the card header opens the full /pomodoro page.
- *
- * @param {Array}  tasks      – list of non-completed tasks from Dashboard
- * @param {number} multiplier – speed multiplier from backend
  */
 export default function PomodoroWidget({ tasks = [], multiplier = 1.0 }) {
     const navigate = useNavigate();
     const [selectedTaskId, setSelectedTaskId] = useState('');
-    const [initSecs, setInitSecs] = useState(25 * 60);
-    const [initTotal, setInitTotal] = useState(25 * 60);
 
-    // Load draft if a task is selected
+    const { secondsLeft, totalSeconds, isRunning, isDone, start, pause, finish, setDuration } =
+        usePomodoroTimer(multiplier);
+
+    // Load draft when task changes
     useEffect(() => {
         if (!selectedTaskId) {
-            setInitSecs(25 * 60);
-            setInitTotal(25 * 60);
+            setDuration(25 * 60, 25 * 60);
             return;
         }
         const task = tasks.find(t => t._id === selectedTaskId);
         if (task?.pomoDraftSeconds && task?.pomoPlannedSeconds) {
-            setInitSecs(task.pomoDraftSeconds);
-            setInitTotal(task.pomoPlannedSeconds);
+            setDuration(task.pomoDraftSeconds, task.pomoPlannedSeconds);
         } else {
-            setInitSecs(25 * 60);
-            setInitTotal(25 * 60);
+            setDuration(25 * 60, 25 * 60);
         }
-    }, [selectedTaskId, tasks]);
+    }, [selectedTaskId, tasks]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const {
-        secondsLeft,
-        totalSeconds,
-        isRunning,
-        isDone,
-        start,
-        pause,
-        finish,
-    } = usePomodoroTimer(selectedTaskId, initSecs, initTotal, multiplier);
-
-    // Auto-handle when timer finishes (widget just marks done, no modal)
+    // Auto-handle when timer finishes (navigate to full page)
     useEffect(() => {
         if (isDone && selectedTaskId) {
-            finish(false); // Don't auto-complete — let user decide on full page
+            finish(false);
             navigate('/pomodoro');
         }
     }, [isDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleStart = () => {
+        if (!selectedTaskId) return;
+        start(selectedTaskId);
+    };
 
     const progress = totalSeconds > 0 ? ((totalSeconds - secondsLeft) / totalSeconds) * 100 : 0;
     const isUrgent = secondsLeft > 0 && secondsLeft < 60;
@@ -129,7 +119,7 @@ export default function PomodoroWidget({ tasks = [], multiplier = 1.0 }) {
                     {!isRunning ? (
                         <button
                             className="pomo-w-btn pomo-w-btn-start"
-                            onClick={start}
+                            onClick={handleStart}
                             disabled={!selectedTaskId || secondsLeft <= 0}
                             title="Start"
                         >

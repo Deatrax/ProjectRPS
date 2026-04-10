@@ -19,8 +19,8 @@ const fmt = (secs) => {
 const PRESETS = [
     { label: '25m', value: 25 * 60 },
     { label: '45m', value: 45 * 60 },
-    { label: '1h',  value: 60 * 60 },
-    { label: '2h',  value: 120 * 60 },
+    { label: '1h', value: 60 * 60 },
+    { label: '2h', value: 120 * 60 },
 ];
 
 // ── Circular Timer SVG ────────────────────────────────────────────────────────
@@ -76,12 +76,12 @@ function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSecond
                         <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                     </filter>
                     <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%"   stopColor={isUrgent ? '#dc2626' : '#6d28d9'} />
+                        <stop offset="0%" stopColor={isUrgent ? '#dc2626' : '#6d28d9'} />
                         <stop offset="100%" stopColor={isUrgent ? '#f87171' : '#c4b5fd'} />
                     </linearGradient>
                     <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%"   stopColor={glowColor} stopOpacity="0.15" />
-                        <stop offset="100%" stopColor={glowColor} stopOpacity="0"    />
+                        <stop offset="0%" stopColor={glowColor} stopOpacity="0.15" />
+                        <stop offset="100%" stopColor={glowColor} stopOpacity="0" />
                     </radialGradient>
                 </defs>
 
@@ -187,7 +187,7 @@ export default function Pomodoro() {
         })
             .then(r => r.json())
             .then(d => setMultiplier(d.multiplier ?? 1.0))
-            .catch(() => {});
+            .catch(() => { });
     }, []);
 
     // ── Load tasks ──
@@ -196,7 +196,7 @@ export default function Pomodoro() {
         fetch(`${API}/tasks`, { headers: { Authorization: `Bearer ${token}` } })
             .then(r => r.json())
             .then(data => setTasks(Array.isArray(data) ? data.filter(t => t.status !== 'completed') : []))
-            .catch(() => {});
+            .catch(() => { });
     }, []);
 
     // ── Load draft when task changes ──
@@ -233,7 +233,7 @@ export default function Pomodoro() {
     // ── Play sound on finish ──
     useEffect(() => {
         if (isDone) {
-            new Audio(FINISH_SOUND).play().catch(() => {});
+            new Audio(FINISH_SOUND).play().catch(() => { });
         }
     }, [isDone]);
 
@@ -291,160 +291,146 @@ export default function Pomodoro() {
 
     return (
         <div className="pomodoro-page">
-            {/* ── Header ── */}
+            {/* Header */}
             <header className="pomo-header">
                 <div className="pomo-header-left">
                     <h1 className="pomo-title">🐼 Panda Pomodoro</h1>
-                    <span className="pomo-subtitle">Time to focus</span>
+                    <span className="pomo-subtitle">Focus · Rest · Repeat</span>
                 </div>
                 {multiplier > 1.0 && (
-                    <div className="penalty-badge">⚡ +{penaltyPct}% speed</div>
+                    <div className="penalty-badge">⚡ +{penaltyPct}% speed penalty</div>
                 )}
             </header>
 
-            {/* ── Task Selector ── */}
-            <div className="pomo-task-selector">
-                <label>Focus on task</label>
-                <div className="pomo-select-wrap">
-                    <select
-                        className="pomo-task-select"
-                        value={selectedTaskId}
-                        onChange={e => setSelectedTaskId(e.target.value)}
-                        disabled={isRunning}
-                    >
-                        <option value="">— choose a task —</option>
-                        {tasks.map(t => (
-                            <option key={t._id} value={t._id}>
-                                {t.status === 'overdue' ? '🔴 ' : ''}{t.title}
-                                {t.course?.courseCode ? ` [${t.course.courseCode}]` : ''}
-                            </option>
-                        ))}
-                    </select>
-                    <span className="pomo-select-arrow">▾</span>
+            {/* ── Two-column layout: Clock LEFT, Controls RIGHT ── */}
+            <div className="pomo-layout">
+
+                {/* LEFT — Big clock */}
+                <div className="pomo-left">
+                    <CircularTimer
+                        progress={progress}
+                        isRunning={isRunning}
+                        isUrgent={isUrgent}
+                        secondsLeft={secondsLeft}
+                        totalSeconds={totalSeconds}
+                        taskTitle={selectedTask?.title}
+                    />
                 </div>
-                {draftInfo && (
-                    <div className="draft-chip">
-                        💾 Draft — {fmt(draftInfo.remaining)} remaining
-                    </div>
-                )}
-            </div>
 
-            {/* ── Circular Timer ── */}
-            <CircularTimer
-                progress={progress}
-                isRunning={isRunning}
-                isUrgent={isUrgent}
-                secondsLeft={secondsLeft}
-                totalSeconds={totalSeconds}
-                taskTitle={selectedTask?.title}
-            />
+                {/* RIGHT — All controls */}
+                <div className="pomo-right">
 
-            {/* ── Duration Controls (always visible when not running) ── */}
-            {!isRunning && (
-                <div className="pomo-duration-section">
-                    <span className="pomo-duration-label">Set duration</span>
-
-                    {/* Preset buttons */}
-                    <div className="pomo-preset-row">
-                        {PRESETS.map(p => (
-                            <button
-                                key={p.label}
-                                className={`pomo-preset-btn ${activePreset === p.label ? 'active' : ''}`}
-                                onClick={() => handlePreset(p)}
+                    {/* Task selector */}
+                    <div className="pomo-section">
+                        <span className="pomo-section-label">Select task</span>
+                        <div className="pomo-select-wrap">
+                            <select
+                                className="pomo-task-select"
+                                value={selectedTaskId}
+                                onChange={e => setSelectedTaskId(e.target.value)}
+                                disabled={isRunning}
                             >
-                                {p.label}
-                            </button>
-                        ))}
+                                <option value="">— choose a task —</option>
+                                {tasks.map(t => (
+                                    <option key={t._id} value={t._id}>
+                                        {t.status === 'overdue' ? '🔴 ' : ''}{t.title}
+                                        {t.course?.courseCode ? ` [${t.course.courseCode}]` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="pomo-select-arrow">▾</span>
+                        </div>
+                        {draftInfo && (
+                            <div className="draft-chip">💾 Draft — {fmt(draftInfo.remaining)} remaining</div>
+                        )}
                     </div>
 
-                    {/* H : M : S manual inputs */}
-                    <div className="pomo-custom-row">
-                        <div className="pomo-hms-inputs">
-                            <div className="pomo-hms-field">
-                                <input
-                                    type="number"
-                                    placeholder="0"
-                                    className="pomo-custom-input"
-                                    value={customH}
-                                    min={0}
-                                    onChange={e => setCustomH(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleCustomSet()}
-                                />
-                                <span className="pomo-hms-label">h</span>
+                    {/* Duration presets */}
+                    {!isRunning && (
+                        <div className="pomo-section">
+                            <span className="pomo-section-label">Duration</span>
+                            <div className="pomo-preset-row">
+                                {PRESETS.map(p => (
+                                    <button
+                                        key={p.label}
+                                        className={`pomo-preset-btn ${activePreset === p.label ? 'active' : ''}`}
+                                        onClick={() => handlePreset(p)}
+                                    >
+                                        {p.label}
+                                    </button>
+                                ))}
                             </div>
-                            <div className="pomo-hms-field">
-                                <input
-                                    type="number"
-                                    placeholder="0"
-                                    className="pomo-custom-input"
-                                    value={customM}
-                                    min={0}
-                                    max={59}
-                                    onChange={e => setCustomM(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleCustomSet()}
-                                />
-                                <span className="pomo-hms-label">m</span>
-                            </div>
-                            <div className="pomo-hms-field">
-                                <input
-                                    type="number"
-                                    placeholder="0"
-                                    className="pomo-custom-input"
-                                    value={customS}
-                                    min={0}
-                                    max={59}
-                                    onChange={e => setCustomS(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleCustomSet()}
-                                />
-                                <span className="pomo-hms-label">s</span>
+
+                            {/* H : M : S inputs */}
+                            <div className="pomo-custom-row">
+                                <div className="pomo-hms-inputs">
+                                    <div className="pomo-hms-field">
+                                        <input type="number" placeholder="0" className="pomo-custom-input"
+                                            value={customH} min={0}
+                                            onChange={e => setCustomH(e.target.value)}
+                                            onKeyDown={e => e.key === 'Enter' && handleCustomSet()}
+                                        />
+                                        <span className="pomo-hms-label">h</span>
+                                    </div>
+                                    <div className="pomo-hms-field">
+                                        <input type="number" placeholder="0" className="pomo-custom-input"
+                                            value={customM} min={0} max={59}
+                                            onChange={e => setCustomM(e.target.value)}
+                                            onKeyDown={e => e.key === 'Enter' && handleCustomSet()}
+                                        />
+                                        <span className="pomo-hms-label">m</span>
+                                    </div>
+                                    <div className="pomo-hms-field">
+                                        <input type="number" placeholder="0" className="pomo-custom-input"
+                                            value={customS} min={0} max={59}
+                                            onChange={e => setCustomS(e.target.value)}
+                                            onKeyDown={e => e.key === 'Enter' && handleCustomSet()}
+                                        />
+                                        <span className="pomo-hms-label">s</span>
+                                    </div>
+                                </div>
+                                <button className="pomo-set-btn" onClick={handleCustomSet}
+                                    disabled={!customH && !customM && !customS}
+                                >
+                                    Set
+                                </button>
                             </div>
                         </div>
-                        <button
-                            className="pomo-set-btn"
-                            onClick={handleCustomSet}
-                            disabled={!customH && !customM && !customS}
+                    )}
+
+                    {/* Main action buttons */}
+                    <div className="pomo-section pomo-controls">
+                        {!isRunning ? (
+                            <button className="pomo-btn pomo-btn-start" onClick={handleStart}
+                                disabled={secondsLeft <= 0}
+                            >
+                                <Play size={22} fill="currentColor" />
+                                <span>{selectedTaskId ? 'Start' : 'Select a task first'}</span>
+                            </button>
+                        ) : (
+                            <button className="pomo-btn pomo-btn-pause" onClick={pause}>
+                                <Pause size={22} fill="currentColor" />
+                                <span>Pause</span>
+                            </button>
+                        )}
+
+                        <button className="pomo-btn pomo-btn-draft" onClick={handleSaveDraft}
+                            disabled={secondsLeft <= 0 || !selectedTaskId}
                         >
-                            Set
+                            <Save size={18} />
+                            <span>Save Draft</span>
                         </button>
                     </div>
+
+                    {multiplier > 1.0 && (
+                        <p className="pomo-penalty-note">
+                            ⚡ Timer runs {penaltyPct}% faster due to overdue tasks
+                        </p>
+                    )}
                 </div>
-            )}
-
-            {/* ── Controls ── */}
-            <div className="pomo-controls">
-                {!isRunning ? (
-                    <button
-                        className="pomo-btn pomo-btn-start"
-                        onClick={handleStart}
-                        disabled={secondsLeft <= 0}
-                    >
-                        <Play size={20} fill="currentColor" />
-                        <span>{selectedTaskId ? 'Start' : 'Select a task first'}</span>
-                    </button>
-                ) : (
-                    <button className="pomo-btn pomo-btn-pause" onClick={pause}>
-                        <Pause size={20} fill="currentColor" />
-                        <span>Pause</span>
-                    </button>
-                )}
-
-                <button
-                    className="pomo-btn pomo-btn-draft"
-                    onClick={handleSaveDraft}
-                    disabled={secondsLeft <= 0 || !selectedTaskId}
-                >
-                    <Save size={18} />
-                    <span>Save Draft</span>
-                </button>
             </div>
 
-            {multiplier > 1.0 && (
-                <p className="pomo-penalty-note">
-                    ⚡ Timer runs {penaltyPct}% faster due to overdue tasks
-                </p>
-            )}
-
-            {/* ── Done Modal ── */}
+            {/* Done modal */}
             {isDone && (
                 <div className="pomo-done-overlay">
                     <div className="pomo-done-card">
@@ -452,12 +438,8 @@ export default function Pomodoro() {
                         <h2>Time's Up!</h2>
                         <p>Did you finish <strong>{selectedTask?.title || 'this task'}</strong>?</p>
                         <div className="pomo-done-actions">
-                            <button className="pomo-done-yes" onClick={handleFinishYes}>
-                                ✅ Yes, mark complete!
-                            </button>
-                            <button className="pomo-done-no" onClick={handleFinishNo}>
-                                Not yet
-                            </button>
+                            <button className="pomo-done-yes" onClick={handleFinishYes}>✅ Yes, mark complete!</button>
+                            <button className="pomo-done-no" onClick={handleFinishNo}>Not yet</button>
                         </div>
                     </div>
                 </div>
@@ -465,3 +447,4 @@ export default function Pomodoro() {
         </div>
     );
 }
+
