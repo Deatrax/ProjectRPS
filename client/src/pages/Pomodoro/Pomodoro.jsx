@@ -197,6 +197,23 @@ export default function Pomodoro() {
         setDuration,
     } = usePomodoroTimer(multiplier);
 
+    // Controls Panda visibility delay
+    const [showPanda, setShowPanda] = useState(true);
+
+    useEffect(() => {
+        let timer;
+        if (isRunning) {
+            // Wait 5 seconds before sliding out
+            timer = setTimeout(() => {
+                setShowPanda(false);
+            }, 5000);
+        } else {
+            // Instantly return when paused/stopped
+            setShowPanda(true);
+        }
+        return () => clearTimeout(timer);
+    }, [isRunning]);
+
     // ── Load multiplier ──
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -462,8 +479,8 @@ export default function Pomodoro() {
                     </div>
                 </div>
             )}
-            {/* Fixed Panda Character (Wishes luck then slides out) */}
-            <div className={`panda-dashboard-anchor ${isRunning ? 'slide-out' : ''}`}>
+            {/* Fixed Panda Character (Wishes luck then slides out after delay) */}
+            <div className={`panda-dashboard-anchor ${!showPanda ? 'slide-out' : ''}`}>
                 <div className="panda-speech-bubble">
                     <div className="bubble-box">
                         {isRunning ? "Good luck! 🐼" : initialQuote}
