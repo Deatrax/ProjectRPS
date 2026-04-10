@@ -160,6 +160,22 @@ function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSecond
 export default function Pomodoro() {
     const navigate = useNavigate();
 
+    // Motivational quotes for setup phase
+    const FOCUS_QUOTES = React.useMemo(() => [
+        "The best way to get it done is to begin. 🐼",
+        "Focus now, relax later. You got this!",
+        "Every minute counts. Let's make progress!",
+        "Deep work mode: ON. 🚀",
+        "Small steps lead to big results.",
+        "Your future self will thank you for this focus."
+    ], []);
+
+    // Pick one quote to stay stable until refresh
+    const initialQuote = React.useMemo(() =>
+        FOCUS_QUOTES[Math.floor(Math.random() * FOCUS_QUOTES.length)],
+        [FOCUS_QUOTES]
+    );
+
     const [tasks, setTasks] = useState([]);
     const [selectedTaskId, setSelectedTaskId] = useState('');
     const [multiplier, setMultiplier] = useState(1.0);
@@ -446,10 +462,12 @@ export default function Pomodoro() {
                     </div>
                 </div>
             )}
-            {/* Fixed Panda Character */}
-            <div className="panda-dashboard-anchor">
+            {/* Fixed Panda Character (Wishes luck then slides out) */}
+            <div className={`panda-dashboard-anchor ${isRunning ? 'slide-out' : ''}`}>
                 <div className="panda-speech-bubble">
-                    <div className="bubble-box">Hi!</div>
+                    <div className="bubble-box">
+                        {isRunning ? "Good luck! 🐼" : initialQuote}
+                    </div>
                     <div className="bubble-dots">
                         <div className="dot dot-3"></div>
                         <div className="dot dot-2"></div>

@@ -9,7 +9,13 @@
   height: 220px;
   z-index: 1000;
   pointer-events: none;
-  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panda-dashboard-anchor.slide-out {
+  transform: translateX(-350px) rotate(-10deg);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .panda-dashboard-anchor .panda-area {
