@@ -271,14 +271,6 @@ const Dashboard = () => {
                 </div>
             </header>
 
-            {/* Dramatic Alert Banner — visible when overdue tasks exist */}
-            {overdueCount > 0 && (
-                <div className="drama-banner">
-                    <span className="drama-icon">⚠️</span>
-                    <span className="drama-text">{DRAMA[dramaMsg]}</span>
-                    <span className="drama-count">{overdueCount} overdue task{overdueCount !== 1 ? 's' : ''}</span>
-                </div>
-            )}
 
             <div className="main-content">
                 {/* Hero Status - Notion Style */}
@@ -541,7 +533,18 @@ const Dashboard = () => {
             {/* Fixed Panda Character (Large on Dashboard) */}
             <div className="panda-dashboard-anchor large">
                 <div className="panda-speech-bubble">
-                    <div className="bubble-box">Hi!</div>
+                    <div className={overdueCount > 0 ? "bubble-box drama" : "bubble-box"}>
+                        {overdueCount > 0 ? (
+                            <>
+                                <span>{DRAMA[dramaMsg]}</span>
+                                <span className="bubble-drama-count">
+                                    {overdueCount} overdue task{overdueCount !== 1 ? 's' : ''}
+                                </span>
+                            </>
+                        ) : (
+                            "Hi!"
+                        )}
+                    </div>
                     <div className="bubble-dots">
                         <div className="dot dot-3"></div>
                         <div className="dot dot-2"></div>
