@@ -46,13 +46,13 @@ export function usePomodoroTimer(multiplier = 1.0) {
 
     // ── Start ──
     const start = useCallback(async (taskId) => {
-        if (!taskId || secondsLeftRef.current <= 0) return;
+        if (secondsLeftRef.current <= 0) return;
         setIsDone(false);
-        taskIdRef.current = taskId;
+        taskIdRef.current = taskId || null;
 
-        // Create/resume session on backend
+        // Create/resume session on backend only iftaskId provided
         let sid = sessionIdRef.current;
-        if (!sid) {
+        if (taskId && !sid) {
             try {
                 const token = localStorage.getItem('token');
                 const res = await fetch(`${API}/pomodoro/start`, {

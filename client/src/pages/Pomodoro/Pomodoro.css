@@ -14,7 +14,15 @@
     flex-direction: column;
     align-items: center;
     padding-bottom: 80px;
+    padding-bottom: 80px;
     overflow-x: hidden;
+
+    --accent-red: #f87171;
+    --accent-green: #34d399;
+    --accent-indigo: #818cf8;
+    --text-muted: rgba(255, 255, 255, 0.3);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Header ──────────────────────────────────────────────────────────────────── */
@@ -93,9 +101,57 @@
 .pomo-left {
     flex: 1 1 auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     min-width: 0;
+}
+
+/* --- Mode Tabs --- */
+.pomo-mode-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.4rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: fit-content;
+}
+
+.mode-tab {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mode-tab:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-tab.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mode-work .mode-tab.active { color: var(--accent-indigo); }
+.mode-short .mode-tab.active, .mode-long .mode-tab.active { color: var(--accent-green); }
+
+.session-counter {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 /* Right — Controls */

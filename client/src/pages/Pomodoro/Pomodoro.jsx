@@ -26,7 +26,7 @@ const PRESETS = [
 ];
 
 // ── Circular Timer SVG ────────────────────────────────────────────────────────
-function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSeconds, taskTitle }) {
+function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSeconds, taskTitle, mode }) {
     const size = 480;
     const cx = size / 2;
     const cy = size / 2;
@@ -61,12 +61,12 @@ function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSecond
         };
     });
 
-    const glowColor = isUrgent ? '#f87171' : isRunning ? '#a78bfa' : '#7c5cfc';
-    const trackColor = isUrgent ? 'rgba(248,113,113,0.12)' : 'rgba(167,139,250,0.1)';
-    const statusText = isRunning ? 'FOCUSING' : secondsLeft > 0 && totalSeconds > 0 ? 'PAUSED' : 'READY';
+    const glowColor = mode === 'work' ? (isUrgent ? '#f87171' : isRunning ? '#a78bfa' : '#7c5cfc') : '#34d399';
+    const trackColor = mode === 'work' ? (isUrgent ? 'rgba(248,113,113,0.12)' : 'rgba(167,139,250,0.1)') : 'rgba(52,211,153,0.1)';
+    const statusText = isRunning ? (mode === 'work' ? 'FOCUSING' : 'RECOVERY') : (secondsLeft > 0 && totalSeconds > 0 ? 'PAUSED' : 'READY');
 
     return (
-        <div className="pomo-circle-wrap">
+        <div className={`pomo-circle-wrap mode-${mode}`}>
             <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="pomo-circle-svg">
                 <defs>
                     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
@@ -78,8 +78,17 @@ function CircularTimer({ progress, isRunning, isUrgent, secondsLeft, totalSecond
                         <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                     </filter>
                     <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor={isUrgent ? '#dc2626' : '#6d28d9'} />
-                        <stop offset="100%" stopColor={isUrgent ? '#f87171' : '#c4b5fd'} />
+                        {mode === 'work' ? (
+                            <>
+                                <stop offset="0%" stopColor={isUrgent ? '#dc2626' : '#6d28d9'} />
+                                <stop offset="100%" stopColor={isUrgent ? '#f87171' : '#c4b5fd'} />
+                            </>
+                        ) : (
+                            <>
+                                <stop offset="0%" stopColor="#059669" />
+                                <stop offset="100%" stopColor="#34d399" />
+                            </>
+                        )}
                     </linearGradient>
                     <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
                         <stop offset="0%" stopColor={glowColor} stopOpacity="0.15" />
@@ -185,6 +194,17 @@ export default function Pomodoro() {
     const [customM, setCustomM] = useState('');
     const [customS, setCustomS] = useState('');
 
+    // --- NEW POMODORO CYCLE STATES ---
+    const [mode, setMode] = useState('work'); // 'work' | 'short' | 'long'
+    const [sessionsCompleted, setSessionsCompleted] = useState(0);
+    const [preferredWorkTime, setPreferredWorkTime] = useState(25 * 60);
+
+    // Controls Panda visibility delay
+    const [showPanda, setShowPanda] = useState(true);
+    const [milestoneMessage, setMilestoneMessage] = useState("");
+    const [pandaDir, setPandaDir] = useState("left"); // Options: left, right, bottom
+    
+    // Timer Hook
     const {
         secondsLeft,
         totalSeconds,
@@ -197,10 +217,7 @@ export default function Pomodoro() {
         setDuration,
     } = usePomodoroTimer(multiplier);
 
-    // Controls Panda visibility delay
-    const [showPanda, setShowPanda] = useState(true);
-    const [milestoneMessage, setMilestoneMessage] = useState("");
-    const [pandaDir, setPandaDir] = useState("left"); // Options: left, right, bottom
+    // Refs
     const milestonesReached = useRef(new Set());
 
     // Effect 1: Milestone & Initial Detection (Runs every second)
@@ -240,10 +257,8 @@ export default function Pomodoro() {
         let timer;
         let dirTimer;
         if (isRunning && showPanda) {
-            // When running and visible, start the 5-second countdown to hide
             timer = setTimeout(() => {
                 setShowPanda(false);
-                // After it slides out (approx 1s), pick a new random direction for the next entrance
                 dirTimer = setTimeout(() => {
                     const dirs = ["left", "right", "bottom"];
                     const nextDir = dirs[Math.floor(Math.random() * dirs.length)];
@@ -255,7 +270,7 @@ export default function Pomodoro() {
             clearTimeout(timer);
             clearTimeout(dirTimer);
         };
-    }, [isRunning, showPanda, milestoneMessage]);
+    }, [isRunning, showPanda, milestoneMessage]); // Consistent size
 
     // Reset milestones when task changes or timer is fully reset
     useEffect(() => {
@@ -314,23 +329,57 @@ export default function Pomodoro() {
             });
     }, [selectedTaskId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // ── Play sound on finish ──
+    // ── Play sound and transition on finish ──
     useEffect(() => {
         if (isDone) {
             new Audio(FINISH_SOUND).play().catch(() => { });
+            
+            // Auto-transition logic
+            if (mode === 'work') {
+                const newCount = sessionsCompleted + 1;
+                setSessionsCompleted(newCount);
+                if (newCount % 4 === 0) {
+                    setMode('long');
+                    setDuration(15 * 60, 15 * 60);
+                } else {
+                    setMode('short');
+                    setDuration(5 * 60, 5 * 60);
+                }
+            } else {
+                setMode('work');
+                setDuration(preferredWorkTime, preferredWorkTime);
+            }
         }
-    }, [isDone]);
+    }, [isDone, mode, sessionsCompleted, setDuration, preferredWorkTime]);
+
+    // ── Mode manual switch ──
+    const handleModeSwitch = (newMode) => {
+        if (isRunning) return;
+        setMode(newMode);
+        if (newMode === 'work') {
+            setDuration(preferredWorkTime, preferredWorkTime);
+            setActivePreset(preferredWorkTime === 25 * 60 ? '25m' : 'Custom');
+        } else if (newMode === 'short') {
+            setDuration(5 * 60, 5 * 60);
+            setActivePreset(null);
+        } else if (newMode === 'long') {
+            setDuration(15 * 60, 15 * 60);
+            setActivePreset(null);
+        }
+    };
 
     // ── Preset click ──
     const handlePreset = (p) => {
-        if (isRunning) return;
+        if (isRunning || mode !== 'work') return;
         setActivePreset(p.label);
         setDraftInfo(null);
         setDuration(p.value, p.value);
+        setPreferredWorkTime(p.value);
     };
 
     // ── Custom H/M/S set ──
     const handleCustomSet = () => {
+        if (mode !== 'work') return;
         const h = parseInt(customH || '0', 10) || 0;
         const m = parseInt(customM || '0', 10) || 0;
         const s = parseInt(customS || '0', 10) || 0;
@@ -339,18 +388,19 @@ export default function Pomodoro() {
         setActivePreset('Custom');
         setDraftInfo(null);
         setDuration(total, total);
+        setPreferredWorkTime(total);
         setCustomH('');
         setCustomM('');
         setCustomS('');
     };
 
-    // ── Start: pass taskId into start() ──
+    // ── Start ──
     const handleStart = () => {
-        if (!selectedTaskId) {
+        if (mode === 'work' && !selectedTaskId) {
             alert('Please select a task first!');
             return;
         }
-        start(selectedTaskId);
+        start(mode === 'work' ? selectedTaskId : null);
     };
 
     // ── Save draft & go back ──
@@ -391,14 +441,36 @@ export default function Pomodoro() {
 
                 {/* LEFT — Big clock */}
                 <div className="pomo-left">
+                    <div className="pomo-mode-tabs">
+                        <button 
+                            className={`mode-tab ${mode === 'work' ? 'active' : ''}`}
+                            onClick={() => handleModeSwitch('work')}
+                        >Focus</button>
+                        <button 
+                            className={`mode-tab ${mode === 'short' ? 'active' : ''}`}
+                            onClick={() => handleModeSwitch('short')}
+                        >Short Break</button>
+                        <button 
+                            className={`mode-tab ${mode === 'long' ? 'active' : ''}`}
+                            onClick={() => handleModeSwitch('long')}
+                        >Long Break</button>
+                    </div>
+
                     <CircularTimer
                         progress={progress}
                         isRunning={isRunning}
                         isUrgent={isUrgent}
                         secondsLeft={secondsLeft}
                         totalSeconds={totalSeconds}
-                        taskTitle={selectedTask?.title}
+                        taskTitle={mode === 'work' ? selectedTask?.title : 'Taking a break...'}
+                        mode={mode}
                     />
+
+                    {mode === 'work' && (
+                        <div className="session-counter">
+                            Session {sessionsCompleted + 1} of 4
+                        </div>
+                    )}
                 </div>
 
                 {/* RIGHT — All controls */}
