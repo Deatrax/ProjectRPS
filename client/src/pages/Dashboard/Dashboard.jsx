@@ -530,8 +530,8 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Fixed Panda Character (Large on Dashboard) */}
-            <div className="panda-dashboard-anchor large">
+            {/* Fixed Panda Character (Small consistent size) */}
+            <div className="panda-dashboard-anchor">
                 <div className="panda-speech-bubble">
                     <div className={overdueCount > 0 ? "bubble-box drama" : "bubble-box"}>
                         {overdueCount > 0 ? (
