@@ -4,7 +4,8 @@
   position: fixed;
   left: 30px;
   bottom: 30px;
-  width: 180px; /* Base size (small) */
+  width: 180px;
+  /* Base size (small) */
   height: 220px;
   z-index: 1000;
   pointer-events: none;
@@ -32,60 +33,132 @@
 
 /* --- BASE (SMALL) SCULPTING --- */
 .panda-dashboard-anchor .ear {
-  position: absolute; width: 48px; height: 48px;
-  background: #0d0f12; border-radius: 50%; top: 0;
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  background: #0d0f12;
+  border-radius: 50%;
+  top: 0;
 }
-.panda-dashboard-anchor .ear.left { left: 28px; }
-.panda-dashboard-anchor .ear.right { right: 28px; }
+
+.panda-dashboard-anchor .ear.left {
+  left: 28px;
+}
+
+.panda-dashboard-anchor .ear.right {
+  right: 28px;
+}
 
 .panda-dashboard-anchor .head {
-  position: absolute; left: 50%; top: 20px;
-  width: 154px; height: 140px; transform: translateX(-50%);
-  background: #f7f7f7; border-radius: 77px;
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 154px;
+  height: 140px;
+  transform: translateX(-50%);
+  background: #f7f7f7;
+  border-radius: 77px;
   box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.06);
 }
 
 .panda-dashboard-anchor .eye-patch {
-  position: absolute; width: 49px; height: 56px; top: 38px;
-  background: #0d0f12; border-radius: 50%; opacity: 0.95;
+  position: absolute;
+  width: 49px;
+  height: 56px;
+  top: 38px;
+  background: #0d0f12;
+  border-radius: 50%;
+  opacity: 0.95;
 }
-.panda-dashboard-anchor .eye-patch.left { left: 28px; transform: rotate(-10deg); }
-.panda-dashboard-anchor .eye-patch.right { right: 28px; transform: rotate(10deg); }
+
+.panda-dashboard-anchor .eye-patch.left {
+  left: 28px;
+  transform: rotate(-10deg);
+}
+
+.panda-dashboard-anchor .eye-patch.right {
+  right: 28px;
+  transform: rotate(10deg);
+}
 
 .panda-dashboard-anchor .eye {
-  position: absolute; left: 50%; top: 25px; width: 13px; height: 13px;
-  transform: translateX(-50%); background: #ffffff; border-radius: 50%; overflow: hidden;
+  position: absolute;
+  left: 50%;
+  top: 25px;
+  width: 13px;
+  height: 13px;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border-radius: 50%;
+  overflow: hidden;
 }
+
 .panda-dashboard-anchor .eye::after {
-  content: ""; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px;
-  transform: translate(-50%, -50%); background: #0d0f12; border-radius: 50%;
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  transform: translate(-50%, -50%);
+  background: #0d0f12;
+  border-radius: 50%;
 }
 
 .panda-dashboard-anchor .nose {
-  position: absolute; left: 50%; top: 92px; width: 12px; height: 9px;
-  transform: translateX(-50%); background: #0d0f12; border-radius: 0 0 7px 7px;
+  position: absolute;
+  left: 50%;
+  top: 92px;
+  width: 12px;
+  height: 9px;
+  transform: translateX(-50%);
+  background: #0d0f12;
+  border-radius: 0 0 7px 7px;
 }
 
 .panda-dashboard-anchor .mouth {
-  position: absolute; left: 50%; top: 104px; width: 30px; height: 14px;
-  transform: translateX(-50%); border-bottom: 2px solid rgba(0, 0, 0, 0.6);
-  border-radius: 0 0 35px 35px; opacity: 0.55;
+  position: absolute;
+  left: 50%;
+  top: 104px;
+  width: 30px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  border-radius: 0 0 35px 35px;
+  opacity: 0.55;
 }
 
 .panda-dashboard-anchor .body {
-  position: absolute; left: 50%; top: 147px;
-  width: 168px; height: 98px; transform: translateX(-50%);
-  background: #f7f7f7; border-radius: 84px 84px 56px 56px;
+  position: absolute;
+  left: 50%;
+  top: 147px;
+  width: 168px;
+  height: 98px;
+  transform: translateX(-50%);
+  background: #f7f7f7;
+  border-radius: 84px 84px 56px 56px;
   box-shadow: inset 0 -7px 0 rgba(0, 0, 0, 0.06);
 }
 
 .panda-dashboard-anchor .arm {
-  position: absolute; width: 63px; height: 42px;
-  background: #0d0f12; border-radius: 28px; top: 14px;
+  position: absolute;
+  width: 63px;
+  height: 42px;
+  background: #0d0f12;
+  border-radius: 28px;
+  top: 14px;
   transition: transform 500ms ease;
 }
-.panda-dashboard-anchor .arm.left { left: 8px; transform-origin: 80% 20%; }
-.panda-dashboard-anchor .arm.right { right: 8px; transform-origin: 20% 20%; }
+
+.panda-dashboard-anchor .arm.left {
+  left: 8px;
+  transform-origin: 80% 20%;
+}
+
+.panda-dashboard-anchor .arm.right {
+  right: 8px;
+  transform-origin: 20% 20%;
+}
 
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -99,40 +172,99 @@
   bottom: 40px;
 }
 
-.panda-dashboard-anchor.large .ear { width: 70px; height: 70px; }
-.panda-dashboard-anchor.large .ear.left { left: 40px; }
-.panda-dashboard-anchor.large .ear.right { right: 40px; }
+.panda-dashboard-anchor.large .ear {
+  width: 70px;
+  height: 70px;
+}
+
+.panda-dashboard-anchor.large .ear.left {
+  left: 40px;
+}
+
+.panda-dashboard-anchor.large .ear.right {
+  right: 40px;
+}
 
 .panda-dashboard-anchor.large .head {
-  width: 220px; height: 200px; top: 30px; border-radius: 110px;
+  width: 220px;
+  height: 200px;
+  top: 30px;
+  border-radius: 110px;
   box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.06);
 }
 
-.panda-dashboard-anchor.large .eye-patch { width: 70px; height: 80px; top: 55px; }
-.panda-dashboard-anchor.large .eye-patch.left { left: 40px; rotate: -10deg; }
-.panda-dashboard-anchor.large .eye-patch.right { right: 40px; rotate: 10deg; }
+.panda-dashboard-anchor.large .eye-patch {
+  width: 70px;
+  height: 80px;
+  top: 55px;
+}
 
-.panda-dashboard-anchor.large .eye { width: 18px; height: 18px; top: 36px; }
-.panda-dashboard-anchor.large .eye::after { width: 8px; height: 8px; }
+.panda-dashboard-anchor.large .eye-patch.left {
+  left: 40px;
+  rotate: -10deg;
+}
 
-.panda-dashboard-anchor.large .nose { width: 16px; height: 12px; top: 130px; border-radius: 0 0 10px 10px; }
-.panda-dashboard-anchor.large .mouth { width: 40px; height: 20px; top: 148px; border-radius: 0 0 50px 50px; border-bottom-width: 3px; }
+.panda-dashboard-anchor.large .eye-patch.right {
+  right: 40px;
+  rotate: 10deg;
+}
+
+.panda-dashboard-anchor.large .eye {
+  width: 18px;
+  height: 18px;
+  top: 36px;
+}
+
+.panda-dashboard-anchor.large .eye::after {
+  width: 8px;
+  height: 8px;
+}
+
+.panda-dashboard-anchor.large .nose {
+  width: 16px;
+  height: 12px;
+  top: 130px;
+  border-radius: 0 0 10px 10px;
+}
+
+.panda-dashboard-anchor.large .mouth {
+  width: 40px;
+  height: 20px;
+  top: 148px;
+  border-radius: 0 0 50px 50px;
+  border-bottom-width: 3px;
+}
 
 .panda-dashboard-anchor.large .body {
-  width: 240px;  height: 140px; top: 210px; border-radius: 120px 120px 80px 80px;
+  width: 240px;
+  height: 140px;
+  top: 210px;
+  border-radius: 120px 120px 80px 80px;
   box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.06);
 }
 
-.panda-dashboard-anchor.large .arm { width: 90px; height: 60px; top: 20px; }
-.panda-dashboard-anchor.large .arm.left { left: 12px; }
-.panda-dashboard-anchor.large .arm.right { right: 12px; }
+.panda-dashboard-anchor.large .arm {
+  width: 90px;
+  height: 60px;
+  top: 20px;
+}
+
+.panda-dashboard-anchor.large .arm.left {
+  left: 12px;
+}
+
+.panda-dashboard-anchor.large .arm.right {
+  right: 12px;
+}
 
 
 /* ── Speech Bubble styles ── */
 .panda-speech-bubble {
   position: absolute;
-  top: -80px; /* Pushed UP significantly to clear the head (Anchor Height 220px) */
-  left: 140px;
+  top: 10px;
+  /* Lower than before, now next to the head */
+  left: 220px;
+  /* Pushed to the RIGHT of the small Panda (180px wide anchor) */
   z-index: 1001;
   pointer-events: auto;
   animation: bubbleFloat 4s ease-in-out infinite;
@@ -145,7 +277,7 @@
   border-radius: 12px;
   font-weight: 800;
   font-size: 16px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border: 3px solid #0d0f12;
   display: flex;
   align-items: center;
@@ -155,8 +287,9 @@
 
 .bubble-dots {
   position: absolute;
-  top: 40px; /* Below the box */
-  left: -20px;
+  top: 30px;
+  left: -25px;
+  /* Leads back towards the panda on the LEFT of the bubble */
 }
 
 .bubble-dots .dot {
@@ -166,15 +299,37 @@
   position: absolute;
 }
 
-/* Dots leading from head (bottom) to bubble (top) */
-.dot-1 { width: 8px; height: 8px; top: 45px; left: -10px; }  /* Closest to Head */
-.dot-2 { width: 12px; height: 12px; top: 25px; left: -5px; } /* Middle */
-.dot-3 { width: 18px; height: 18px; top: 5px; left: 0px; }   /* Closest to Box */
+/* Dots leading from bubble (right) to right ear (left) */
+.dot-1 {
+  width: 8px;
+  height: 8px;
+  top: 15px;
+  left: -25px;
+}
+
+/* Closest to Ear */
+.dot-2 {
+  width: 12px;
+  height: 12px;
+  top: 12px;
+  left: -14px;
+}
+
+/* Middle */
+.dot-3 {
+  width: 18px;
+  height: 18px;
+  top: 5px;
+  left: 0px;
+}
+
+/* Closest to Box */
 
 /* Scaling for Large Variant */
 .panda-dashboard-anchor.large .panda-speech-bubble {
-  top: -120px; /* Pushed UP even more for the big anchor (320px) */
-  left: 200px;
+  top: 20px;
+  left: 320px;
+  /* Pushed right of the big Panda (260px wide anchor) */
 }
 
 .panda-dashboard-anchor.large .bubble-box {
@@ -185,24 +340,55 @@
 }
 
 .panda-dashboard-anchor.large .bubble-dots {
-  top: 60px;
-  left: -30px;
+  top: 45px;
+  left: -40px;
 }
 
-.panda-dashboard-anchor.large .dot-1 { width: 12px; height: 12px; top: 70px; left: -15px; }
-.panda-dashboard-anchor.large .dot-2 { width: 18px; height: 18px; top: 40px; left: -10px; }
-.panda-dashboard-anchor.large .dot-3 { width: 26px; height: 26px; top: 10px; left: 0px; }
+.panda-dashboard-anchor.large .dot-1 {
+  width: 12px;
+  height: 12px;
+  top: 30px;
+  left: -40px;
+}
+
+.panda-dashboard-anchor.large .dot-2 {
+  width: 18px;
+  height: 18px;
+  top: 22px;
+  left: -22px;
+}
+
+.panda-dashboard-anchor.large .dot-3 {
+  width: 26px;
+  height: 26px;
+  top: 5px;
+  left: 0px;
+}
 
 
 /* Animations */
 @keyframes dashboardPandaFloat {
-  0%, 100% { transform: translate(-50%, 0); }
-  50% { transform: translate(-50%, -12px); }
+
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+
+  50% {
+    transform: translate(-50%, -12px);
+  }
 }
 
 @keyframes bubbleFloat {
-  0%, 100% { transform: translateY(0) rotate(5deg); }
-  50% { transform: translateY(-5px) rotate(8deg); }
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+
+  50% {
+    transform: translateY(-5px) rotate(-8deg);
+  }
 }
 
 @media (max-width: 1200px) {
