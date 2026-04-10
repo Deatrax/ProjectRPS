@@ -538,8 +538,8 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Fixed Panda Character */}
-            <div className="panda-dashboard-anchor">
+            {/* Fixed Panda Character (Large on Dashboard) */}
+            <div className="panda-dashboard-anchor large">
                 <Panda />
             </div>
         </div>
