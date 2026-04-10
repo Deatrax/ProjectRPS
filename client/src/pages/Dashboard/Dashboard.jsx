@@ -61,6 +61,7 @@ const Dashboard = () => {
                         status: task.status,
                         lastAttemptedAt: task.lastAttemptedAt || null,
                         pomoDraftSeconds: task.pomoDraftSeconds || null,
+                        pomoPlannedSeconds: task.pomoPlannedSeconds || null,
                         createdAt: task.createdAt
                     }));
 

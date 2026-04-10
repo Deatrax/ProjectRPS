@@ -63,6 +63,10 @@ const TaskSchema = new mongoose.Schema({
     pomoDraftSeconds: {
         type: Number,
         default: null  // null = no draft saved
+    },
+    pomoPlannedSeconds: {
+        type: Number,
+        default: null
     }
 }, { timestamps: true });
 

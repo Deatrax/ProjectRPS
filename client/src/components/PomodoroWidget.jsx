@@ -40,18 +40,23 @@ const timeAgo = (dateStr) => {
 export default function PomodoroWidget({ tasks = [], multiplier = 1.0 }) {
     const navigate = useNavigate();
     const [selectedTaskId, setSelectedTaskId] = useState('');
-    const [initSecs, setInitSecs] = useState(25 * 60); // default 25 min
+    const [initSecs, setInitSecs] = useState(25 * 60);
+    const [initTotal, setInitTotal] = useState(25 * 60);
 
     // Load draft if a task is selected
     useEffect(() => {
-        setInitSecs(25 * 60);
-        if (!selectedTaskId) return;
-        // Check if selected task has a pomoDraftSeconds value
+        if (!selectedTaskId) {
+            setInitSecs(25 * 60);
+            setInitTotal(25 * 60);
+            return;
+        }
         const task = tasks.find(t => t._id === selectedTaskId);
-        if (task?.pomoDraftSeconds) {
+        if (task?.pomoDraftSeconds && task?.pomoPlannedSeconds) {
             setInitSecs(task.pomoDraftSeconds);
+            setInitTotal(task.pomoPlannedSeconds);
         } else {
             setInitSecs(25 * 60);
+            setInitTotal(25 * 60);
         }
     }, [selectedTaskId, tasks]);
 
@@ -63,7 +68,7 @@ export default function PomodoroWidget({ tasks = [], multiplier = 1.0 }) {
         start,
         pause,
         finish,
-    } = usePomodoroTimer(selectedTaskId, initSecs, multiplier);
+    } = usePomodoroTimer(selectedTaskId, initSecs, initTotal, multiplier);
 
     // Auto-handle when timer finishes (widget just marks done, no modal)
     useEffect(() => {

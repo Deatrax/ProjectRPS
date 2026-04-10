@@ -55,6 +55,24 @@ router.get('/speed-multiplier', protect, async (req, res) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /api/pomodoro/active-session
+// Returns any active session for the current user
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/active-session', protect, async (req, res) => {
+    try {
+        const session = await PomodoroSession.findOne({
+            user: req.user.id,
+            status: 'active'
+        }).populate('task', 'title status pomoDraftSeconds pomoPlannedSeconds');
+        res.json({ session });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/pomodoro/start
 // Start a new Pomodoro session for a specific task
 // Body: { taskId, plannedSeconds }
@@ -75,19 +93,43 @@ router.post('/start', protect, async (req, res) => {
 
         const multiplier = await calculateMultiplier(req.user.id);
 
-        // Create the session
-        const session = new PomodoroSession({
-            user: req.user.id,
-            task: taskId,
-            plannedSeconds,
-            speedMultiplier: multiplier,
-            status: 'active'
-        });
-        await session.save();
+        // Idempotency: check for an existing active session for this user
+        // If there's one for the SAME task, return it.
+        // If there's one for a DIFFERENT task, we might want to 'abandon' the old one
+        // or just return the old one. For now, let's just return any active session if it exists.
+        let session = await PomodoroSession.findOne({ user: req.user.id, status: 'active' });
+
+        if (session) {
+            // If it's a different task, optionally abandon the old one?
+            // For simplicity, let's just create a new one if it's a different task,
+            // but update the old one to 'abandoned'
+            if (session.task.toString() !== taskId) {
+                session.status = 'abandoned';
+                session.finishedAt = new Date();
+                await session.save();
+                session = null; // force new session creation
+            } else {
+                return res.json({ session, multiplier, msg: 'Resumed existing active session' });
+            }
+        }
+
+        if (!session) {
+            // Create the session
+            session = new PomodoroSession({
+                user: req.user.id,
+                task: taskId,
+                plannedSeconds,
+                speedMultiplier: multiplier,
+                status: 'active'
+            });
+            await session.save();
+        }
 
         // Stamp lastAttemptedAt on the task (and clear any existing draft)
+        // Also save the planned seconds to the task for future draft recovery
         await Task.findByIdAndUpdate(taskId, {
             lastAttemptedAt: new Date(),
+            pomoPlannedSeconds: plannedSeconds,
             status: task.status === 'pending' ? 'in-progress' : task.status
         });
 
@@ -124,8 +166,10 @@ router.patch('/:id/save-draft', protect, async (req, res) => {
         await session.save();
 
         // Save draft remaining seconds on the task AND update lastAttemptedAt
+        // We also want to keep pomoPlannedSeconds (already saved in /start)
         await Task.findByIdAndUpdate(session.task, {
             pomoDraftSeconds: remainingSeconds,
+            // pomoPlannedSeconds: session.plannedSeconds, // redundant but safe
             lastAttemptedAt: new Date()
         });
 
@@ -199,7 +243,10 @@ router.get('/task/:taskId/draft', protect, async (req, res) => {
             return res.status(404).json({ msg: 'Task not found' });
         }
 
-        res.json({ pomoDraftSeconds: task.pomoDraftSeconds || null });
+        res.json({ 
+            pomoDraftSeconds: task.pomoDraftSeconds || null,
+            pomoPlannedSeconds: task.pomoPlannedSeconds || null
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

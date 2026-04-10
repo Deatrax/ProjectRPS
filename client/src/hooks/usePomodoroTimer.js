@@ -4,154 +4,158 @@ const API = 'http://localhost:5000/api';
 
 /**
  * usePomodoroTimer
- * ─────────────────
- * Shared timer logic used by both the full Pomodoro page and the dashboard mini-widget.
- *
- * @param {string|null} taskId  – MongoDB Task ID currently selected
- * @param {number}      initialSeconds – Seconds to start from (0 = user sets manually)
- * @param {number}      multiplier – Speed multiplier from backend (1.0 = normal, 1.1 = 10% faster)
+ * A clean, reliable Pomodoro timer hook using timestamp-based countdown.
  */
-export function usePomodoroTimer(taskId, initialSeconds = 0, multiplier = 1.0) {
-    const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
-    const [totalSeconds, setTotalSeconds] = useState(initialSeconds);
+export function usePomodoroTimer(multiplier = 1.0) {
+    const [secondsLeft, setSecondsLeft] = useState(25 * 60);
+    const [totalSeconds, setTotalSeconds] = useState(25 * 60);
     const [isRunning, setIsRunning] = useState(false);
-    const [sessionId, setSessionId] = useState(null);  // PomodoroSession._id
-    const [isDone, setIsDone] = useState(false);  // true when timer hits 0
+    const [isDone, setIsDone] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
 
-    // Refs so interval callbacks always see latest values
-    const secondsRef = useRef(secondsLeft);
-    const elapsedRef = useRef(0);           // elapsed ticks (in real seconds)
+    // Refs to avoid stale closures in the interval
+    const secondsLeftRef = useRef(25 * 60);
+    const totalSecondsRef = useRef(25 * 60);
+    const startTimeRef = useRef(null);
+    const startSecondsRef = useRef(25 * 60);
+    const multiplierRef = useRef(multiplier);
     const intervalRef = useRef(null);
-    const sessionIdRef = useRef(sessionId);
+    const sessionIdRef = useRef(null);
+    const taskIdRef = useRef(null);
 
-    useEffect(() => { secondsRef.current = secondsLeft; }, [secondsLeft]);
-    useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
+    // Keep refs in sync
+    useEffect(() => { multiplierRef.current = multiplier; }, [multiplier]);
+    useEffect(() => { secondsLeftRef.current = secondsLeft; }, [secondsLeft]);
+    useEffect(() => { totalSecondsRef.current = totalSeconds; }, [totalSeconds]);
 
-    // ── Reset when task or initial seconds change ──────────────────────────────
-    useEffect(() => {
-        stop(false); // stop without saving draft
-        setSecondsLeft(initialSeconds);
-        setTotalSeconds(initialSeconds);
+    // Cleanup interval on unmount
+    useEffect(() => () => clearInterval(intervalRef.current), []);
+
+    // ── Set Duration (called externally when preset/custom is picked or draft loaded) ──
+    const setDuration = useCallback((seconds, total) => {
+        clearInterval(intervalRef.current);
+        setIsRunning(false);
+        const s = Math.max(1, Math.round(seconds));
+        const t = Math.max(s, Math.round(total || seconds));
+        setSecondsLeft(s);
+        setTotalSeconds(t);
+        secondsLeftRef.current = s;
+        totalSecondsRef.current = t;
         setIsDone(false);
-        elapsedRef.current = 0;
-    }, [taskId, initialSeconds]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // ── Internal tick ──────────────────────────────────────────────────────────
-    const tick = useCallback(() => {
-        const next = secondsRef.current - 1;
-        elapsedRef.current += 1;
-        if (next <= 0) {
-            setSecondsLeft(0);
-            secondsRef.current = 0;
-            setIsRunning(false);
-            clearInterval(intervalRef.current);
-            setIsDone(true);
-        } else {
-            setSecondsLeft(next);
-        }
     }, []);
 
-    // ── Start ──────────────────────────────────────────────────────────────────
-    const start = useCallback(async () => {
-        if (!taskId || secondsRef.current <= 0) return;
+    // ── Start ──
+    const start = useCallback(async (taskId) => {
+        if (!taskId || secondsLeftRef.current <= 0) return;
         setIsDone(false);
+        taskIdRef.current = taskId;
 
-        // Create session on backend if not already active
-        if (!sessionIdRef.current) {
+        // Create/resume session on backend
+        let sid = sessionIdRef.current;
+        if (!sid) {
             try {
                 const token = localStorage.getItem('token');
                 const res = await fetch(`${API}/pomodoro/start`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ taskId, plannedSeconds: totalSeconds })
+                    body: JSON.stringify({ taskId, plannedSeconds: totalSecondsRef.current }),
                 });
                 const data = await res.json();
                 if (data.session?._id) {
-                    setSessionId(data.session._id);
-                    sessionIdRef.current = data.session._id;
+                    sid = data.session._id;
+                    sessionIdRef.current = sid;
+                    setSessionId(sid);
+                    localStorage.setItem('pomo_sid', sid);
                 }
             } catch (e) {
-                console.error('Pomodoro start error:', e);
+                console.warn('Failed to create pomodoro session, running local-only:', e);
             }
         }
 
-        // Calculate real-world interval: 1000ms / multiplier
-        // e.g. multiplier 1.1 → ~909 ms per tick → 60 min becomes ~54.5 min
-        const intervalMs = Math.round(1000 / multiplier);
-        intervalRef.current = setInterval(tick, intervalMs);
-        setIsRunning(true);
-    }, [taskId, totalSeconds, multiplier, tick]);
+        startTimeRef.current = Date.now();
+        startSecondsRef.current = secondsLeftRef.current;
 
-    // ── Pause ──────────────────────────────────────────────────────────────────
+        clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(() => {
+            const elapsed = ((Date.now() - startTimeRef.current) / 1000) * multiplierRef.current;
+            const next = Math.max(0, Math.floor(startSecondsRef.current - elapsed));
+            setSecondsLeft(next);
+            secondsLeftRef.current = next;
+
+            if (next <= 0) {
+                clearInterval(intervalRef.current);
+                setIsRunning(false);
+                setIsDone(true);
+                localStorage.removeItem('pomo_sid');
+            }
+        }, 250);
+
+        setIsRunning(true);
+    }, []);
+
+    // ── Pause ──
     const pause = useCallback(() => {
         clearInterval(intervalRef.current);
         setIsRunning(false);
     }, []);
 
-    // ── Stop (internal helper) ────────────────────────────────────────────────
-    const stop = useCallback((shouldSaveDraft = true) => {
+    // ── Save Draft ──
+    const saveDraft = useCallback(async () => {
         clearInterval(intervalRef.current);
         setIsRunning(false);
-    }, []);
 
-    // ── Save Draft ─────────────────────────────────────────────────────────────
-    const saveDraft = useCallback(async () => {
-        pause();
         const sid = sessionIdRef.current;
         if (!sid) return;
+
         try {
             const token = localStorage.getItem('token');
             await fetch(`${API}/pomodoro/${sid}/save-draft`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
-                    remainingSeconds: secondsRef.current,
-                    elapsedSeconds: elapsedRef.current
-                })
+                    remainingSeconds: secondsLeftRef.current,
+                    elapsedSeconds: totalSecondsRef.current - secondsLeftRef.current,
+                }),
             });
         } catch (e) {
-            console.error('Pomodoro save-draft error:', e);
+            console.warn('Failed to save draft:', e);
         }
-        setSessionId(null);
-        sessionIdRef.current = null;
-        elapsedRef.current = 0;
-    }, [pause]);
 
-    // ── Finish (timer done or user declares done) ──────────────────────────────
+        localStorage.removeItem('pomo_sid');
+        sessionIdRef.current = null;
+        setSessionId(null);
+    }, []);
+
+    // ── Finish ──
     const finish = useCallback(async (markTaskDone = false) => {
-        pause();
+        clearInterval(intervalRef.current);
+        setIsRunning(false);
+
         const sid = sessionIdRef.current;
-        if (!sid) return;
+        if (!sid) {
+            setIsDone(false);
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             await fetch(`${API}/pomodoro/${sid}/finish`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
-                    elapsedSeconds: elapsedRef.current,
-                    markTaskDone
-                })
+                    elapsedSeconds: totalSecondsRef.current - secondsLeftRef.current,
+                    markTaskDone,
+                }),
             });
         } catch (e) {
-            console.error('Pomodoro finish error:', e);
+            console.warn('Failed to finish session:', e);
         }
-        setSessionId(null);
+
+        localStorage.removeItem('pomo_sid');
         sessionIdRef.current = null;
-        elapsedRef.current = 0;
+        setSessionId(null);
         setIsDone(false);
-    }, [pause]);
-
-    // ── Set custom duration (before starting) ──────────────────────────────────
-    const setDuration = useCallback((seconds) => {
-        if (isRunning) return;
-        setSecondsLeft(seconds);
-        setTotalSeconds(seconds);
-        setIsDone(false);
-        elapsedRef.current = 0;
-    }, [isRunning]);
-
-    // Cleanup on unmount
-    useEffect(() => () => clearInterval(intervalRef.current), []);
+    }, []);
 
     return {
         secondsLeft,
@@ -163,6 +167,6 @@ export function usePomodoroTimer(taskId, initialSeconds = 0, multiplier = 1.0) {
         pause,
         saveDraft,
         finish,
-        setDuration
+        setDuration,
     };
 }
