@@ -1,3 +1,139 @@
+/* Selection Bar */
+.selection-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+  z-index: 100;
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.selected-count {
+  font-weight: 700;
+  color: #ffe9a6;
+  font-size: 1.1rem;
+}
+
+.btn-select-all {
+  background: none;
+  border: 1px solid rgba(255, 233, 166, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-select-all:hover {
+  background: rgba(255, 233, 166, 0.1);
+}
+
+.selection-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-cancel-selection {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete-selected {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete-selected:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-delete-selected:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+}
+
+/* Checkbox Styles */
+.selection-checkbox-wrapper {
+  margin-right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-checkbox.checked {
+  background: #ffe9a6;
+  border-color: #ffe9a6;
+  color: #0b1020;
+}
+
+.course-card.selected {
+  background: rgba(255, 233, 166, 0.08);
+  border-color: rgba(255, 233, 166, 0.4);
+}
+
+/* Animation */
+.animate-slide-down {
+  animation: slideDown 0.3s ease forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-list.selection-active .course-card {
+  cursor: pointer;
+}
+
+.course-list.selection-active .course-card:hover {
+  transform: none; /* Disable shift in selection mode */
+}
+
+/* Existing styles below */
 :root {
   --bg-dark: #0b1020;
   --glow-color: #18224a;

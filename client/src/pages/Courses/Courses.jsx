@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Edit, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X, ArrowLeft, Plus } from 'lucide-react';
+import { Edit, BookOpen, FileText, CheckSquare, Trash2, X, ArrowLeft, Plus, Check } from 'lucide-react';
 import './Courses.css';
 import axios from 'axios';
 
@@ -16,6 +16,10 @@ const Courses = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Selection Mode State
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedCourses, setSelectedCourses] = useState([]);
 
   useEffect(() => {
     const fetchCoursesAndTasks = async () => {
@@ -66,15 +70,26 @@ const Courses = () => {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
 
   const handleDeleteCourse = (course) => {
     setCourseToDelete(course);
+    setIsBulkDelete(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleBulkDeleteInitiate = () => {
+    if (selectedCourses.length === 0) {
+      setError('Please select at least one course to delete.');
+      return;
+    }
+    setIsBulkDelete(true);
     setShowDeleteConfirm(true);
   };
 
   const confirmDelete = async () => {
-    if (!courseToDelete || !user || !user.token) {
-      setError('Course or user not identified for deletion.');
+    if (!user || !user.token) {
+      setError('User not identified for deletion.');
       setShowDeleteConfirm(false);
       return;
     }
@@ -88,18 +103,47 @@ const Courses = () => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      await axios.delete(`http://localhost:5000/api/courses/${courseToDelete._id}`, config);
-      setCourses(courses.filter((course) => course._id !== courseToDelete._id));
+
+      if (isBulkDelete) {
+        await axios.post('http://localhost:5000/api/courses/bulk-delete', { courseIds: selectedCourses }, config);
+        setCourses(courses.filter((course) => !selectedCourses.includes(course._id)));
+        setSelectedCourses([]);
+        setIsSelectionMode(false);
+      } else if (courseToDelete) {
+        await axios.delete(`http://localhost:5000/api/courses/${courseToDelete._id}`, config);
+        setCourses(courses.filter((course) => course._id !== courseToDelete._id));
+      }
+      
       setShowDeleteConfirm(false);
       setCourseToDelete(null);
+      setIsBulkDelete(false);
     } catch (err) {
-      console.error('Error deleting course:', err);
-      setError(err.response?.data?.message || 'Failed to delete course.');
-      setShowDeleteConfirm(false);
-      setCourseToDelete(null);
+      console.error('Error deleting course(s):', err);
+      setError(err.response?.data?.message || 'Failed to delete course(s).');
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleCourseSelection = (courseId) => {
+    if (selectedCourses.includes(courseId)) {
+      setSelectedCourses(selectedCourses.filter(id => id !== courseId));
+    } else {
+      setSelectedCourses([...selectedCourses, courseId]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCourses.length === courses.length) {
+      setSelectedCourses([]);
+    } else {
+      setSelectedCourses(courses.map(c => c._id));
+    }
+  };
+
+  const cancelSelectionMode = () => {
+    setIsSelectionMode(false);
+    setSelectedCourses([]);
   };
 
   useEffect(() => {
@@ -137,90 +181,72 @@ const Courses = () => {
                 <p>Manage your courses and learning materials</p>
               </div>
 
-              <div
-                className="floating-button-wrapper"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => {
-                  setIsHovered(false);
-                  setHoveredButton(null);
-                }}
-              >
-                {/* on click toggle menu open/closed */}
-                <button
-                  className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+              {!isSelectionMode && (
+                <div
+                  className="floating-button-wrapper"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => {
+                    setIsHovered(false);
+                    setHoveredButton(null);
+                  }}
                 >
-                  <Edit size={28} />
-                </button>
+                  <button
+                    className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  >
+                    <Edit size={28} />
+                  </button>
 
-                {/* Floating action buttons are shown if menu is open */}
-                {isHovered || isMenuOpen ? (
-                  <>
-                    <button
-                      className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
-                      onMouseEnter={() => setHoveredButton(1)}
-                      onClick={() => navigate('/courses/add')}
-                    >
-                      <BookOpen size={18} /> Add Course
-                    </button>
+                  {isHovered || isMenuOpen ? (
+                    <>
+                      <button
+                        className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
+                        onMouseEnter={() => setHoveredButton(1)}
+                        onClick={() => navigate('/courses/add')}
+                      >
+                        <BookOpen size={18} /> Add Course
+                      </button>
 
-                    <button
-                      className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
-                      onMouseEnter={() => setHoveredButton(2)}
-                      onClick={() => navigate('/taskpicker')}
-                    >
-                      <CheckSquare size={18} /> Add Task
-                    </button>
+                      <button
+                        className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
+                        onMouseEnter={() => setHoveredButton(2)}
+                        onClick={() => navigate('/taskpicker')}
+                      >
+                        <CheckSquare size={18} /> Add Task
+                      </button>
 
-                    <button
-                      className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
-                      onMouseEnter={() => setHoveredButton(3)}
-                    >
-                      <Trash2 size={18} /> Delete All
-                    </button>
-                  </>
-                ) : null}
-              </div>
+                      <button
+                        className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
+                        onMouseEnter={() => setHoveredButton(3)}
+                        onClick={() => setIsSelectionMode(true)}
+                      >
+                        <Trash2 size={18} /> Delete All
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="thin-line"></div>
 
-          {/* Delete Confirmation Modal */}
-          {showDeleteConfirm && courseToDelete && (
-            <div className="modal-overlay">
-              <div className="modal">
-                <div className="modal-header">
-                  <h2>Confirm Deletion</h2>
-                  <button onClick={() => { setShowDeleteConfirm(false); setError(null); }} className="btn-close">
-                    <X size={24} />
-                  </button>
-                </div>
-                <div className="modal-body">
-                  {error && <p className="error-message">{error}</p>}
-                  <p>Are you sure you want to delete the course <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
-                </div>
-                <div className="modal-actions">
-                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); }} className="btn-modal-secondary">
-                    Cancel
-                  </button>
-                  <button onClick={confirmDelete} className="btn-modal-danger" disabled={loading}>
-                    {loading ? 'Deleting...' : 'Delete Course'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Course Rows */}
-          <div className="course-list">
+          <div className={`course-list ${isSelectionMode ? 'selection-active' : ''}`}>
             {courses.map(course => (
               <div
                 key={course._id}
-                className="course-card"
-                onClick={() => window.location.href = `/coursedetails?id=${course._id}`}
+                className={`course-card ${selectedCourses.includes(course._id) ? 'selected' : ''}`}
+                onClick={() => isSelectionMode ? toggleCourseSelection(course._id) : window.location.href = `/coursedetails?id=${course._id}`}
                 style={{ '--course-color': course.color }}
               >
+                {isSelectionMode && (
+                  <div className="selection-checkbox-wrapper" onClick={(e) => { e.stopPropagation(); toggleCourseSelection(course._id); }}>
+                    <div className={`custom-checkbox ${selectedCourses.includes(course._id) ? 'checked' : ''}`}>
+                      {selectedCourses.includes(course._id) && <Check size={16} />}
+                    </div>
+                  </div>
+                )}
                 <div className="course-accent" style={{ backgroundColor: course.color }}></div>
                 <div className="course-info">
                   <p className="course-code" style={{ color: course.color }}>{course.courseCode}</p>
@@ -228,33 +254,59 @@ const Courses = () => {
                   <p className="course-meta">{taskCounts[course._id] || 0} tasks total</p>
                 </div>
 
-                <div className="icon-group-container">
-                  <div className="stat-item">
-                    <div className="stat-icon task-bg"><CheckSquare size={18} /></div>
-                    <span className="stat-count">{taskCounts[course._id] || 0}</span>
+                {!isSelectionMode && (
+                  <div className="icon-group-container">
+                    <div className="stat-item">
+                      <div className="stat-icon task-bg"><CheckSquare size={18} /></div>
+                      <span className="stat-count">{taskCounts[course._id] || 0}</span>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-icon assignment-bg"><FileText size={18} /></div>
+                      <span className="stat-count">0</span>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-icon material-bg"><BookOpen size={18} /></div>
+                      <span className="stat-count">0</span>
+                    </div>
+                    <button
+                      className="delete-row-btn"
+                      title="Delete Course"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCourse(course);
+                      }}
+                    >
+                      <Trash2 size={20} />
+                    </button>
                   </div>
-                  <div className="stat-item">
-                    <div className="stat-icon assignment-bg"><FileText size={18} /></div>
-                    <span className="stat-count">0</span>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-icon material-bg"><BookOpen size={18} /></div>
-                    <span className="stat-count">0</span>
-                  </div>
-                  <button
-                    className="delete-row-btn"
-                    title="Delete Course"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCourse(course);
-                    }}
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
+                )}
               </div>
             ))}
           </div>
+
+          {/* Selection Bar at the end */}
+          {isSelectionMode && (
+            <div className="selection-bar animate-slide-up">
+              <div className="selection-info">
+                <span className="selected-count">{selectedCourses.length} selected</span>
+                <button className="btn-select-all" onClick={handleSelectAll}>
+                  {selectedCourses.length === courses.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+              <div className="selection-actions">
+                <button className="btn-cancel-selection" onClick={cancelSelectionMode}>
+                  Cancel
+                </button>
+                <button 
+                  className="btn-delete-selected" 
+                  onClick={handleBulkDeleteInitiate}
+                  disabled={selectedCourses.length === 0}
+                >
+                  Delete Selected
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
