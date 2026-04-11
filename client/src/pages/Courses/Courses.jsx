@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X, ArrowLeft } from 'lucide-react';
+import { Edit, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X, ArrowLeft, Plus } from 'lucide-react';
 import './Courses.css';
 import axios from 'axios';
 
@@ -145,12 +145,12 @@ const Courses = () => {
                   setHoveredButton(null);
                 }}
               >
-                {/* on click + button toggles menu open/closed */}
+                {/* on click toggle menu open/closed */}
                 <button
                   className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
-                  <Plus size={28} />
+                  <Edit size={28} />
                 </button>
 
                 {/* Floating action buttons are shown if menu is open */}
@@ -176,7 +176,7 @@ const Courses = () => {
                       className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
                       onMouseEnter={() => setHoveredButton(3)}
                     >
-                      <FileQuestion size={18} />
+                      <Trash2 size={18} /> Delete All
                     </button>
                   </>
                 ) : null}
