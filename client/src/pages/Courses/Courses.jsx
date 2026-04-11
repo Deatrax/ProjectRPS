@@ -13,6 +13,7 @@ const Courses = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [taskCounts, setTaskCounts] = useState({});
+  const [fileCounts, setFileCounts] = useState({});
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +23,7 @@ const Courses = () => {
   const [selectedCourses, setSelectedCourses] = useState([]);
 
   useEffect(() => {
-    const fetchCoursesAndTasks = async () => {
+    const fetchCoursesTasksAndMaterials = async () => {
       if (!user || !user.token) {
         setLoading(false);
         setError('User not authenticated.');
@@ -39,33 +40,44 @@ const Courses = () => {
           },
         };
 
-        // Fetch courses and tasks in parallel
-        const [coursesResponse, tasksResponse] = await Promise.all([
+        // Fetch courses, tasks, and all materials in parallel
+        const [coursesResponse, tasksResponse, materialsResponse] = await Promise.all([
           axios.get('http://localhost:5000/api/courses', config),
-          axios.get('http://localhost:5000/api/tasks', config)
+          axios.get('http://localhost:5000/api/tasks', config),
+          axios.get('http://localhost:5000/api/materials/all', config)
         ]);
         
         setCourses(coursesResponse.data);
 
-        // Process tasks to get counts
-        const counts = tasksResponse.data.reduce((acc, task) => {
+        // Process tasks to get counts per course
+        const tCounts = tasksResponse.data.reduce((acc, task) => {
           if (task.course) {
             const courseId = task.course._id || task.course;
             acc[courseId] = (acc[courseId] || 0) + 1;
           }
           return acc;
         }, {});
-        setTaskCounts(counts);
+        setTaskCounts(tCounts);
+
+        // Process materials to get counts per course
+        const fCounts = materialsResponse.data.reduce((acc, mat) => {
+          if (mat.course) {
+            const courseId = mat.course._id || mat.course;
+            acc[courseId] = (acc[courseId] || 0) + 1;
+          }
+          return acc;
+        }, {});
+        setFileCounts(fCounts);
 
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError('Failed to fetch courses or tasks.');
+        setError('Failed to fetch courses, tasks, or materials.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCoursesAndTasks();
+    fetchCoursesTasksAndMaterials();
   }, [user]);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -293,12 +305,8 @@ const Courses = () => {
                     <span className="stat-count">{taskCounts[course._id] || 0}</span>
                   </div>
                   <div className="stat-item">
-                    <div className="stat-icon assignment-bg"><FileText size={18} /></div>
-                    <span className="stat-count">0</span>
-                  </div>
-                  <div className="stat-item">
-                    <div className="stat-icon material-bg"><BookOpen size={18} /></div>
-                    <span className="stat-count">0</span>
+                    <div className="stat-icon material-bg"><FileText size={18} /></div>
+                    <span className="stat-count">{fileCounts[course._id] || 0}</span>
                   </div>
                   {!isSelectionMode && (
                     <button

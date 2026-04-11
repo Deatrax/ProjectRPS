@@ -16,12 +16,21 @@ const TaskDetails = () => {
     const [taskMaterials, setTaskMaterials] = useState([]);
     const { user } = useAuth();
 
-    const [activeTab, setActiveTab] = useState('details'); 
+    const [activeTab, setActiveTab] = useState('details'); // 'details' or 'materials'
     const [file, setFile] = useState(null);
     const [displayFileName, setDisplayFileName] = useState('');
     const [uploading, setUploading] = useState(false);
     const [materialError, setMaterialError] = useState(null);
     const fileInputRef = useRef(null);
+
+    // Modal State
+    const [modalConfig, setModalConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        type: 'info' // 'info' or 'danger'
+    });
 
     useEffect(() => {
         const fetchTaskData = async () => {
@@ -53,6 +62,30 @@ const TaskDetails = () => {
 
         fetchTaskData();
     }, [id, user]);
+
+    const showAlert = (title, message, type = 'info') => {
+        setModalConfig({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: null,
+            type
+        });
+    };
+
+    const showConfirm = (title, message, onConfirm) => {
+        setModalConfig({
+            isOpen: true,
+            title,
+            message,
+            onConfirm,
+            type: 'danger'
+        });
+    };
+
+    const closeModal = () => {
+        setModalConfig(prev => ({ ...prev, isOpen: false }));
+    };
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -95,35 +128,41 @@ const TaskDetails = () => {
             setFile(null);
             setDisplayFileName('');
             if (fileInputRef.current) fileInputRef.current.value = '';
+            showAlert('Success', 'File uploaded successfully!');
         } catch (err) {
             console.error("Error uploading material:", err);
             setMaterialError(err.message);
+            showAlert('Error', err.message, 'danger');
         } finally {
             setUploading(false);
         }
     };
 
     const handleDeleteMaterial = async (materialId) => {
-        if (!window.confirm('Are you sure you want to delete this material?')) return;
+        showConfirm(
+            'Confirm Deletion',
+            'Are you sure you want to delete this material? This action cannot be undone.',
+            async () => {
+                try {
+                    const res = await fetch(`http://localhost:5000/api/materials/${materialId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            Authorization: `Bearer ${user.token}`
+                        }
+                    });
 
-        try {
-            const res = await fetch(`http://localhost:5000/api/materials/${materialId}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${user.token}`
+                    if (res.ok) {
+                        setTaskMaterials(prev => prev.filter(m => m._id !== materialId));
+                    } else {
+                        const errorData = await res.json();
+                        throw new Error(errorData.message || 'Delete failed');
+                    }
+                } catch (err) {
+                    console.error("Error deleting material:", err);
+                    showAlert('Error', 'Failed to delete material: ' + err.message, 'danger');
                 }
-            });
-
-            if (res.ok) {
-                setTaskMaterials(prev => prev.filter(m => m._id !== materialId));
-            } else {
-                const errorData = await res.json();
-                throw new Error(errorData.message || 'Delete failed');
             }
-        } catch (err) {
-            console.error("Error deleting material:", err);
-            alert("Failed to delete material: " + err.message);
-        }
+        );
     };
 
     if (loading) return (
@@ -181,7 +220,7 @@ const TaskDetails = () => {
 
                     <div className="thin-line"></div>
 
-                    {/* Stats Grid */}
+                    {/* Stats Grid - Exactly like CourseDetails */}
                     <div className="stats-grid">
                         <div className="stat-card">
                             <div className="stat-icon-wrapper" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
@@ -205,7 +244,7 @@ const TaskDetails = () => {
 
                     {/* Main Glass Panel */}
                     <div className="glass-panel">
-                        {/* Tab Toggle */}
+                        {/* Tab Toggle - Exactly like CourseDetails */}
                         <div className="toggle-container">
                             <button 
                                 className={`toggle-btn ${activeTab === 'details' ? 'active' : ''}`}
@@ -362,6 +401,54 @@ const TaskDetails = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Global Modal for Alerts & Confirmation */}
+            {modalConfig.isOpen && (
+                <div className="modal-overlay" onClick={closeModal}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>{modalConfig.title}</h2>
+                            <button onClick={closeModal} className="btn-close" style={{
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                cursor: 'pointer',
+                                padding: '0.6rem',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                transition: 'all 0.3s ease'
+                            }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>{modalConfig.message}</p>
+                        </div>
+                        <div className="modal-actions">
+                            {modalConfig.onConfirm ? (
+                                <>
+                                    <button onClick={closeModal} className="btn-modal-secondary">
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            modalConfig.onConfirm();
+                                            closeModal();
+                                        }} 
+                                        className={modalConfig.type === 'danger' ? 'btn-modal-danger' : 'btn-modal-primary'}
+                                    >
+                                        Delete
+                                    </button>
+                                </>
+                            ) : (
+                                <button onClick={closeModal} className="btn-modal-primary">
+                                    OK
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

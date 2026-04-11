@@ -6,7 +6,8 @@ const {
     getCourseMaterials, 
     uploadTaskMaterial, 
     getTaskMaterials, 
-    deleteMaterial 
+    deleteMaterial,
+    getAllMaterials
 } = require('../controllers/materialController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -31,6 +32,7 @@ const upload = multer({
 });
 
 // Course materials
+router.get('/all', protect, getAllMaterials); // Add this before other routes
 router.post('/:courseId', protect, upload.single('materialFile'), uploadMaterial);
 router.get('/:courseId', protect, getCourseMaterials);
 

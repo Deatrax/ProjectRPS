@@ -171,10 +171,16 @@ const deleteMaterial = asyncHandler(async (req, res) => {
     }
 });
 
+const getAllMaterials = asyncHandler(async (req, res) => {
+    const materials = await Material.find({ user: req.user.id });
+    res.json(materials);
+});
+
 module.exports = {
     uploadMaterial,
     getCourseMaterials,
     uploadTaskMaterial,
     getTaskMaterials,
     deleteMaterial,
+    getAllMaterials,
 };
