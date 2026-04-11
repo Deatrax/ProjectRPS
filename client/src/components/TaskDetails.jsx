@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, FileText, BarChart2, Tag } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Calendar, FileText, BarChart2, Tag, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './TaskDetails.css';
 
@@ -8,7 +8,6 @@ const TaskDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [task, setTask] = useState(null);
-
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
 
@@ -24,8 +23,6 @@ const TaskDetails = () => {
                 if (!res.ok) throw new Error('Failed to fetch task');
 
                 const data = await res.json();
-
-
                 setTask(data);
             } catch (err) {
                 console.error("Error fetching task:", err);
@@ -37,9 +34,28 @@ const TaskDetails = () => {
         fetchTask();
     }, [id, user]);
 
-    if (!task) return <div className="loading-spinner">Loading...</div>;
+    if (loading) return (
+        <div className="task-details-page-wrapper">
+            <div className="container">
+                <div className="content-limit">
+                    <div className="loading-state">Loading task details...</div>
+                </div>
+            </div>
+        </div>
+    );
+
+    if (!task) return (
+        <div className="task-details-page-wrapper">
+            <div className="container">
+                <div className="content-limit">
+                    <div className="error-state">Task not found</div>
+                </div>
+            </div>
+        </div>
+    );
 
     const formatDate = (date) => {
+        if (!date) return 'No Date';
         return new Date(date).toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
@@ -48,73 +64,120 @@ const TaskDetails = () => {
         });
     };
 
+    const getDifficultyColor = (difficulty) => {
+        if (difficulty >= 8) return '#ef4444'; // Red
+        if (difficulty >= 5) return '#f59e0b'; // Amber
+        return '#10b981'; // Green
+    };
+
     return (
-        <div className="task-details-container">
-            <div className="tasks-header">
-                <div className="tasks-title-group">
-                    <button onClick={() => navigate(-1)} className="back-btn">
-                        <ArrowLeft size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-                        Back
-                    </button>
-                    <h1 className="tasks-title" style={{ marginTop: '20px' }}>{task.title}</h1>
-                    <div className="tasks-meta">
-                        <div className="meta-tag">
-                            <Calendar size={14} />
-                            {formatDate(task.date)}
+        <div className="task-details-page-wrapper">
+            <div className="container">
+                <div className="content-limit">
+                    {/* Header Section */}
+                    <div className="header-section">
+                        <div className="header-content">
+                            <Link to="/tasks" className="back-btn">
+                                <ArrowLeft size={20} />
+                            </Link>
+                            <div className="header-text">
+                                <h1>Task Details</h1>
+                                <p>{task.course ? `${task.course.courseCode} • ${task.course.courseTitle}` : task.category || 'General Task'}</p>
+                            </div>
                         </div>
-                        <div className="meta-tag">
-                            <Tag size={14} />
-                            {task.category}
+                    </div>
+
+                    <div className="thin-line"></div>
+
+                    <div className="task-details-grid">
+                        {/* Main Info Card */}
+                        <div className="detail-main-card">
+                            <div className="card-header-row">
+                                <h2 className="detail-title">{task.title}</h2>
+                                <span className={`status-badge ${task.status === 'completed' ? 'completed' : 'pending'}`}>
+                                    {task.status === 'completed' ? <CheckCircle size={14} /> : <Clock size={14} />}
+                                    {task.status || 'Pending'}
+                                </span>
+                            </div>
+
+                            <div className="detail-description">
+                                <h3>Description</h3>
+                                <p>{task.description || 'No description provided for this task.'}</p>
+                            </div>
+
+                            <div className="detail-meta-grid">
+                                <div className="meta-item">
+                                    <Calendar className="meta-icon" size={20} />
+                                    <div className="meta-info">
+                                        <span className="meta-label">Deadline</span>
+                                        <span className="meta-value">{formatDate(task.deadline || task.date)}</span>
+                                    </div>
+                                </div>
+
+                                <div className="meta-item">
+                                    <Tag className="meta-icon" size={20} />
+                                    <div className="meta-info">
+                                        <span className="meta-label">Category</span>
+                                        <span className="meta-value">{task.category || 'General'}</span>
+                                    </div>
+                                </div>
+
+                                <div className="meta-item">
+                                    <BarChart2 className="meta-icon" size={20} />
+                                    <div className="meta-info">
+                                        <span className="meta-label">Difficulty</span>
+                                        <span className="meta-value" style={{ color: getDifficultyColor(task.difficulty) }}>
+                                            {task.difficulty}/10
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="meta-tag" style={{ color: '#a5b4fc', borderColor: '#a5b4fc' }}>
-                            {task.course ? (task.course.courseCode || 'Course Info') : 'No Course'}
+
+                        {/* Sidebar Cards */}
+                        <div className="detail-sidebar">
+                            <div className="sidebar-card priority-card" style={{ borderColor: getDifficultyColor(task.difficulty) }}>
+                                <h3>Task Priority</h3>
+                                <div className="difficulty-meter">
+                                    <div className="meter-bg">
+                                        <div 
+                                            className="meter-fill" 
+                                            style={{ 
+                                                width: `${task.difficulty * 10}%`,
+                                                background: getDifficultyColor(task.difficulty)
+                                            }}
+                                        ></div>
+                                    </div>
+                                    <span>{task.difficulty >= 8 ? 'High Priority' : task.difficulty >= 5 ? 'Medium Priority' : 'Low Priority'}</span>
+                                </div>
+                            </div>
+
+                            {task.materials && (
+                                <div className="sidebar-card materials-card">
+                                    <h3>Resources</h3>
+                                    <a href={task.materials} target="_blank" rel="noopener noreferrer" className="resource-link">
+                                        <FileText size={18} />
+                                        <span>View Materials</span>
+                                    </a>
+                                </div>
+                            )}
+
+                            <div className="sidebar-card info-card">
+                                <h3>Quick Info</h3>
+                                <div className="info-row">
+                                    <span>Created</span>
+                                    <span>{new Date(task.createdAt || Date.now()).toLocaleDateString()}</span>
+                                </div>
+                                {task.weight && (
+                                    <div className="info-row">
+                                        <span>Weight</span>
+                                        <span>{task.weight}%</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div className="glass-card">
-                <div className="description-section">
-                    <span className="section-label">Description</span>
-                    <p className="description-text">
-                        {task.description}
-                    </p>
-                </div>
-
-                <div className="details-grid">
-                    <div className="detail-item">
-                        <span className="section-label" style={{ marginBottom: '5px' }}>Difficulty</span>
-                        <div className="detail-value">{task.difficulty}/10</div>
-                        <div className="difficulty-bar">
-                            <div
-                                className="difficulty-fill"
-                                style={{ width: `${task.difficulty * 10}%` }}
-                            ></div>
-                        </div>
-                    </div>
-
-                    <div className="detail-item">
-                        <span className="section-label" style={{ marginBottom: '5px' }}>Weight</span>
-                        <div className="detail-value">15%</div>
-                        <div className="section-label" style={{ fontSize: '0.7rem', marginTop: '5px', opacity: 0.7 }}>of Final Grade</div>
-                    </div>
-
-                    <div className="detail-item">
-                        <span className="section-label" style={{ marginBottom: '5px' }}>Status</span>
-                        <div className="detail-value" style={{ color: '#fbbf24' }}>In Progress</div>
-                    </div>
-                </div>
-
-                {task.materials && (
-                    <div className="materials-section">
-                        <span className="section-label">Resources</span>
-                        <br />
-                        <a href={task.materials} target="_blank" rel="noopener noreferrer" className="material-link">
-                            <FileText size={18} />
-                            View Attached Materials
-                        </a>
-                    </div>
-                )}
             </div>
         </div>
     );
