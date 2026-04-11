@@ -249,17 +249,13 @@ const deleteCourses = asyncHandler(async (req, res) => {
         throw new Error('Invalid course IDs');
     }
 
-    // Verify ownership of all courses before deleting
-    const courses = await Course.find({ _id: { $in: courseIds }, user: req.user.id });
+    // Only delete courses that belong to the user
+    const result = await Course.deleteMany({ 
+        _id: { $in: courseIds }, 
+        user: req.user.id 
+    });
 
-    if (courses.length !== courseIds.length) {
-        res.status(401);
-        throw new Error('Some courses not found or user not authorized');
-    }
-
-    await Course.deleteMany({ _id: { $in: courseIds }, user: req.user.id });
-
-    res.json({ message: 'Courses removed' });
+    res.json({ message: `${result.deletedCount} courses removed` });
 });
 
 module.exports = {

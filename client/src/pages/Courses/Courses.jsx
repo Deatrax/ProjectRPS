@@ -220,7 +220,7 @@ const Courses = () => {
                         onMouseEnter={() => setHoveredButton(3)}
                         onClick={() => setIsSelectionMode(true)}
                       >
-                        <Trash2 size={18} /> Delete All
+                        <Trash2 size={18} /> Delete Course
                       </button>
                     </>
                   ) : null}
@@ -231,6 +231,36 @@ const Courses = () => {
 
           <div className="thin-line"></div>
 
+          {/* Delete Confirmation Modal */}
+          {showDeleteConfirm && (
+            <div className="modal-overlay">
+              <div className="modal">
+                <div className="modal-header">
+                  <h2>Confirm Deletion</h2>
+                  <button onClick={() => { setShowDeleteConfirm(false); setError(null); setIsBulkDelete(false); setCourseToDelete(null); }} className="btn-close">
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className="modal-body">
+                  {error && <p className="error-message">{error}</p>}
+                  {isBulkDelete ? (
+                    <p>Are you sure you want to delete <span className="highlight-text">{selectedCourses.length}</span> courses? This action cannot be undone.</p>
+                  ) : (
+                    courseToDelete && <p>Are you sure you want to delete the course <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
+                  )}
+                </div>
+                <div className="modal-actions">
+                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); setIsBulkDelete(false); }} className="btn-modal-secondary">
+                    Cancel
+                  </button>
+                  <button onClick={confirmDelete} className="btn-modal-danger" disabled={loading}>
+                    {loading ? 'Deleting...' : isBulkDelete ? 'Delete Selected' : 'Delete Course'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Course Rows */}
           <div className={`course-list ${isSelectionMode ? 'selection-active' : ''}`}>
             {courses.map(course => (
@@ -240,34 +270,37 @@ const Courses = () => {
                 onClick={() => isSelectionMode ? toggleCourseSelection(course._id) : window.location.href = `/coursedetails?id=${course._id}`}
                 style={{ '--course-color': course.color }}
               >
-                {isSelectionMode && (
-                  <div className="selection-checkbox-wrapper" onClick={(e) => { e.stopPropagation(); toggleCourseSelection(course._id); }}>
-                    <div className={`custom-checkbox ${selectedCourses.includes(course._id) ? 'checked' : ''}`}>
-                      {selectedCourses.includes(course._id) && <Check size={16} />}
-                    </div>
-                  </div>
-                )}
                 <div className="course-accent" style={{ backgroundColor: course.color }}></div>
-                <div className="course-info">
-                  <p className="course-code" style={{ color: course.color }}>{course.courseCode}</p>
-                  <h3 className="course-title">{course.courseTitle}</h3>
-                  <p className="course-meta">{taskCounts[course._id] || 0} tasks total</p>
+                
+                <div className="card-main-content">
+                  {isSelectionMode && (
+                    <div className="selection-checkbox-wrapper" onClick={(e) => { e.stopPropagation(); toggleCourseSelection(course._id); }}>
+                      <div className={`custom-checkbox ${selectedCourses.includes(course._id) ? 'checked' : ''}`}>
+                        {selectedCourses.includes(course._id) && <Check size={16} />}
+                      </div>
+                    </div>
+                  )}
+                  <div className="course-info">
+                    <p className="course-code" style={{ color: course.color }}>{course.courseCode}</p>
+                    <h3 className="course-title">{course.courseTitle}</h3>
+                    <p className="course-meta">{taskCounts[course._id] || 0} tasks total</p>
+                  </div>
                 </div>
 
-                {!isSelectionMode && (
-                  <div className="icon-group-container">
-                    <div className="stat-item">
-                      <div className="stat-icon task-bg"><CheckSquare size={18} /></div>
-                      <span className="stat-count">{taskCounts[course._id] || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                      <div className="stat-icon assignment-bg"><FileText size={18} /></div>
-                      <span className="stat-count">0</span>
-                    </div>
-                    <div className="stat-item">
-                      <div className="stat-icon material-bg"><BookOpen size={18} /></div>
-                      <span className="stat-count">0</span>
-                    </div>
+                <div className="icon-group-container">
+                  <div className="stat-item">
+                    <div className="stat-icon task-bg"><CheckSquare size={18} /></div>
+                    <span className="stat-count">{taskCounts[course._id] || 0}</span>
+                  </div>
+                  <div className="stat-item">
+                    <div className="stat-icon assignment-bg"><FileText size={18} /></div>
+                    <span className="stat-count">0</span>
+                  </div>
+                  <div className="stat-item">
+                    <div className="stat-icon material-bg"><BookOpen size={18} /></div>
+                    <span className="stat-count">0</span>
+                  </div>
+                  {!isSelectionMode && (
                     <button
                       className="delete-row-btn"
                       title="Delete Course"
@@ -278,8 +311,8 @@ const Courses = () => {
                     >
                       <Trash2 size={20} />
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -302,7 +335,7 @@ const Courses = () => {
                   onClick={handleBulkDeleteInitiate}
                   disabled={selectedCourses.length === 0}
                 >
-                  Delete Selected
+                  Delete
                 </button>
               </div>
             </div>
