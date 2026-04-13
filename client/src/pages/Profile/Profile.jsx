@@ -2,11 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     User, BookOpen, CheckSquare, Clock, AlertTriangle,
-    BarChart2, Mail, Calendar, Zap, ArrowLeft
+    BarChart2, Mail, Calendar, Zap, ArrowLeft,
+    Award, Star, Flame, Trophy, Target, Shield, Crown, Moon, Layers, AlertCircle, ShieldAlert
 } from 'lucide-react';
 import './Profile.css';
+import achievementService from '../../services/achievementService';
 
 const API = 'http://localhost:5000/api';
+
+const iconMap = {
+    Target,
+    Zap,
+    Flame,
+    Trophy,
+    Shield,
+    Crown,
+    Clock,
+    Moon,
+    Layers,
+    AlertCircle,
+    Award,
+    Star,
+    ShieldAlert
+};
 
 // Format a Date string nicely
 const fmtDate = (iso) => {
@@ -32,22 +50,34 @@ export default function Profile() {
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [stats, setStats] = useState(null);
+    const [achievements, setAchievements] = useState([]);
+    const [achievementStats, setAchievementStats] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
 
-        Promise.all([
-            fetch(`${API}/auth/me`, { headers }).then(r => r.json()),
-            fetch(`${API}/auth/stats`, { headers }).then(r => r.json()),
-        ])
-            .then(([profileData, statsData]) => {
+        const fetchData = async () => {
+            try {
+                const [profileData, statsData, achData] = await Promise.all([
+                    fetch(`${API}/auth/me`, { headers }).then(r => r.json()),
+                    fetch(`${API}/auth/stats`, { headers }).then(r => r.json()),
+                    achievementService.getAchievements()
+                ]);
+                
                 setProfile(profileData);
                 setStats(statsData);
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
+                setAchievements(achData.achievements);
+                setAchievementStats(achData.stats);
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
 
     if (loading) {
@@ -57,6 +87,8 @@ export default function Profile() {
     const initials = profile?.name
         ? profile.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
         : 'U';
+
+    const unlockedAchievements = achievements.filter(a => a.unlocked);
 
     return (
         <div className="profile-page">
@@ -82,6 +114,59 @@ export default function Profile() {
                             <p className="profile-email">{profile?.email || '—'}</p>
                             <p className="profile-since">{memberSince(profile?.createdAt)}</p>
                         </div>
+                    </div>
+                </div>
+
+                {/* ── Achievements Highlights ── */}
+                <div className="profile-card">
+                    <div className="card-label" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Award size={12} /> Achievements
+                        </div>
+                        <span style={{ color: 'var(--light-accent)', cursor: 'pointer', fontSize: '0.7rem' }} onClick={() => navigate('/achievements')}>
+                            View All
+                        </span>
+                    </div>
+                    
+                    <div className="achievement-highlights">
+                        {unlockedAchievements.length > 0 ? (
+                            <div className="achievement-badges-row">
+                                {unlockedAchievements.slice(0, 5).map(achievement => {
+                                    const IconComponent = iconMap[achievement.icon] || Star;
+                                    return (
+                                        <div key={achievement.id} className="mini-achievement-badge" title={achievement.title}>
+                                            <div className="mini-badge-icon" style={{ backgroundColor: `${achievement.color}20` }}>
+                                                <IconComponent size={18} color={achievement.color} />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {unlockedAchievements.length > 5 && (
+                                    <div className="mini-achievement-badge more" onClick={() => navigate('/achievements')}>
+                                        +{unlockedAchievements.length - 5}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <p className="empty-achievements">No achievements unlocked yet. Keep grinding!</p>
+                        )}
+                        
+                        {achievementStats && (
+                            <div className="achievement-summary-row">
+                                <div className="ach-stat">
+                                    <span className="ach-val">{achievementStats.unlockedCount}</span>
+                                    <span className="ach-lab">Unlocked</span>
+                                </div>
+                                <div className="ach-stat">
+                                    <span className="ach-val">{achievementStats.totalPoints}</span>
+                                    <span className="ach-lab">Points</span>
+                                </div>
+                                <div className="ach-stat rank">
+                                    <span className="ach-val-small">{achievementStats.rank}</span>
+                                    <span className="ach-lab">Current Rank</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
