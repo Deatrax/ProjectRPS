@@ -7,25 +7,40 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is logged in
-        const token = localStorage.getItem('token');
-        if (token) {
-            // TODO: verify the token with the backend here
+        const verifyUser = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    // 1. Quick local check to avoid unnecessary network request
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    if (payload.exp && payload.exp * 1000 < Date.now()) {
+                        throw new Error("Stored token is expired locally.");
+                    }
 
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                if (payload.exp && payload.exp * 1000 < Date.now()) {
-                    console.warn("Stored token is expired.");
+                    // 2. Ask backend to verify signature and ensure user still exists
+                    const res = await fetch('http://localhost:5000/api/auth/me', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (res.ok) {
+                        const userData = await res.json();
+                        // Merge backend data with the token
+                        setUser({ ...userData, token });
+                    } else {
+                        throw new Error("Backend verification failed.");
+                    }
+                } catch (e) {
+                    console.warn("Session invalid:", e.message);
                     localStorage.removeItem('token');
-                } else {
-                    setUser({ ...payload, token });
+                    setUser(null);
                 }
-            } catch (e) {
-                console.error("Invalid token", e);
-                localStorage.removeItem('token');
             }
-        }
-        setLoading(false);
+            setLoading(false);
+        };
+
+        verifyUser();
     }, []);
 
     const login = (userData, token) => {
