@@ -4,7 +4,7 @@ import {
     User, BookOpen, CheckSquare, Clock, AlertTriangle,
     BarChart2, Mail, Calendar, Zap, ArrowLeft,
     Award, Star, Flame, Trophy, Target, Shield, Crown, Moon, Layers, AlertCircle, ShieldAlert,
-    BookHeart, ChevronDown, ChevronUp
+    BookHeart, ChevronDown, ChevronUp, X, Settings
 } from 'lucide-react';
 import './Profile.css';
 import achievementService from '../../services/achievementService';
@@ -57,6 +57,14 @@ export default function Profile() {
     const [letters, setLetters] = useState([]);
     const [expandedLetter, setExpandedLetter] = useState(null);
 
+    // Settings Modals State
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [editProfile, setEditProfile] = useState({ name: '', email: '' });
+    const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [formMsg, setFormMsg] = useState({ type: '', text: '' });
+    const [actionLoading, setActionLoading] = useState(false);
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
@@ -100,6 +108,87 @@ export default function Profile() {
         : 'U';
 
     const unlockedAchievements = achievements.filter(a => a.unlocked);
+
+    const openProfileModal = () => {
+        setEditProfile({ name: profile?.name || '', email: profile?.email || '' });
+        setFormMsg({ type: '', text: '' });
+        setShowProfileModal(true);
+    };
+
+    const openPasswordModal = () => {
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setFormMsg({ type: '', text: '' });
+        setShowPasswordModal(true);
+    };
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        setFormMsg({ type: '', text: '' });
+        setActionLoading(true);
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API}/auth/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(editProfile)
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                setProfile({ ...profile, name: data.name, email: data.email });
+                if (data.token) localStorage.setItem('token', data.token); // update token if it was re-issued
+                setFormMsg({ type: 'success', text: 'Profile updated successfully!' });
+                setTimeout(() => setShowProfileModal(false), 1500);
+            } else {
+                setFormMsg({ type: 'error', text: data.message || 'Failed to update profile' });
+            }
+        } catch (err) {
+            setFormMsg({ type: 'error', text: 'Server error' });
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleUpdatePassword = async (e) => {
+        e.preventDefault();
+        setFormMsg({ type: '', text: '' });
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            return setFormMsg({ type: 'error', text: 'New passwords do not match' });
+        }
+
+        setActionLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API}/auth/password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                setFormMsg({ type: 'success', text: 'Password updated successfully!' });
+                setTimeout(() => setShowPasswordModal(false), 1500);
+            } else {
+                setFormMsg({ type: 'error', text: data.message || 'Failed to update password' });
+            }
+        } catch (err) {
+            setFormMsg({ type: 'error', text: 'Server error' });
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     return (
         <div className="profile-page-wrapper">
@@ -254,7 +343,17 @@ export default function Profile() {
                                 <span className="info-key">Member Since</span>
                                 <span className="info-val">{fmtDate(profile?.createdAt)}</span>
                             </div>
+                            
+                            <div className="account-actions-row" style={{ marginTop: '1.5rem', display: 'flex', gap: '0.8rem' }}>
+                                <button className="settings-action-btn" onClick={openProfileModal}>
+                                    <Settings size={14} /> Edit Profile
+                                </button>
+                                <button className="settings-action-btn outline" onClick={openPasswordModal}>
+                                    <ShieldAlert size={14} /> Change Password
+                                </button>
+                            </div>
                         </div>
+
 
                         {/* ── Quick links ── */}
                         <div className="profile-card">
@@ -338,6 +437,115 @@ export default function Profile() {
                     </div>
                 </div>
             </div>
+
+            {/* Edit Profile Modal */}
+            {showProfileModal && (
+                <div className="modal-overlay" onClick={() => setShowProfileModal(false)}>
+                    <div className="modal cd-edit-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Edit Profile</h2>
+                            <button onClick={() => setShowProfileModal(false)} className="btn-close">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdateProfile}>
+                            <div className="modal-body">
+                                {formMsg.text && (
+                                    <div className={`form-msg ${formMsg.type === 'error' ? 'msg-error' : 'msg-success'}`}>
+                                        {formMsg.text}
+                                    </div>
+                                )}
+                                <div className="cd-form-group">
+                                    <label>Full Name</label>
+                                    <input 
+                                        type="text" 
+                                        className="cd-input" 
+                                        value={editProfile.name} 
+                                        onChange={e => setEditProfile({...editProfile, name: e.target.value})}
+                                        required 
+                                    />
+                                </div>
+                                <div className="cd-form-group">
+                                    <label>Email Address</label>
+                                    <input 
+                                        type="email" 
+                                        className="cd-input" 
+                                        value={editProfile.email} 
+                                        onChange={e => setEditProfile({...editProfile, email: e.target.value})}
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setShowProfileModal(false)} className="btn-modal-secondary">Cancel</button>
+                                <button type="submit" className="btn-modal-primary" disabled={actionLoading}>
+                                    {actionLoading ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Change Password Modal */}
+            {showPasswordModal && (
+                <div className="modal-overlay" onClick={() => setShowPasswordModal(false)}>
+                    <div className="modal cd-edit-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Change Password</h2>
+                            <button onClick={() => setShowPasswordModal(false)} className="btn-close">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdatePassword}>
+                            <div className="modal-body">
+                                {formMsg.text && (
+                                    <div className={`form-msg ${formMsg.type === 'error' ? 'msg-error' : 'msg-success'}`}>
+                                        {formMsg.text}
+                                    </div>
+                                )}
+                                <div className="cd-form-group">
+                                    <label>Current Password</label>
+                                    <input 
+                                        type="password" 
+                                        className="cd-input" 
+                                        value={passwordData.currentPassword} 
+                                        onChange={e => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                                        required 
+                                    />
+                                </div>
+                                <div className="cd-form-group">
+                                    <label>New Password</label>
+                                    <input 
+                                        type="password" 
+                                        className="cd-input" 
+                                        value={passwordData.newPassword} 
+                                        onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})}
+                                        required 
+                                        minLength="6"
+                                    />
+                                </div>
+                                <div className="cd-form-group">
+                                    <label>Confirm New Password</label>
+                                    <input 
+                                        type="password" 
+                                        className="cd-input" 
+                                        value={passwordData.confirmPassword} 
+                                        onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setShowPasswordModal(false)} className="btn-modal-secondary">Cancel</button>
+                                <button type="submit" className="btn-modal-primary" disabled={actionLoading}>
+                                    {actionLoading ? 'Updating...' : 'Update Password'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

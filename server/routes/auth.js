@@ -136,4 +136,73 @@ router.get('/stats', protect, async (req, res) => {
   }
 });
 
+// ── PUT /api/auth/profile  Update user profile ─────────────────────────────
+router.put('/profile', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      
+      if (req.body.email) {
+          const emailExists = await User.findOne({ email: req.body.email.toLowerCase().trim() });
+          if (emailExists && emailExists._id.toString() !== user._id.toString()) {
+              return res.status(400).json({ message: 'Email already in use' });
+          }
+          user.email = req.body.email.toLowerCase().trim();
+      }
+
+      const updatedUser = await user.save();
+
+      // Issue a new token
+      const token = jwt.sign(
+        { userId: updatedUser._id, name: updatedUser.name },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+
+      res.json({
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        token: token
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ── PUT /api/auth/password  Update user password ─────────────────────────────
+router.put('/password', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+         return res.status(400).json({ message: 'Please provide both current and new password' });
+      }
+
+      const isMatch = await user.matchPassword(currentPassword);
+      if (!isMatch) {
+         return res.status(400).json({ message: 'Invalid current password' });
+      }
+
+      user.password = newPassword;
+      await user.save();
+
+      res.json({ message: 'Password updated successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error("Password update error:", error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
