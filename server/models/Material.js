@@ -9,14 +9,27 @@ const materialSchema = new mongoose.Schema({
     course: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course',
-        required: true
+        required: false 
+    },
+    task: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task',
+        required: false
     },
     title: {
         type: String,
         required: true
     },
+    description: {
+        type: String,
+        default: ''
+    },
     fileUrl: {
-        type: String, // This will store the path/URL to the uploaded file
+        type: String, 
+        required: true
+    },
+    publicId: {
+        type: String,
         required: true
     },
     fileType: {

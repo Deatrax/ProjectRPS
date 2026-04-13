@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X, ArrowLeft } from 'lucide-react';
+import { Edit, BookOpen, FileText, CheckSquare, Trash2, X, ArrowLeft, Plus, Check } from 'lucide-react';
 import './Courses.css';
 import axios from 'axios';
 
@@ -13,12 +13,17 @@ const Courses = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [taskCounts, setTaskCounts] = useState({});
+  const [fileCounts, setFileCounts] = useState({});
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Selection Mode State
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedCourses, setSelectedCourses] = useState([]);
+
   useEffect(() => {
-    const fetchCoursesAndTasks = async () => {
+    const fetchCoursesTasksAndMaterials = async () => {
       if (!user || !user.token) {
         setLoading(false);
         setError('User not authenticated.');
@@ -35,46 +40,68 @@ const Courses = () => {
           },
         };
 
-        // Fetch courses and tasks in parallel
-        const [coursesResponse, tasksResponse] = await Promise.all([
+        // Fetch courses, tasks, and all materials in parallel
+        const [coursesResponse, tasksResponse, materialsResponse] = await Promise.all([
           axios.get('http://localhost:5000/api/courses', config),
-          axios.get('http://localhost:5000/api/tasks', config)
+          axios.get('http://localhost:5000/api/tasks', config),
+          axios.get('http://localhost:5000/api/materials/all', config)
         ]);
         
         setCourses(coursesResponse.data);
 
-        // Process tasks to get counts
-        const counts = tasksResponse.data.reduce((acc, task) => {
+        // Process tasks to get counts per course
+        const tCounts = tasksResponse.data.reduce((acc, task) => {
           if (task.course) {
             const courseId = task.course._id || task.course;
             acc[courseId] = (acc[courseId] || 0) + 1;
           }
           return acc;
         }, {});
-        setTaskCounts(counts);
+        setTaskCounts(tCounts);
+
+        // Process materials to get counts per course
+        const fCounts = materialsResponse.data.reduce((acc, mat) => {
+          if (mat.course) {
+            const courseId = mat.course._id || mat.course;
+            acc[courseId] = (acc[courseId] || 0) + 1;
+          }
+          return acc;
+        }, {});
+        setFileCounts(fCounts);
 
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError('Failed to fetch courses or tasks.');
+        setError('Failed to fetch courses, tasks, or materials.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCoursesAndTasks();
+    fetchCoursesTasksAndMaterials();
   }, [user]);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
 
   const handleDeleteCourse = (course) => {
     setCourseToDelete(course);
+    setIsBulkDelete(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleBulkDeleteInitiate = () => {
+    if (selectedCourses.length === 0) {
+      setError('Please select at least one course to delete.');
+      return;
+    }
+    setIsBulkDelete(true);
     setShowDeleteConfirm(true);
   };
 
   const confirmDelete = async () => {
-    if (!courseToDelete || !user || !user.token) {
-      setError('Course or user not identified for deletion.');
+    if (!user || !user.token) {
+      setError('User not identified for deletion.');
       setShowDeleteConfirm(false);
       return;
     }
@@ -88,18 +115,47 @@ const Courses = () => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      await axios.delete(`http://localhost:5000/api/courses/${courseToDelete._id}`, config);
-      setCourses(courses.filter((course) => course._id !== courseToDelete._id));
+
+      if (isBulkDelete) {
+        await axios.post('http://localhost:5000/api/courses/bulk-delete', { courseIds: selectedCourses }, config);
+        setCourses(courses.filter((course) => !selectedCourses.includes(course._id)));
+        setSelectedCourses([]);
+        setIsSelectionMode(false);
+      } else if (courseToDelete) {
+        await axios.delete(`http://localhost:5000/api/courses/${courseToDelete._id}`, config);
+        setCourses(courses.filter((course) => course._id !== courseToDelete._id));
+      }
+      
       setShowDeleteConfirm(false);
       setCourseToDelete(null);
+      setIsBulkDelete(false);
     } catch (err) {
-      console.error('Error deleting course:', err);
-      setError(err.response?.data?.message || 'Failed to delete course.');
-      setShowDeleteConfirm(false);
-      setCourseToDelete(null);
+      console.error('Error deleting course(s):', err);
+      setError(err.response?.data?.message || 'Failed to delete course(s).');
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleCourseSelection = (courseId) => {
+    if (selectedCourses.includes(courseId)) {
+      setSelectedCourses(selectedCourses.filter(id => id !== courseId));
+    } else {
+      setSelectedCourses([...selectedCourses, courseId]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCourses.length === courses.length) {
+      setSelectedCourses([]);
+    } else {
+      setSelectedCourses(courses.map(c => c._id));
+    }
+  };
+
+  const cancelSelectionMode = () => {
+    setIsSelectionMode(false);
+    setSelectedCourses([]);
   };
 
   useEffect(() => {
@@ -137,75 +193,80 @@ const Courses = () => {
                 <p>Manage your courses and learning materials</p>
               </div>
 
-              <div
-                className="floating-button-wrapper"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => {
-                  setIsHovered(false);
-                  setHoveredButton(null);
-                }}
-              >
-                {/* on click + button toggles menu open/closed */}
-                <button
-                  className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+              {!isSelectionMode && (
+                <div
+                  className="floating-button-wrapper"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => {
+                    setIsHovered(false);
+                    setHoveredButton(null);
+                  }}
                 >
-                  <Plus size={28} />
-                </button>
+                  <button
+                    className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  >
+                    <Edit size={28} />
+                  </button>
 
-                {/* Floating action buttons are shown if menu is open */}
-                {isHovered || isMenuOpen ? (
-                  <>
-                    <button
-                      className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
-                      onMouseEnter={() => setHoveredButton(1)}
-                      onClick={() => navigate('/courses/add')}
-                    >
-                      <BookOpen size={18} /> Add Course
-                    </button>
+                  {isHovered || isMenuOpen ? (
+                    <>
+                      <button
+                        className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
+                        onMouseEnter={() => setHoveredButton(1)}
+                        onClick={() => navigate('/courses/add')}
+                      >
+                        <BookOpen size={18} /> Add Course
+                      </button>
 
-                    <button
-                      className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
-                      onMouseEnter={() => setHoveredButton(2)}
-                      onClick={() => navigate('/taskpicker')}
-                    >
-                      <CheckSquare size={18} /> Add Task
-                    </button>
+                      <button
+                        className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
+                        onMouseEnter={() => setHoveredButton(2)}
+                        onClick={() => navigate('/taskpicker')}
+                      >
+                        <CheckSquare size={18} /> Add Task
+                      </button>
 
-                    <button
-                      className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
-                      onMouseEnter={() => setHoveredButton(3)}
-                    >
-                      <FileQuestion size={18} />
-                    </button>
-                  </>
-                ) : null}
-              </div>
+                      <button
+                        className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
+                        onMouseEnter={() => setHoveredButton(3)}
+                        onClick={() => setIsSelectionMode(true)}
+                      >
+                        <Trash2 size={18} /> Delete Course
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="thin-line"></div>
 
           {/* Delete Confirmation Modal */}
-          {showDeleteConfirm && courseToDelete && (
+          {showDeleteConfirm && (
             <div className="modal-overlay">
               <div className="modal">
                 <div className="modal-header">
                   <h2>Confirm Deletion</h2>
-                  <button onClick={() => { setShowDeleteConfirm(false); setError(null); }} className="btn-close">
+                  <button onClick={() => { setShowDeleteConfirm(false); setError(null); setIsBulkDelete(false); setCourseToDelete(null); }} className="btn-close">
                     <X size={24} />
                   </button>
                 </div>
                 <div className="modal-body">
                   {error && <p className="error-message">{error}</p>}
-                  <p>Are you sure you want to delete the course <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
+                  {isBulkDelete ? (
+                    <p>Are you sure you want to delete <span className="highlight-text">{selectedCourses.length}</span> courses? This action cannot be undone.</p>
+                  ) : (
+                    courseToDelete && <p>Are you sure you want to delete the course <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
+                  )}
                 </div>
                 <div className="modal-actions">
-                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); }} className="btn-modal-secondary">
+                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); setIsBulkDelete(false); }} className="btn-modal-secondary">
                     Cancel
                   </button>
                   <button onClick={confirmDelete} className="btn-modal-danger" disabled={loading}>
-                    {loading ? 'Deleting...' : 'Delete Course'}
+                    {loading ? 'Deleting...' : isBulkDelete ? 'Delete Selected' : 'Delete Course'}
                   </button>
                 </div>
               </div>
@@ -213,19 +274,29 @@ const Courses = () => {
           )}
 
           {/* Course Rows */}
-          <div className="course-list">
+          <div className={`course-list ${isSelectionMode ? 'selection-active' : ''}`}>
             {courses.map(course => (
               <div
                 key={course._id}
-                className="course-card"
-                onClick={() => window.location.href = `/coursedetails?id=${course._id}`}
+                className={`course-card ${selectedCourses.includes(course._id) ? 'selected' : ''}`}
+                onClick={() => isSelectionMode ? toggleCourseSelection(course._id) : window.location.href = `/coursedetails?id=${course._id}`}
                 style={{ '--course-color': course.color }}
               >
                 <div className="course-accent" style={{ backgroundColor: course.color }}></div>
-                <div className="course-info">
-                  <p className="course-code" style={{ color: course.color }}>{course.courseCode}</p>
-                  <h3 className="course-title">{course.courseTitle}</h3>
-                  <p className="course-meta">{taskCounts[course._id] || 0} tasks total</p>
+                
+                <div className="card-main-content">
+                  {isSelectionMode && (
+                    <div className="selection-checkbox-wrapper" onClick={(e) => { e.stopPropagation(); toggleCourseSelection(course._id); }}>
+                      <div className={`custom-checkbox ${selectedCourses.includes(course._id) ? 'checked' : ''}`}>
+                        {selectedCourses.includes(course._id) && <Check size={16} />}
+                      </div>
+                    </div>
+                  )}
+                  <div className="course-info">
+                    <p className="course-code" style={{ color: course.color }}>{course.courseCode}</p>
+                    <h3 className="course-title">{course.courseTitle}</h3>
+                    <p className="course-meta">{taskCounts[course._id] || 0} tasks total</p>
+                  </div>
                 </div>
 
                 <div className="icon-group-container">
@@ -234,27 +305,49 @@ const Courses = () => {
                     <span className="stat-count">{taskCounts[course._id] || 0}</span>
                   </div>
                   <div className="stat-item">
-                    <div className="stat-icon assignment-bg"><FileText size={18} /></div>
-                    <span className="stat-count">0</span>
+                    <div className="stat-icon material-bg"><FileText size={18} /></div>
+                    <span className="stat-count">{fileCounts[course._id] || 0}</span>
                   </div>
-                  <div className="stat-item">
-                    <div className="stat-icon material-bg"><BookOpen size={18} /></div>
-                    <span className="stat-count">0</span>
-                  </div>
-                  <button
-                    className="delete-row-btn"
-                    title="Delete Course"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCourse(course);
-                    }}
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                  {!isSelectionMode && (
+                    <button
+                      className="delete-row-btn"
+                      title="Delete Course"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCourse(course);
+                      }}
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Selection Bar at the end */}
+          {isSelectionMode && (
+            <div className="selection-bar animate-slide-up">
+              <div className="selection-info">
+                <span className="selected-count">{selectedCourses.length} selected</span>
+                <button className="btn-select-all" onClick={handleSelectAll}>
+                  {selectedCourses.length === courses.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+              <div className="selection-actions">
+                <button className="btn-cancel-selection" onClick={cancelSelectionMode}>
+                  Cancel
+                </button>
+                <button 
+                  className="btn-delete-selected" 
+                  onClick={handleBulkDeleteInitiate}
+                  disabled={selectedCourses.length === 0}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

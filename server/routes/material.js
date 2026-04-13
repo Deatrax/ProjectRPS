@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { uploadMaterial, getCourseMaterials, deleteMaterial } = require('../controllers/materialController');
+const { 
+    uploadMaterial, 
+    getCourseMaterials, 
+    uploadTaskMaterial, 
+    getTaskMaterials, 
+    deleteMaterial,
+    getAllMaterials
+} = require('../controllers/materialController');
 const { protect } = require('../middleware/authMiddleware');
 
 // Configure Multer to store files in memory
@@ -24,11 +31,16 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
-
+// Course materials
+router.get('/all', protect, getAllMaterials); // Add this before other routes
 router.post('/:courseId', protect, upload.single('materialFile'), uploadMaterial);
-
 router.get('/:courseId', protect, getCourseMaterials);
 
-router.delete('/:courseId/:materialId', protect, deleteMaterial);
+// Task materials
+router.post('/task/:taskId', protect, upload.single('materialFile'), uploadTaskMaterial);
+router.get('/task/:taskId', protect, getTaskMaterials);
+
+// General delete (by material ID)
+router.delete('/:materialId', protect, deleteMaterial);
 
 module.exports = router;

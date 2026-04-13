@@ -4,6 +4,7 @@ const {
     getCourses,
     createCourse,
     deleteCourse,
+    deleteCourses,
     getCourseById,
     getTasks,
     addTask,
@@ -18,6 +19,9 @@ const { protect } = require('../middleware/authMiddleware');
 router.route('/')
     .get(protect, getCourses)
     .post(protect, createCourse);
+
+router.route('/bulk-delete')
+    .post(protect, deleteCourses);
 
 router.route('/:id')
     .get(protect, getCourseById)
