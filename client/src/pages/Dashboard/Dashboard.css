@@ -29,7 +29,36 @@
     overflow-x: hidden;
     padding-bottom: 80px;
     /* Space for bottom nav */
+    transition: background 0.5s ease;
 }
+
+/* Visual Modes */
+.dashboard-container.mode-doom {
+    background: radial-gradient(1200px 700px at 50% 10%, #450a0a 0%, #1a0505 60%);
+}
+
+.dashboard-container.mode-panic {
+    background: radial-gradient(1200px 700px at 50% 10%, #431407 0%, #1a0a05 60%);
+}
+
+.dashboard-container.mode-grind {
+    background: radial-gradient(1200px 700px at 50% 10%, #3f2c06 0%, #151004 60%);
+}
+
+/* Tooltips & Badges */
+.mode-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
 
 /* Header Section (Replaces Top Navbar) */
 .dashboard-header {
@@ -97,6 +126,13 @@
     padding: 1rem 2rem 8rem 2rem;
 }
 
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .dashboard-header, .main-content {
+        padding: 1rem;
+    }
+}
+
 /* Hero Section */
 .hero-section {
     margin-bottom: 3rem;
@@ -134,9 +170,9 @@
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(to right, #3b82f6, #6366f1);
+    background-color: var(--accent-blue);
     border-radius: 9999px;
-    transition: width 0.7s ease-in-out;
+    transition: width 0.7s ease-in-out, background-color 0.5s ease;
 }
 
 .active-tasks-text {
@@ -616,121 +652,7 @@
     font-size: 0.75rem;
 }
 
-/* Notch Bottom Navbar */
-.notch-navbar-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    pointer-events: none;
-    /* Allow clicks through the empty areas */
-}
 
-.notch-navbar {
-    pointer-events: auto;
-    width: 90%;
-    max-width: 600px;
-    background: rgba(11, 16, 32, 0.85);
-    /* Dark glassy bg */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: none;
-    /* Merged with bottom */
-
-    /* Variable Rounding: Rounded top corners, square bottom to merge */
-    border-radius: 24px 24px 0 0;
-
-    padding: 1rem 2rem;
-    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
-    /* Account for iPhone home bar */
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    box-shadow:
-        0 -10px 40px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-
-    position: relative;
-}
-
-/* Optional: "Liquid" connector effect using pseudo-elements if desired - keeping simple for now to ensure robustness across browsers */
-
-.nav-item {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 0.5rem;
-}
-
-.nav-item:hover {
-    color: var(--text-primary);
-    transform: translateY(-2px);
-}
-
-.nav-item.active {
-    color: var(--accent-blue);
-}
-
-.nav-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background-color: var(--accent-blue);
-    box-shadow: 0 0 8px var(--accent-blue);
-}
-
-.nav-item-icon {
-    transition: transform 0.3s;
-}
-
-.nav-item:hover .nav-item-icon {
-    transform: scale(1.1);
-}
-
-.nav-label {
-    font-size: 0.65rem;
-    font-weight: 500;
-    opacity: 0.8;
-}
-
-/* Add a subtle glow at the top edge of the notch */
-.notch-navbar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 20px;
-    right: 20px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
-}
 
 @keyframes ping {
 
@@ -739,4 +661,59 @@
         transform: scale(2);
         opacity: 0;
     }
+}
+
+/* ── Overdue Task Highlight ───────────────────────────────────────────────── */
+.task-item.overdue {
+    background: rgba(239, 68, 68, 0.06);
+    border-left: 2px solid rgba(239, 68, 68, 0.5);
+    border-radius: 0.5rem;
+}
+
+.task-item.overdue:hover {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.task-item.overdue .task-title {
+    color: rgba(252, 165, 165, 0.9);
+}
+
+.overdue-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0.1rem 0.4rem;
+    border-radius: 99px;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+    display: inline-block;
+}
+
+/* ── Last Attempted Timestamp ─────────────────────────────────────────────── */
+.last-attempted {
+    color: rgba(167, 139, 250, 0.7);
+    font-style: italic;
+    font-size: 0.72rem;
+}
+
+/* ── Draft Chip (mini) ───────────────────────────────────────────────────── */
+.draft-chip-sm {
+    color: #fde68a;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    padding: 0.05rem 0.35rem;
+    border-radius: 99px;
+}
+
+/* ── Empty State ─────────────────────────────────────────────────────────── */
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
 }

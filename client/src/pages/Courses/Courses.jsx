@@ -1,30 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X } from 'lucide-react';
+import { Plus, BookOpen, FileText, CheckSquare, Trash2, FileQuestion, X, ArrowLeft } from 'lucide-react';
 import './Courses.css';
 import axios from 'axios';
 
 const Courses = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showAddCourse, setShowAddCourse] = useState(false);
-  const [newCourseName, setNewCourseName] = useState('');
-  const [newCourseCode, setNewCourseCode] = useState('');
-  const [newCourseColor, setNewCourseColor] = useState('');
-  const [newCourseSemester, setNewCourseSemester] = useState('');
-  const [addingCourse, setAddingCourse] = useState(false);
+  const [taskCounts, setTaskCounts] = useState({});
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchCoursesAndTasks = async () => {
       if (!user || !user.token) {
         setLoading(false);
         setError('User not authenticated.');
-        console.log('User not authenticated.');
         return;
       }
 
@@ -37,62 +34,35 @@ const Courses = () => {
             Authorization: `Bearer ${user.token}`,
           },
         };
-        const response = await axios.get('http://localhost:5000/api/courses', config);
-        setCourses(response.data);
+
+        // Fetch courses and tasks in parallel
+        const [coursesResponse, tasksResponse] = await Promise.all([
+          axios.get('http://localhost:5000/api/courses', config),
+          axios.get('http://localhost:5000/api/tasks', config)
+        ]);
+        
+        setCourses(coursesResponse.data);
+
+        // Process tasks to get counts
+        const counts = tasksResponse.data.reduce((acc, task) => {
+          if (task.course) {
+            const courseId = task.course._id || task.course;
+            acc[courseId] = (acc[courseId] || 0) + 1;
+          }
+          return acc;
+        }, {});
+        setTaskCounts(counts);
+
       } catch (err) {
-        console.error('Error fetching courses:', err);
-        setError('Failed to fetch courses.');
+        console.error('Error fetching data:', err);
+        setError('Failed to fetch courses or tasks.');
       } finally {
         setLoading(false);
       }
     };
-    fetchCourses();
+
+    fetchCoursesAndTasks();
   }, [user]);
-
-  const addCourse = async () => {
-    if (!newCourseName.trim() || !newCourseCode.trim()) {
-      setError('Course name and code are required.');
-      return;
-    }
-    if (!user || !user.token) {
-      setError('User not authenticated. Please log in.');
-      return;
-    }
-
-    setAddingCourse(true);
-    setError(null);
-
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-
-      const response = await axios.post(
-        'http://localhost:5000/api/courses',
-        { courseTitle: newCourseName, courseCode: newCourseCode, color: newCourseColor, semester: newCourseSemester }, // Map to backend schema
-        config
-      );
-      setCourses([...courses, response.data]);
-      setNewCourseName('');
-      setNewCourseCode('');
-      setNewCourseColor(''); // Reset color
-      setNewCourseSemester(''); // Reset semester
-      setShowAddCourse(false);
-    } catch (err) {
-      console.error('Error adding course:', err);
-      const errorMessage = err.response?.data?.message || 'Failed to add course.';
-      if (errorMessage.includes('Course with this code already exists')) {
-        setError('A course with this code already exists. Please use a different code.');
-      } else {
-        setError(errorMessage);
-      }
-    } finally {
-      setAddingCourse(false);
-    }
-  };
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
@@ -159,9 +129,12 @@ const Courses = () => {
           {/* Header Section */}
           <div className="header-section">
             <div className="header-content">
+              <Link to="/dashboard" className="back-btn">
+                <ArrowLeft size={20}/>
+              </Link>
               <div className="header-text">
-                <h1 className="header-title">My Courses</h1>
-                <p className="header-description">Manage your courses and learning materials</p>
+                <h1>My Courses</h1>
+                <p>Manage your courses and learning materials</p>
               </div>
 
               <div
@@ -186,7 +159,7 @@ const Courses = () => {
                     <button
                       className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
                       onMouseEnter={() => setHoveredButton(1)}
-                      onClick={() => setShowAddCourse(true)}
+                      onClick={() => navigate('/courses/add')}
                     >
                       <BookOpen size={18} /> Add Course
                     </button>
@@ -194,6 +167,7 @@ const Courses = () => {
                     <button
                       className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
                       onMouseEnter={() => setHoveredButton(2)}
+                      onClick={() => navigate('/taskpicker')}
                     >
                       <CheckSquare size={18} /> Add Task
                     </button>
@@ -212,52 +186,6 @@ const Courses = () => {
 
           <div className="thin-line"></div>
 
-          {/* Add Course Modal */}
-          {showAddCourse && (
-            <div className="modal-overlay">
-              <div className="modal">
-                <div className="modal-header">
-                  <h2>New Course</h2>
-                  <button onClick={() => { setShowAddCourse(false); setError(null); setNewCourseName(''); setNewCourseCode(''); setNewCourseColor(''); setNewCourseSemester(''); }} className="btn-close">
-                    <X size={24} />
-                  </button>
-                </div>
-                {error && <p className="error-message">{error}</p>}
-                <input
-                  type="text"
-                  placeholder="Course name"
-                  value={newCourseName}
-                  onChange={(e) => setNewCourseName(e.target.value)}
-                  className="input-field"
-                />
-                <input
-                  type="text"
-                  placeholder="Course code"
-                  value={newCourseCode}
-                  onChange={(e) => setNewCourseCode(e.target.value)}
-                  className="input-field"
-                />
-                <input
-                  type="text"
-                  placeholder="Course Color (e.g., #3b82f6)"
-                  value={newCourseColor}
-                  onChange={(e) => setNewCourseColor(e.target.value)}
-                  className="input-field"
-                />
-                <input
-                  type="text"
-                  placeholder="Semester (e.g., Fall 2023)"
-                  value={newCourseSemester}
-                  onChange={(e) => setNewCourseSemester(e.target.value)}
-                  className="input-field"
-                />
-                <button onClick={addCourse} className="btn-submit" disabled={addingCourse}>
-                  {addingCourse ? 'Adding...' : 'Create Course'}
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Delete Confirmation Modal */}
           {showDeleteConfirm && courseToDelete && (
             <div className="modal-overlay">
@@ -268,14 +196,16 @@ const Courses = () => {
                     <X size={24} />
                   </button>
                 </div>
-                {error && <p className="error-message">{error}</p>}
-                <p>Are you sure you want to delete the course "{courseToDelete.courseTitle}"?</p>
-                <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); }} className="btn-secondary">
+                <div className="modal-body">
+                  {error && <p className="error-message">{error}</p>}
+                  <p>Are you sure you want to delete the course <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
+                </div>
+                <div className="modal-actions">
+                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); }} className="btn-modal-secondary">
                     Cancel
                   </button>
-                  <button onClick={confirmDelete} className="btn-primary" disabled={loading}>
-                    {loading ? 'Deleting...' : 'Delete'}
+                  <button onClick={confirmDelete} className="btn-modal-danger" disabled={loading}>
+                    {loading ? 'Deleting...' : 'Delete Course'}
                   </button>
                 </div>
               </div>
@@ -285,17 +215,23 @@ const Courses = () => {
           {/* Course Rows */}
           <div className="course-list">
             {courses.map(course => (
-              <div key={course._id} className="course-card">
+              <div
+                key={course._id}
+                className="course-card"
+                onClick={() => window.location.href = `/coursedetails?id=${course._id}`}
+                style={{ '--course-color': course.color }}
+              >
+                <div className="course-accent" style={{ backgroundColor: course.color }}></div>
                 <div className="course-info">
-                  <p className="course-code">{course.courseCode}</p>
+                  <p className="course-code" style={{ color: course.color }}>{course.courseCode}</p>
                   <h3 className="course-title">{course.courseTitle}</h3>
-                  <p className="course-meta">0 assignments total</p>
+                  <p className="course-meta">{taskCounts[course._id] || 0} tasks total</p>
                 </div>
 
                 <div className="icon-group-container">
                   <div className="stat-item">
                     <div className="stat-icon task-bg"><CheckSquare size={18} /></div>
-                    <span className="stat-count">0</span>
+                    <span className="stat-count">{taskCounts[course._id] || 0}</span>
                   </div>
                   <div className="stat-item">
                     <div className="stat-icon assignment-bg"><FileText size={18} /></div>
@@ -305,7 +241,14 @@ const Courses = () => {
                     <div className="stat-icon material-bg"><BookOpen size={18} /></div>
                     <span className="stat-count">0</span>
                   </div>
-                  <button className="delete-row-btn" title="Delete Course" onClick={() => handleDeleteCourse(course)}>
+                  <button
+                    className="delete-row-btn"
+                    title="Delete Course"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCourse(course);
+                    }}
+                  >
                     <Trash2 size={20} />
                   </button>
                 </div>

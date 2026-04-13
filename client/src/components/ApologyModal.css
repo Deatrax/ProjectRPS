@@ -1,0 +1,232 @@
+/* ── ApologyModal ──────────────────────────────────────────────────────────── */
+
+.apology-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(12px);
+    animation: apologyFadeIn 0.5s ease;
+}
+
+@keyframes apologyFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ── Modal Card ──────────────────────────────────────────────────────────── */
+.apology-card {
+    width: min(560px, 92vw);
+    background: linear-gradient(160deg, #0f0720 0%, #0b1020 100%);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 24px;
+    padding: 2.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow:
+        0 0 0 1px rgba(239, 68, 68, 0.1),
+        0 40px 100px rgba(0, 0, 0, 0.7),
+        0 0 60px rgba(239, 68, 68, 0.08);
+    animation: apologySlideUp 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes apologySlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.apology-header {
+    text-align: center;
+}
+
+.apology-skull {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    animation: apologyShake 2s ease-in-out infinite;
+}
+
+@keyframes apologyShake {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    20% {
+        transform: rotate(-8deg);
+    }
+
+    40% {
+        transform: rotate(8deg);
+    }
+
+    60% {
+        transform: rotate(-4deg);
+    }
+
+    80% {
+        transform: rotate(4deg);
+    }
+}
+
+.apology-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fca5a5;
+    margin: 0 0 0.4rem;
+    letter-spacing: -0.01em;
+}
+
+.apology-subtitle {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 0;
+}
+
+/* ── Overdue list ────────────────────────────────────────────────────────── */
+.apology-overdue-list {
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: rgba(252, 165, 165, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.apology-overdue-list span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* ── Dramatic cycling message ────────────────────────────────────────────── */
+.apology-drama {
+    text-align: center;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.35);
+    min-height: 1.4rem;
+    transition: opacity 0.5s ease;
+}
+
+.apology-drama.fading {
+    opacity: 0;
+}
+
+/* ── Textarea ────────────────────────────────────────────────────────────── */
+.apology-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+
+.apology-textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.9rem;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.apology-textarea:focus {
+    border-color: rgba(239, 68, 68, 0.45);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Word counter ────────────────────────────────────────────────────────── */
+.apology-word-count {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+}
+
+.word-count-num {
+    font-weight: 700;
+    transition: color 0.3s;
+}
+
+.word-count-num.enough {
+    color: #4ade80;
+}
+
+.word-count-num.close {
+    color: #fbbf24;
+}
+
+.word-count-num.low {
+    color: #f87171;
+}
+
+.word-count-label {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Submit button ───────────────────────────────────────────────────────── */
+.apology-submit {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 14px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.35);
+}
+
+.apology-submit:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.apology-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(220, 38, 38, 0.5);
+}
+
+/* ── Navbar lock overlay ─────────────────────────────────────────────────── */
+.navbar-locked {
+    pointer-events: none !important;
+    opacity: 0.3 !important;
+    filter: grayscale(1);
+}

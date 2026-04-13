@@ -2,9 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/auth');  
-const courseRoutes = require('./routes/course'); 
-const materialRoutes = require('./routes/material'); 
+const authRoutes = require('./routes/auth');
+const courseRoutes = require('./routes/course');
+const materialRoutes = require('./routes/material');
+const taskRoutes = require('./routes/tasks');
+const achievementRoutes = require('./routes/achievements');
+const pomodoroRoutes = require('./routes/pomodoro');
 
 const app = express();
 
@@ -24,15 +27,20 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Use authentication routes
 app.use('/api/auth', authRoutes);
-app.use('/api/courses', require('./routes/courses'));
-app.use('/api/tasks', require('./routes/tasks'));
-
-
 // Use course routes
 app.use('/api/courses', courseRoutes);
 
+// Use task routes
+app.use('/api/tasks', taskRoutes);
+
 // Use material routes
 app.use('/api/materials', materialRoutes);
+
+// Use achievement routes
+app.use('/api/achievements', achievementRoutes);
+
+// Use pomodoro routes
+app.use('/api/pomodoro', pomodoroRoutes);
 
 // Define the port
 const PORT = process.env.PORT || 5000;

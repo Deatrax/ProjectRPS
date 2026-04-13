@@ -1,34 +1,74 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import './TaskPicker.css';
 
 const TaskPicker = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time for comparison
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'lab',
+    category: 'General',
     difficulty: 5,
     weight: 10
   });
 
   // Date state (indexes)
-  // Defaults: Day 15 (index 14), Sep (index 8), 2025 (index 2)
   const [dateState, setDateState] = useState({
-    dayIndex: 14,
-    monthIndex: 8,
-    yearIndex: 2
+    dayIndex: today.getDate() - 1,
+    monthIndex: today.getMonth(),
+    yearIndex: 2 // Default to 2025 (adjust based on years array)
   });
 
-  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const [error, setError] = useState('');
+
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const years = [2023, 2024, 2025, 2026, 2027, 2028];
+  
+  const currentYearVal = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => currentYearVal + i);
+
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  // Dynamically calculate days
+  const currentYear = years[dateState.yearIndex];
+  const currentMonth = dateState.monthIndex;
+  const numDays = getDaysInMonth(currentMonth, currentYear);
+  const days = Array.from({ length: numDays }, (_, i) => i + 1);
 
   const dayRef = useRef(null);
   const monthRef = useRef(null);
   const yearRef = useRef(null);
   const ITEM_HEIGHT = 50;
+
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        if (user && user.token) {
+          const res = await axios.get('http://localhost:5000/api/courses', {
+            headers: { Authorization: `Bearer ${user.token}` }
+          });
+          setCourses(res.data);
+          if (res.data.length > 0) {
+            setFormData(prev => ({ ...prev, course: res.data[0]._id }));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+      }
+    };
+    fetchCourses();
+  }, [user]);
 
   useEffect(() => {
     // Initial scroll
@@ -37,10 +77,28 @@ const TaskPicker = () => {
     if (yearRef.current) yearRef.current.scrollTop = dateState.yearIndex * ITEM_HEIGHT;
   }, []);
 
+  // Ensure dayIndex stays within bounds when month/year changes
+  useEffect(() => {
+    if (dateState.dayIndex >= numDays) {
+      const newDayIndex = numDays - 1;
+      setDateState(prev => ({ ...prev, dayIndex: newDayIndex }));
+      if (dayRef.current) dayRef.current.scrollTop = newDayIndex * ITEM_HEIGHT;
+    }
+  }, [numDays]);
+
   const handleScroll = (e, type) => {
     const scrollTop = e.target.scrollTop;
     const index = Math.round(scrollTop / ITEM_HEIGHT);
-    setDateState(prev => ({ ...prev, [type]: index }));
+    
+    // Safety check for index range
+    let maxIndex = 0;
+    if (type === 'dayIndex') maxIndex = numDays - 1;
+    if (type === 'monthIndex') maxIndex = months.length - 1;
+    if (type === 'yearIndex') maxIndex = years.length - 1;
+    
+    const safeIndex = Math.min(Math.max(0, index), maxIndex);
+    setDateState(prev => ({ ...prev, [type]: safeIndex }));
+    setError(''); // Clear error on scroll
   };
 
   const handleChange = (e) => {
@@ -49,210 +107,153 @@ const TaskPicker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
     if (!user || !user.token) {
-      alert('You must be logged in to create a task.');
+      setError('You must be logged in to create a task.');
       return;
     }
 
-    // Calculate actual date
-    const dIndex = Math.min(Math.max(0, dateState.dayIndex), days.length - 1);
-    const mIndex = Math.min(Math.max(0, dateState.monthIndex), months.length - 1);
-    const yIndex = Math.min(Math.max(0, dateState.yearIndex), years.length - 1);
+    const selectedDay = days[dateState.dayIndex];
+    const selectedMonth = dateState.monthIndex;
+    const selectedYear = years[dateState.yearIndex];
 
-    const selectedDay = days[dIndex];
-    const selectedMonth = mIndex; // 0-11
-    const selectedYear = years[yIndex];
+    // Create date object
+    const taskDate = new Date(selectedYear, selectedMonth, selectedDay, 23, 59, 59);
 
-    // Create date object (set time to noon to avoid timezone issues)
-    const taskDate = new Date(selectedYear, selectedMonth, selectedDay, 12, 0, 0);
+    // 1. Validation: Cannot be in the past
+    if (taskDate < today) {
+      setError('Deadline cannot be in the past. Please select a future date.');
+      return;
+    }
 
     const payload = {
       title: formData.title,
       description: formData.description,
       category: formData.category,
       difficulty: Number(formData.difficulty),
-      date: taskDate
+      weight: Number(formData.weight),
+      deadline: taskDate,
+      course: formData.course
     };
 
     try {
       const config = {
         headers: {
           'Content-Type': 'application/json',
-          'x-auth-token': user.token
+          'Authorization': `Bearer ${user.token}`
         }
       };
 
       const res = await axios.post('http://localhost:5000/api/tasks', payload, config);
-      console.log('Task Created:', res.data);
       alert('Task Created Successfully!');
-
-      // Optional: clear form
-      setFormData({
-        title: '',
-        description: '',
-        category: 'lab',
-        difficulty: 5,
-        weight: 10
-      });
+      navigate('/tasks');
     } catch (err) {
       console.error('Error creating task:', err);
-      alert('Error creating task. See console for details.');
+      setError(err.response?.data?.message || 'Error creating task.');
     }
   };
+
+  const categories = ['Exam', 'Assignment', 'Lab Task', 'Presentation', 'Project', 'General'];
 
   return (
     <div className="task-picker-scope">
       <div className="picker-container">
 
-        <h1 className="page-title">Add Task</h1>
+        <div className="header-section">
+          <button onClick={() => navigate(-1)} className="back-btn">
+            <ArrowLeft size={20}/>
+          </button>
+          <h1 className="page-title">Add New Task</h1>
+        </div>
+
+        <div className="thin-line"></div>
+
+        {error && (
+          <div className="error-alert">
+            <AlertTriangle size={18} />
+            <span>{error}</span>
+          </div>
+        )}
 
         {/* 1. Date Picker */}
         <div className="date-picker-section">
-          {/* Day Wheel */}
-          <div
-            className="wheel"
-            id="dayWheel"
-            ref={dayRef}
-            onScroll={(e) => handleScroll(e, 'dayIndex')}
-          >
+          <div className="wheel" ref={dayRef} onScroll={(e) => handleScroll(e, 'dayIndex')}>
             <div className="wheel-spacer"></div>
             {days.map(d => (
-              <div key={d} className="wheel-item">{d}</div>
+              <div key={d} className={`wheel-item ${d === days[dateState.dayIndex] ? 'active' : ''}`}>{d}</div>
             ))}
             <div className="wheel-spacer"></div>
           </div>
 
-          {/* Month Wheel */}
-          <div
-            className="wheel"
-            id="monthWheel"
-            ref={monthRef}
-            onScroll={(e) => handleScroll(e, 'monthIndex')}
-          >
+          <div className="wheel" ref={monthRef} onScroll={(e) => handleScroll(e, 'monthIndex')}>
             <div className="wheel-spacer"></div>
             {months.map((m, i) => (
-              <div key={i} className="wheel-item">{m}</div>
+              <div key={i} className={`wheel-item ${i === dateState.monthIndex ? 'active' : ''}`}>{m}</div>
             ))}
             <div className="wheel-spacer"></div>
           </div>
 
-          {/* Year Wheel */}
-          <div
-            className="wheel"
-            id="yearWheel"
-            ref={yearRef}
-            onScroll={(e) => handleScroll(e, 'yearIndex')}
-          >
+          <div className="wheel" ref={yearRef} onScroll={(e) => handleScroll(e, 'yearIndex')}>
             <div className="wheel-spacer"></div>
-            {years.map(y => (
-              <div key={y} className="wheel-item">{y}</div>
+            {years.map((y, i) => (
+              <div key={y} className={`wheel-item ${i === dateState.yearIndex ? 'active' : ''}`}>{y}</div>
             ))}
             <div className="wheel-spacer"></div>
           </div>
         </div>
 
-        {/* 2. Form */}
         <form onSubmit={handleSubmit}>
           <fieldset>
             <legend>Task Details</legend>
 
             <div className="form-group">
-              <label>Task Name</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="e.g. Calculus Midterm"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Provide the details regarding this task..."
-              ></textarea>
-            </div>
-
-            <div className="form-group">
-              <label>Category</label>
-              <div className="radio-group">
-                <input
-                  type="radio"
-                  id="cat-lab"
-                  name="category"
-                  value="lab"
-                  checked={formData.category === 'lab'}
-                  onChange={handleChange}
-                />
-                <label htmlFor="cat-lab">Lab Task</label>
-
-                <input
-                  type="radio"
-                  id="cat-assign"
-                  name="category"
-                  value="assign"
-                  checked={formData.category === 'assign'}
-                  onChange={handleChange}
-                />
-                <label htmlFor="cat-assign">Assignment</label>
-
-                <input
-                  type="radio"
-                  id="cat-exam"
-                  name="category"
-                  value="exam"
-                  checked={formData.category === 'exam'}
-                  onChange={handleChange}
-                />
-                <label htmlFor="cat-exam">Exam Prep</label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Difficulty</label>
-              <select
-                name="difficulty"
-                value={formData.difficulty}
-                onChange={handleChange}
-              >
-                {[1, 2, 3, 4, 5].map((num, index) => (
-                  <option key={num} value={num}>
-                    {['Auto-pilot Task', 'Ugh, Okay!', 'Time To Be Thoughtful', 'Deep Focus Mode', 'Why Does This Exist!?'][index]}
+              <label>Course</label>
+              <select name="course" value={formData.course} onChange={handleChange} required>
+                <option value="" disabled>Select a Course</option>
+                {courses.map(course => (
+                  <option key={course._id} value={course._id}>
+                    {course.courseCode} - {course.courseTitle}
                   </option>
                 ))}
               </select>
             </div>
 
             <div className="form-group">
-              <label>Weight</label>
-              <input
-                type="text"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                placeholder="The value should be within 1-100"
-                required
-              />
+              <label>Task Name</label>
+              <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="e.g. Calculus Midterm" required />
             </div>
+
             <div className="form-group">
-              <label>Materials</label>
-              <div className="upload-box" onClick={() => document.getElementById('file-input').click()}>
-                <span className="plus-icon">+</span>
-                <span>Click to Upload Files</span>
-                <input type="file" id="file-input" hidden />
+              <label>Description</label>
+              <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Provide details..."></textarea>
+            </div>
+
+            <div className="form-group">
+              <label>Category</label>
+              <select name="category" value={formData.category} onChange={handleChange}>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Difficulty (1-5)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input type="range" min="1" max="5" name="difficulty" value={formData.difficulty} onChange={handleChange} style={{ flex: 1 }} />
+                <span style={{ fontWeight: 'bold', color:'white' }}>{formData.difficulty}</span>
               </div>
             </div>
 
-            <button type="submit" className="submit-btn">Create New Task</button>
+            <div className="form-group">
+              <label>Weight (1-100%)</label>
+              <input type="number" name="weight" min="1" max="100" value={formData.weight} onChange={handleChange} required />
+            </div>
+
+            <button type="submit" className="submit-btn">Create Task</button>
           </fieldset>
         </form>
-
       </div>
     </div>
   );

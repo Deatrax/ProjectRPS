@@ -1,0 +1,142 @@
+:root {
+    --bg-primary: #0b1020;
+    --bg-secondary: rgba(255, 255, 255, 0.08);
+    --text-primary: rgba(255, 255, 255, 0.9);
+    --text-secondary: rgba(255, 255, 255, 0.65);
+    --text-muted: rgba(255, 255, 255, 0.45);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --hover-bg: rgba(255, 255, 255, 0.12);
+    --nav-bg: rgba(11, 16, 32, 0.85);
+    --accent-blue: #3b82f6;
+    --accent-indigo: #6366f1;
+}
+
+/* Tooltips */
+.nav-item-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-tooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.nav-item-wrapper:hover .nav-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Notch Bottom Navbar */
+.notch-navbar-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    /* Increased z-index to be on top of everything */
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    /* Allow clicks through the empty areas */
+}
+
+.notch-navbar {
+    pointer-events: auto;
+    width: 90%;
+    max-width: 600px;
+    background: var(--nav-bg);
+    /* Dark glassy bg */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    /* Merged with bottom */
+
+    /* Variable Rounding: Rounded top corners, square bottom to merge */
+    border-radius: 24px 24px 0 0;
+
+    padding: 1rem 2rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    /* Account for iPhone home bar */
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    box-shadow:
+        0 -10px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    position: relative;
+    transition: box-shadow 0.3s ease, border-top-color 0.3s ease;
+}
+
+.nav-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0.5rem;
+}
+
+.nav-item:hover {
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.nav-item.active {
+    color: var(--accent-blue);
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: currentColor;
+    /* Use currentColor to match active color */
+    box-shadow: 0 0 8px currentColor;
+}
+
+.nav-item-icon {
+    transition: transform 0.3s;
+}
+
+.nav-item:hover .nav-item-icon {
+    transform: scale(1.1);
+}
+
+/* Add a subtle glow at the top edge of the notch */
+.notch-navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}

@@ -8,11 +8,11 @@
     --accent-glow: rgba(74, 144, 226, 0.4);
     --bg-dark: #18224a;
     --glass-border: rgba(255, 255, 255, 0.1);
+    --bg-secondary: rgba(255, 255, 255, 0.08);
+    --border-color: rgba(255, 255, 255, 0.1);
 
     /* Body/Root replacements */
     font-family: 'Poppins', sans-serif;
-    /* Deep Space Gradient */
-    background: radial-gradient(circle at 50% 10%, #1f2c5c 0%, #0b1020 80%);
     color: #333;
     min-height: 100vh;
     width: 100%;
@@ -35,12 +35,9 @@
 /* --- Main Container --- */
 .task-picker-scope .picker-container {
     /* STRICTLY 80% WIDTH */
-    width: 80%;
-    max-width: 1000px;
-    /* Optional cap so it's not too wide on huge monitors */
-    min-width: 350px;
-    /* Prevents it from crushing on mobile */
-
+    width: 100%;
+    max-width: 600px;
+    padding-bottom: 120px;
     background: transparent;
     display: flex;
     flex-direction: column;
@@ -60,31 +57,59 @@
     }
 }
 
+.task-picker-scope .header-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  min-height: 60px;
+}
+
+.task-picker-scope .back-btn {
+  position: absolute;
+  left: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.8rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 60;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-5px);
+}
+
 /* --- Page Title --- */
 .task-picker-scope .page-title {
     color: #fff;
     font-size: 36px;
     font-weight: 600;
     margin: 0;
-    padding-bottom: 10px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0px;
     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
     position: relative;
-    text-align: left;
+    text-align: center;
     /* Ensure title aligns with content */
 }
 
-.task-picker-scope .page-title::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 60px;
-    height: 2px;
-    background: var(--primary-color);
-    box-shadow: 0 0 10px var(--primary-color);
+.thin-line {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 233, 166, 0.3), transparent);
+  margin-top: 0.5rem;    
+  margin-bottom: -10px; 
+  padding: 0;
 }
+
 
 /* --- Date Picker Section (Glassmorphism) --- */
 .task-picker-scope .date-picker-section {
@@ -96,10 +121,11 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
-    padding: 20px 0;
+    padding: 4px 0;
     height: var(--wheel-height);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     width: 100%;
+    margin-top: 0;
     /* Ensure picker spans full container width */
 }
 
@@ -155,19 +181,44 @@
     text-shadow: 0 0 12px var(--primary-color);
 }
 
+.task-picker-scope .wheel-item.active {
+    color: #fff;
+    font-weight: 700;
+    transform: scale(1.2);
+    text-shadow: 0 0 15px var(--primary-color);
+}
+
+.error-alert {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
 /* --- Form Section --- */
 .task-picker-scope fieldset {
-    background-color: #ffffff;
-    border: none;
-    border-radius: 20px;
-    padding: 40px;
-    margin: 0;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-    position: relative;
+    background: var(--bg-secondary);
     width: 100%;
-    /* Ensure form spans full container width */
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    position: relative;
     box-sizing: border-box;
-    /* Includes padding in width calculation */
 }
 
 .task-picker-scope legend {
@@ -192,7 +243,7 @@
     margin-bottom: 10px;
     font-size: 13px;
     font-weight: 600;
-    color: #555;
+    color: white;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     text-align: left;
@@ -202,15 +253,13 @@
 .task-picker-scope .form-group textarea,
 .task-picker-scope .form-group select {
     width: 100%;
-    padding: 15px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    background-color: #f4f6f9;
-    font-size: 15px;
-    font-family: 'Poppins', sans-serif;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-    color: #333;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: border-color 0.2s;
 }
 
 .task-picker-scope .form-group textarea {
@@ -222,9 +271,7 @@
 .task-picker-scope .form-group textarea:focus,
 .task-picker-scope .form-group select:focus {
     outline: none;
-    background-color: #fff;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+    border-color: var(--accent-blue);
 }
 
 /* --- Fancy Radio Chips --- */

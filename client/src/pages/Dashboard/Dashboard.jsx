@@ -1,44 +1,206 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Home, BookOpen, CheckSquare, TrendingUp, Award, Settings, User,
-    Plus, Calendar, Clock, Moon, Sun
+    BookOpen, CheckSquare,
+    Plus, Calendar, Clock, Timer
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import PomodoroWidget, { timeAgo } from '../../components/PomodoroWidget';
+import Panda from '../../components/Panda';
 import './Dashboard.css';
+import '../../components/PandaAnchor.css';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    // State management
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    const [painScore, setPainScore] = useState(45);
-    const [tasks, setTasks] = useState([
-        { id: 1, name: 'Database Lab Report', deadline: '2026-02-10', difficulty: 8, weight: 15, course: 'CSE 4541', courseColor: '#3b82f6', completed: false },
-        { id: 2, name: 'Web Programming Midterm Prep', deadline: '2026-02-12', difficulty: 7, weight: 20, course: 'CSE 4540', courseColor: '#8b5cf6', completed: false },
-        { id: 3, name: 'Algorithm Assignment 3', deadline: '2026-02-09', difficulty: 9, weight: 10, course: 'CSE 3501', courseColor: '#06b6d4', completed: false },
-        { id: 4, name: 'Software Engineering UML Diagrams', deadline: '2026-02-14', difficulty: 5, weight: 8, course: 'CSE 4503', courseColor: '#10b981', completed: false },
-        { id: 5, name: 'Computer Networks Quiz Study', deadline: '2026-02-11', difficulty: 6, weight: 5, course: 'CSE 4561', courseColor: '#f59e0b', completed: false },
-        { id: 6, name: 'Machine Learning Lab 4', deadline: '2026-02-15', difficulty: 8, weight: 12, course: 'CSE 4643', courseColor: '#ec4899', completed: false },
-        { id: 7, name: 'Read Chapter 8 - OS Concepts', deadline: '2026-02-13', difficulty: 4, weight: 3, course: 'CSE 4521', courseColor: '#6366f1', completed: false },
-        { id: 8, name: 'Project Proposal Presentation', deadline: '2026-02-18', difficulty: 7, weight: 15, course: 'CSE 4540', courseColor: '#8b5cf6', completed: false },
-        { id: 9, name: 'Compiler Design Assignment', deadline: '2026-02-16', difficulty: 9, weight: 12, course: 'CSE 4641', courseColor: '#14b8a6', completed: false },
-        { id: 10, name: 'Weekly Problem Set', deadline: '2026-02-10', difficulty: 5, weight: 5, course: 'CSE 3501', courseColor: '#06b6d4', completed: false },
-    ]);
+    const { user } = useAuth();
 
-    // Dock items
-    const dockItems = [
-        { icon: Home, label: 'Dashboard', path: '/' },
-        { icon: BookOpen, label: 'Courses', path: '/courses/new' },
-        { icon: CheckSquare, label: 'All Tasks', path: '/tasks' },
-        { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
-        { icon: Award, label: 'Achievements', path: '/achievements' },
-        { icon: Settings, label: 'Settings', path: '/settings' },
+    // State management
+    const [tasks, setTasks] = useState([]);
+    const [painScore, setPainScore] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [multiplier, setMultiplier] = useState(1.0);
+    const [dramaMsg] = useState(() => Math.floor(Math.random() * 5));
+
+    // Mode Configuration
+    const getModeConfig = (score) => {
+        if (score >= 80) return { mode: 'Doom', color: '#ef4444', class: 'mode-doom' }; // Red
+        if (score >= 60) return { mode: 'Panic', color: '#f97316', class: 'mode-panic' }; // Orange
+        if (score >= 30) return { mode: 'Grind', color: '#f59e0b', class: 'mode-grind' }; // Amber/Yellow
+        return { mode: 'Relaxed', color: '#10b981', class: 'mode-relaxed' }; // Green/Teal
+    };
+
+    const currentMode = getModeConfig(painScore);
+
+    // Fetch tasks from API
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch('http://localhost:5000/api/tasks', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Transform data to match UI needs
+                    const formattedTasks = data.map(task => ({
+                        id: task._id,
+                        _id: task._id,
+                        name: task.title,
+                        deadline: task.deadline ? task.deadline.split('T')[0] : '',
+                        difficulty: task.difficulty,
+                        weight: task.weight,
+                        course: task.course ? task.course.courseCode : task.category || 'General',
+                        courseColor: task.course ? task.course.color : '#6b7280',
+                        completed: task.status === 'completed',
+                        overdue: task.status === 'overdue',
+                        status: task.status,
+                        lastAttemptedAt: task.lastAttemptedAt || null,
+                        pomoDraftSeconds: task.pomoDraftSeconds || null,
+                        pomoPlannedSeconds: task.pomoPlannedSeconds || null,
+                        createdAt: task.createdAt
+                    }));
+
+                    setTasks(formattedTasks);
+                    calculatePainScore(formattedTasks);
+                }
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTasks();
+    }, []);
+
+    // Fetch speed multiplier for the widget
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:5000/api/pomodoro/speed-multiplier', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(r => r.json())
+            .then(d => setMultiplier(d.multiplier ?? 1.0))
+            .catch(() => { });
+    }, []);
+
+    // Dramatic cycling banner
+    const DRAMA = [
+        '"Your task weeps in your absence…"',
+        '"The database is disappointed in you."',
+        '"Time waits for no one. Especially not you."',
+        '"Your future self is filing a complaint."',
+        '"Even the compiler gave up on you."',
     ];
+    const overdueCount = tasks.filter(t => t.overdue).length;
+
+
+    //Pain score formula
+    const calculatePainScore = (taskList) => {
+        const activeTasks = taskList.filter(t => !t.completed);
+
+        if (activeTasks.length === 0) {
+            setPainScore(0);
+            return;
+        }
+
+        const MAX_DIFFICULTY = 5;
+        const REFERENCE_TASK_COUNT = 10;
+
+        const taskCount = activeTasks.length;
+
+        let totalDifficulty = 0;
+        let urgencySum = 0;
+        let procrastinationSum = 0;
+
+        const now = new Date();
+
+        activeTasks.forEach(task => {
+
+            const difficultyNorm = (task.difficulty || 1) / MAX_DIFFICULTY;
+            const weightNorm = (task.weight || 1) / 100;
+
+            totalDifficulty += difficultyNorm;
+
+            const deadlineDate = new Date(task.deadline || now);
+            const timeDiff = deadlineDate - now;
+            const daysRemaining = Math.max(
+                1,
+                Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
+            );
+
+            // Softer urgency growth
+            const urgency =
+                difficultyNorm *
+                weightNorm *
+                (1 / Math.sqrt(daysRemaining));
+
+            urgencySum += urgency;
+
+            // Panic boost when very close
+            if (daysRemaining <= 2) {
+                const procrastination =
+                    difficultyNorm *
+                    weightNorm *
+                    (1 / Math.sqrt(daysRemaining));
+
+                procrastinationSum += procrastination;
+            }
+        });
+
+        const avgDifficulty = totalDifficulty / taskCount;
+        const avgUrgency = urgencySum / taskCount;
+        const avgProcrastination = procrastinationSum / taskCount;
+
+        // Workload grows slowly with more tasks
+        const workloadPressure =
+            Math.log(taskCount + 1) /
+            Math.log(REFERENCE_TASK_COUNT + 1);
+
+        const combined =
+            (0.30 * avgDifficulty)
+            + (0.35 * avgUrgency)
+            + (0.25 * workloadPressure)
+            + (0.10 * avgProcrastination);
+
+        // Compression curve so 100 is rare
+        let finalScore = Math.pow(combined, 0.8) * 100;
+
+        finalScore = Math.round(finalScore);
+        finalScore = Math.min(100, Math.max(1, finalScore));
+
+        setPainScore(finalScore);
+    };
 
     // Toggle task completion
-    const toggleTask = (taskId) => {
-        setTasks(tasks.map(task =>
-            task.id === taskId ? { ...task, completed: !task.completed } : task
-        ));
+    const toggleTask = async (taskId, currentStatus) => {
+
+        const updatedTasks = tasks.map(task =>
+            task.id === taskId ? { ...task, completed: !currentStatus } : task
+        );
+        setTasks(updatedTasks);
+        calculatePainScore(updatedTasks);
+
+        // API Call
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ completed: !currentStatus })
+            });
+        } catch (error) {
+            console.error("Error updating task:", error);
+        }
     };
 
     // Get timeline data
@@ -71,6 +233,7 @@ const Dashboard = () => {
         const tasksWithPosition = [];
 
         tasks.filter(t => !t.completed).forEach(task => {
+            if (!task.deadline) return;
             const deadlineIndex = timeline.findIndex(day => day.date === task.deadline);
             if (deadlineIndex !== -1) {
                 tasksWithPosition.push({
@@ -85,27 +248,35 @@ const Dashboard = () => {
 
     const timelineTasks = getTasksOnTimeline();
 
+    if (loading) {
+        return <div className="dashboard-container center-content">Loading your pain...</div>;
+    }
+
     return (
-        <div className="dashboard-container" data-theme="dark">
+        <div className={`dashboard-container ${currentMode.class}`} data-theme="dark">
             {/* New Header Section */}
             <header className="dashboard-header">
                 <div className="header-title">
                     <h1>RPS Dashboard</h1>
+                    <span className="mode-badge" style={{ backgroundColor: currentMode.color }}>
+                        {currentMode.mode} Mode
+                    </span>
                 </div>
                 <div className="header-controls">
                     {/* User Badge */}
                     <div className="user-badge">
-                        <div className="user-avatar">SM</div>
-                        <span className="user-name">Sadman</span>
+                        <div className="user-avatar">{user?.name ? user.name.substring(0, 2).toUpperCase() : 'U'}</div>
+                        <span className="user-name">{user?.name || 'User'}</span>
                     </div>
                 </div>
             </header>
+
 
             <div className="main-content">
                 {/* Hero Status - Notion Style */}
                 <div className="hero-section">
                     <div className="pain-score-header">
-                        <h2 className="pain-score-value">
+                        <h2 className="pain-score-value" style={{ color: currentMode.color }}>
                             {painScore}
                         </h2>
                         <span className="pain-score-label">
@@ -116,7 +287,10 @@ const Dashboard = () => {
                     <div className="progress-bar-container">
                         <div
                             className="progress-bar-fill"
-                            style={{ width: `${painScore}%` }}
+                            style={{
+                                width: `${Math.min(painScore, 100)}%`,
+                                backgroundColor: currentMode.color
+                            }}
                         ></div>
                     </div>
 
@@ -125,17 +299,19 @@ const Dashboard = () => {
                     </p>
                 </div>
 
+                {/* Pomodoro Widget */}
+                <PomodoroWidget
+                    tasks={tasks.filter(t => !t.completed)}
+                    multiplier={multiplier}
+                />
+
                 {/* Quick Actions - Minimal Style */}
                 <div className="quick-actions">
-                    <button className="action-btn primary">
+                    <button className="action-btn primary" onClick={() => navigate('/taskpicker')}>
                         <Plus size={16} />
                         New Task
                     </button>
-                    <button className="action-btn secondary" onClick={() => navigate('/courses/new')}>
-                        <BookOpen size={16} />
-                        Add Course
-                    </button>
-                    <button className="action-btn secondary">
+                    <button className="action-btn secondary" onClick={() => console.log('Calendar clicked')}>
                         <Calendar size={16} />
                         Calendar
                     </button>
@@ -288,36 +464,47 @@ const Dashboard = () => {
                         {tasks.slice(0, 10).map((task, index) => (
                             <div
                                 key={task.id}
-                                className={`task-item ${task.completed ? 'completed' : ''}`}
-                                onClick={() => window.location.href = `/tasks/${task.id}`}
+                                className={`task-item ${task.completed ? 'completed' : ''
+                                    } ${task.overdue ? 'overdue' : ''
+                                    }`}
+                                onClick={() => navigate(`/tasks/${task.id}`)}
                                 style={{ cursor: 'pointer' }}
                             >
                                 {/* Checkbox */}
                                 <input
                                     type="checkbox"
                                     checked={task.completed}
-                                    onChange={(e) => {
-                                        e.stopPropagation();
-                                        toggleTask(task.id);
-                                    }}
+                                    onChange={() => toggleTask(task.id, task.completed)}
+                                    onClick={(e) => e.stopPropagation()}
                                     className="task-checkbox"
                                 />
 
                                 {/* Course Color */}
                                 <div
                                     className="task-course-dot"
-                                    style={{ backgroundColor: task.courseColor }}
+                                    style={{ backgroundColor: task.overdue ? '#ef4444' : task.courseColor }}
                                 ></div>
 
                                 {/* Task Info */}
                                 <div className="task-content">
                                     <div className="task-title">
+                                        {task.overdue && <span className="overdue-badge">🔴 Overdue</span>}
                                         {task.name}
                                     </div>
                                     <div className="task-subtitle">
                                         <span>{task.course}</span>
                                         <span>•</span>
                                         <span>{task.deadline}</span>
+                                        <span>•</span>
+                                        <span className="last-attempted">
+                                            {timeAgo(task.lastAttemptedAt)}
+                                        </span>
+                                        {task.pomoDraftSeconds && (
+                                            <>
+                                                <span>•</span>
+                                                <span className="draft-chip-sm">💾 Draft</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
@@ -334,41 +521,42 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         ))}
+                        {tasks.length === 0 && (
+                            <div className="empty-state">
+                                No tasks found. Create one to get started!
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Notification-style Bottom Navbar (Notch) */}
-            <div className="notch-navbar-container">
-                <nav className="notch-navbar">
-                    {dockItems.map((item, index) => (
-                        <BottomNavItem key={index} {...item} />
-                    ))}
-                </nav>
+            {/* Fixed Panda Character (Small consistent size) */}
+            <div className="panda-dashboard-anchor">
+                <div className="panda-speech-bubble">
+                    <div className={overdueCount > 0 ? "bubble-box drama" : "bubble-box"}>
+                        {overdueCount > 0 ? (
+                            <>
+                                <span>{DRAMA[dramaMsg]}</span>
+                                <span className="bubble-drama-count">
+                                    {overdueCount} overdue task{overdueCount !== 1 ? 's' : ''}
+                                </span>
+                            </>
+                        ) : (
+                            "Hi!"
+                        )}
+                    </div>
+                    <div className="bubble-dots">
+                        <div className="dot dot-3"></div>
+                        <div className="dot dot-2"></div>
+                        <div className="dot dot-1"></div>
+                    </div>
+                </div>
+                <Panda />
             </div>
         </div>
     );
 };
 
-// Bottom Nav Item
-const BottomNavItem = ({ icon: Icon, label, path }) => {
-    const navigate = useNavigate();
-    // Basic active state simulation (in real app, use useLocation)
-    const isActive = path === '/'; // This logic is simplified, might need update for real highlighting
 
-    return (
-        <button
-            className={`nav-item ${isActive ? 'active' : ''}`}
-            onClick={() => navigate(path)}
-        >
-            <div className="nav-item-icon">
-                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-            </div>
-            {/* Optional label if space permits, or just icon for cleanliness 
-            <span className="nav-label">{label}</span>
-            */}
-        </button>
-    );
-};
 
 export default Dashboard;

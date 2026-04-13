@@ -96,4 +96,44 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// ── GET /api/auth/me  Return the current user's profile ─────────────────────
+const { protect } = require('../middleware/authMiddleware');
+const Task = require('../models/Task');
+
+router.get('/me', protect, async (req, res) => {
+  try {
+    res.json({
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      createdAt: req.user.createdAt,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ── GET /api/auth/stats  Aggregated task stats for profile ───────────────────
+router.get('/stats', protect, async (req, res) => {
+  try {
+    const tasks = await Task.find({ user: req.user._id });
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    const overdue = tasks.filter(t => t.status === 'overdue').length;
+    const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+    const pending = tasks.filter(t => t.status === 'pending').length;
+
+    res.json({
+      total,
+      completed,
+      overdue,
+      inProgress,
+      pending,
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
