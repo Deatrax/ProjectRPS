@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     User, BookOpen, CheckSquare, Clock, AlertTriangle,
-    BarChart2, Mail, Calendar, Zap
+    BarChart2, Mail, Calendar, Zap, ArrowLeft
 } from 'lucide-react';
 import './Profile.css';
 
@@ -62,7 +62,9 @@ export default function Profile() {
         <div className="profile-page">
             {/* Header */}
             <header className="profile-header">
-                <User size={20} style={{ color: 'rgba(255,255,255,0.4)' }} />
+                <button onClick={() => navigate(-1)} className="back-btn">
+                    <ArrowLeft size={20} />
+                </button>
                 <h1>My Profile</h1>
             </header>
 
