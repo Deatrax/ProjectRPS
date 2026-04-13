@@ -46,6 +46,49 @@
   animation: dashboardPandaFloat 4s ease-in-out infinite;
 }
 
+/* --- ANGRY REACTION (DASHBOARD) --- */
+.panda.reaction-angry {
+  animation: dashboardPandaFloat 4s ease-in-out infinite !important;
+}
+
+.panda.reaction-angry .eye {
+  background: #ff4d4d !important;
+  box-shadow: 0 0 12px #ff0000, 0 0 4px #ff0000;
+  transition: all 0.3s ease;
+}
+
+.panda.reaction-angry .eye::after {
+  background: #330000 !important;
+}
+
+.panda.reaction-angry .eye-patch::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 120%;
+  height: 8px;
+  background: #0d0f12;
+  border-radius: 4px;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.panda.reaction-angry .eye-patch.left::before {
+  transform: rotate(22deg);
+  left: -4px;
+}
+
+.panda.reaction-angry .eye-patch.right::before {
+  transform: rotate(-22deg);
+  right: -4px;
+}
+
+@keyframes pandaShake {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(calc(-50% - 2px)) rotate(-0.5deg); }
+  75% { transform: translateX(calc(-50% + 2px)) rotate(0.5deg); }
+}
+
 /* --- BASE (SMALL) SCULPTING --- */
 .panda-dashboard-anchor .ear {
   position: absolute;

@@ -14,7 +14,7 @@ const Navbar = () => {
 
     const handleLogout = () => {
         logout();
-        // Since useAuth already clears localStorage and updates state, App.jsx will rerender and handle redirection
+        navigate('/');
     };
 
     // Dock items configuration

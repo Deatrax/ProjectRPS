@@ -172,3 +172,7 @@
     padding: 0.5rem;
     border-radius: 4px;
 }
+
+option {
+    color: #0b1020;
+}
