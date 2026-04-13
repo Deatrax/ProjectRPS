@@ -494,47 +494,48 @@ body {
   opacity: 1;
   pointer-events: auto;
   /* ANIMATION: Drops DOWN from -200px to 150px (Belly Position) */
-  transform: translate(-50%, 220%);
+  /* 170% positions it perfectly on the belly */
+  transform: translate(-50%, 170%);
 }
 
 /* Arms for Welcome (Holding the belly card) */
 .state-welcome .arm.left {
-  transform: rotate(25deg) translate(5px, 0px);
+  transform: rotate(32deg) translate(10px, 0px);
 }
 
 .state-welcome .arm.right {
-  transform: rotate(-25deg) translate(-5px, 0px);
+  transform: rotate(-32deg) translate(-10px, 0px);
 }
 
 .card.welcome {
   background: rgba(255, 255, 255, 0.6);
   border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-  padding: 40px 32px;
-  max-width: 380px;
+  padding: 24px 20px;
+  max-width: 260px;
   backdrop-filter: blur(20px);
 }
 
 .card.welcome h2 {
   color: #0d0f12;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .card.welcome p {
   color: rgba(13, 15, 18, 0.7);
-  font-size: 17px;
-  margin-bottom: 28px;
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 
 .card.welcome .primary {
   background: #0d0f12;
   color: #fff;
   border: none;
-  font-size: 18px;
-  padding: 16px;
-  border-radius: 16px;
+  font-size: 16px;
+  padding: 12px;
+  border-radius: 12px;
   font-weight: 700;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
