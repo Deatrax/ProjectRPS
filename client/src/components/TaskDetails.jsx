@@ -207,9 +207,9 @@ const TaskDetails = () => {
                 <div className="content-limit">
                     {/* Header Section */}
                     <div className="header-section">
-                        <Link to="/tasks" className="back-btn">
+                        <button onClick={() => navigate(-1)} className="back-btn">
                             <ArrowLeft size={20} />
-                        </Link>
+                        </button>
                         <div className="header-text">
                             <h1 className="header-title">{task.title}</h1>
                             <p className="header-description">

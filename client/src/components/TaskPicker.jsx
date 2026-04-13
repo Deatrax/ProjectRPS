@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, X } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,8 @@ import './TaskPicker.css';
 
 const TaskPicker = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const preSelectedCourseId = searchParams.get('courseId');
   const { user } = useAuth();
 
   const today = new Date();
@@ -17,7 +19,8 @@ const TaskPicker = () => {
     description: '',
     category: 'General',
     difficulty: 5,
-    weight: 10
+    weight: 10,
+    course: preSelectedCourseId || ''
   });
 
   // Date state (indexes)
@@ -67,8 +70,12 @@ const TaskPicker = () => {
             headers: { Authorization: `Bearer ${user.token}` }
           });
           setCourses(res.data);
-          if (res.data.length > 0) {
+          
+          // If we don't have a pre-selected course and there are courses available, pick the first one
+          if (!preSelectedCourseId && res.data.length > 0 && !formData.course) {
             setFormData(prev => ({ ...prev, course: res.data[0]._id }));
+          } else if (preSelectedCourseId) {
+            setFormData(prev => ({ ...prev, course: preSelectedCourseId }));
           }
         }
       } catch (err) {
@@ -76,7 +83,7 @@ const TaskPicker = () => {
       }
     };
     fetchCourses();
-  }, [user]);
+  }, [user, preSelectedCourseId]);
 
   useEffect(() => {
     // Initial scroll
@@ -106,7 +113,7 @@ const TaskPicker = () => {
   const closeModal = () => {
     setModalConfig(prev => ({ ...prev, isOpen: false }));
     if (modalConfig.title === 'Success') {
-      navigate('/tasks');
+      navigate(-1); // Go back to where we came from
     }
   };
 
@@ -135,6 +142,11 @@ const TaskPicker = () => {
 
     if (!user || !user.token) {
       setError('You must be logged in to create a task.');
+      return;
+    }
+
+    if (!formData.course) {
+      setError('Please select a course.');
       return;
     }
 
