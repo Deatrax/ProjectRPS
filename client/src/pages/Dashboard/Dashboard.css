@@ -480,6 +480,27 @@
     /* Allow interaction if needed */
 }
 
+.task-hover-card.align-left {
+    transform: translateX(-15%);
+}
+
+.task-hover-card.align-left .card-arrow {
+    left: 15%;
+}
+
+.task-hover-card.align-right {
+    transform: translateX(-85%);
+}
+
+.task-hover-card.align-right .card-arrow {
+    left: 85%;
+}
+
+.timeline-task-marker:hover .task-hover-card.align-left,
+.timeline-task-marker:hover .task-hover-card.align-right {
+    bottom: 2rem;
+}
+
 .card-content {
     background-color: var(--bg-primary);
     border-radius: 0.75rem;
