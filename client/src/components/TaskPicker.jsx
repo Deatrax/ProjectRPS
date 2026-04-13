@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, X } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import './TaskPicker.css';
@@ -8,7 +8,7 @@ import './TaskPicker.css';
 const TaskPicker = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset time for comparison
 
@@ -29,8 +29,16 @@ const TaskPicker = () => {
 
   const [error, setError] = useState('');
 
+  // Modal State
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info' 
+  });
+
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
+
   const currentYearVal = new Date().getFullYear();
   const years = Array.from({ length: 6 }, (_, i) => currentYearVal + i);
 
@@ -86,16 +94,32 @@ const TaskPicker = () => {
     }
   }, [numDays]);
 
+  const showAlert = (title, message, type = 'info') => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type
+    });
+  };
+
+  const closeModal = () => {
+    setModalConfig(prev => ({ ...prev, isOpen: false }));
+    if (modalConfig.title === 'Success') {
+      navigate('/tasks');
+    }
+  };
+
   const handleScroll = (e, type) => {
     const scrollTop = e.target.scrollTop;
     const index = Math.round(scrollTop / ITEM_HEIGHT);
-    
+
     // Safety check for index range
     let maxIndex = 0;
     if (type === 'dayIndex') maxIndex = numDays - 1;
     if (type === 'monthIndex') maxIndex = months.length - 1;
     if (type === 'yearIndex') maxIndex = years.length - 1;
-    
+
     const safeIndex = Math.min(Math.max(0, index), maxIndex);
     setDateState(prev => ({ ...prev, [type]: safeIndex }));
     setError(''); // Clear error on scroll
@@ -145,9 +169,8 @@ const TaskPicker = () => {
         }
       };
 
-      const res = await axios.post('http://localhost:5000/api/tasks', payload, config);
-      alert('Task Created Successfully!');
-      navigate('/tasks');
+      await axios.post('http://localhost:5000/api/tasks', payload, config);
+      showAlert('Success', 'Task Created Successfully!');
     } catch (err) {
       console.error('Error creating task:', err);
       setError(err.response?.data?.message || 'Error creating task.');
@@ -255,6 +278,37 @@ const TaskPicker = () => {
           </fieldset>
         </form>
       </div>
+
+      {/* Global Modal for Alerts */}
+      {modalConfig.isOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{modalConfig.title}</h2>
+              <button onClick={closeModal} className="btn-close" style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.5)',
+                cursor: 'pointer',
+                padding: '0.6rem',
+                borderRadius: '50%',
+                display: 'flex',
+                transition: 'all 0.3s ease'
+              }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>{modalConfig.message}</p>
+            </div>
+            <div className="modal-actions">
+              <button onClick={closeModal} className="btn-modal-primary">
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
