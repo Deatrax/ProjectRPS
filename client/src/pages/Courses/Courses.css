@@ -14,7 +14,7 @@
 .courses-page-wrapper .container {
   width: 100%;
   min-height: 100vh;
-  padding: 3rem 1rem 120px 1rem;
+  padding: 5rem 1rem 120px 1rem;
   box-sizing: border-box;
   background: transparent !important;
 }
@@ -579,4 +579,97 @@
 
 .animate-slide-up {
   animation: slideUp 0.4s ease forwards;
+}
+
+/* 4th action button — top */
+.courses-page-wrapper .btn-top {
+  bottom: 80px;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+}
+
+.courses-page-wrapper .btn-top:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.6),
+              0 0 25px rgba(245, 158, 11, 0.4);
+  color: white;
+}
+
+/* Restore row button */
+.courses-page-wrapper .restore-row-btn {
+  background: none;
+  border: none;
+  color: rgba(245, 158, 11, 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.courses-page-wrapper .restore-row-btn:hover {
+  color: #f59e0b;
+  transform: scale(1.2);
+}
+
+/* Archive selection bar button */
+.btn-archive-selected {
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.btn-archive-selected:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Archive confirmation modal button */
+.btn-modal-archive {
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  border: none;
+  color: white;
+  padding: 0.8rem 1.8rem;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-modal-archive:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+}
+
+/* Bottom archived toggle */
+.archived-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+  padding-bottom: 2rem;
+}
+
+.btn-archived-toggle {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  padding: 0.7rem 1.8rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.3s ease;
+}
+
+.btn-archived-toggle:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
 }

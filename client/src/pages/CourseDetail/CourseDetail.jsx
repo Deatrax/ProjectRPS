@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, CheckSquare, FileText, FolderOpen, X, ArrowLeft } from 'lucide-react';
+import { Plus, CheckSquare, FileText, FolderOpen, X, ArrowLeft, Archive, ArchiveRestore } from 'lucide-react';
 import './CourseDetail.css';
 
 export default function CourseDetails() {
@@ -31,6 +31,7 @@ export default function CourseDetails() {
   const [materialError, setMaterialError] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [archiveLoading, setArchiveLoading] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -71,6 +72,22 @@ export default function CourseDetails() {
 
     fetchCourseData();
   }, [id, user]);
+
+  const handleArchiveToggle = async () => {
+    if (!user?.token || !courseDetails) return;
+    setArchiveLoading(true);
+    const endpoint = courseDetails.archived ? 'unarchive' : 'archive';
+    try {
+      await axios.patch(`http://localhost:5000/api/courses/${id}/${endpoint}`, {}, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setCourseDetails((prev) => ({ ...prev, archived: !prev.archived }));
+    } catch (err) {
+      console.error('Archive toggle failed:', err);
+    } finally {
+      setArchiveLoading(false);
+    }
+  };
 
 
   const addItem = async (type) => {
@@ -288,8 +305,22 @@ export default function CourseDetails() {
         </button>
 
         <div className="course-detail-header">
-          <h1>{courseDetails.name}</h1>
-          <p>{courseDetails.description}</p>
+          <div className="course-detail-header-top">
+            <div>
+              <h1>{courseDetails.courseTitle || courseDetails.name}</h1>
+              <p>{courseDetails.courseCode || courseDetails.description}</p>
+            </div>
+            <button
+              className={`btn-archive-course ${courseDetails.archived ? 'is-archived' : ''}`}
+              onClick={handleArchiveToggle}
+              disabled={archiveLoading}
+              title={courseDetails.archived ? 'Restore this course' : 'Archive this course'}
+            >
+              {courseDetails.archived
+                ? <><ArchiveRestore size={16} /> {archiveLoading ? 'Restoring...' : 'Restore'}</>
+                : <><Archive size={16} /> {archiveLoading ? 'Archiving...' : 'Archive'}</>}
+            </button>
+          </div>
         </div>
 
         {showDeleteConfirm && itemToDelete && (
