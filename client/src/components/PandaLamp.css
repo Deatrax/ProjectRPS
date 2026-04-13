@@ -495,7 +495,7 @@ body {
   pointer-events: auto;
   /* ANIMATION: Drops DOWN from -200px to 150px (Belly Position) */
   /* 170% positions it perfectly on the belly */
-  transform: translate(-50%, 170%);
+  transform: translate(-50%, 166.5%);
 }
 
 /* Arms for Welcome (Holding the belly card) */
@@ -556,7 +556,7 @@ body {
   opacity: 1;
   pointer-events: auto;
   /* ANIMATION: Drops DOWN from -200px to 0px (Chest Position) */
-  transform: translate(calc(-50% + 200px), 55%);
+  transform: translate(calc(-50% + 200px), 25%);
 }
 
 .state-login .eye {
@@ -582,7 +582,7 @@ body {
 .state-signup #signupCard {
   opacity: 1;
   pointer-events: auto;
-  transform: translate(calc(-50% + 200px), 20%);
+  transform: translate(calc(-50% + 230px), -5%);
 }
 
 .state-signup .eye {
