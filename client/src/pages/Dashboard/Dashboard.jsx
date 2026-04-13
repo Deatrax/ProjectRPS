@@ -551,7 +551,7 @@ const Dashboard = () => {
                         <div className="dot dot-1"></div>
                     </div>
                 </div>
-                <Panda />
+                <Panda reaction={overdueCount > 0 ? 'angry' : ''} />
             </div>
         </div>
     );
