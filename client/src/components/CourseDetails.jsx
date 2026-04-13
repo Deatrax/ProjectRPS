@@ -23,6 +23,15 @@ const CourseDetails = () => {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
 
+    // Modal State
+    const [modalConfig, setModalConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        type: 'info' // 'info' or 'danger'
+    });
+
     useEffect(() => {
         const fetchData = async () => {
             if (!user || !user.token || !courseId) return;
@@ -52,6 +61,30 @@ const CourseDetails = () => {
         fetchData();
     }, [user, courseId]);
 
+    const showAlert = (title, message, type = 'info') => {
+        setModalConfig({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: null,
+            type
+        });
+    };
+
+    const showConfirm = (title, message, onConfirm) => {
+        setModalConfig({
+            isOpen: true,
+            title,
+            message,
+            onConfirm,
+            type: 'danger'
+        });
+    };
+
+    const closeModal = () => {
+        setModalConfig(prev => ({ ...prev, isOpen: false }));
+    };
+
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -71,10 +104,10 @@ const CourseDetails = () => {
             };
             const res = await axios.post(`http://localhost:5000/api/materials/${courseId}`, formData, config);
             setMaterials(prev => [...prev, res.data]);
-            alert('File uploaded successfully!');
+            showAlert('Success', 'File uploaded successfully!');
         } catch (err) {
             console.error("Upload error:", err);
-            alert(err.response?.data?.message || 'Failed to upload file');
+            showAlert('Error', err.response?.data?.message || 'Failed to upload file', 'danger');
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -82,18 +115,22 @@ const CourseDetails = () => {
     };
 
     const handleDeleteMaterial = async (materialId) => {
-        if (!window.confirm('Are you sure you want to delete this material?')) return;
-
-        try {
-            const config = {
-                headers: { Authorization: `Bearer ${user.token}` }
-            };
-            await axios.delete(`http://localhost:5000/api/materials/${courseId}/${materialId}`, config);
-            setMaterials(prev => prev.filter(m => m._id !== materialId));
-        } catch (err) {
-            console.error("Delete error:", err);
-            alert('Failed to delete material');
-        }
+        showConfirm(
+            'Confirm Deletion',
+            'Are you sure you want to delete this material? This action cannot be undone.',
+            async () => {
+                try {
+                    const config = {
+                        headers: { Authorization: `Bearer ${user.token}` }
+                    };
+                    await axios.delete(`http://localhost:5000/api/materials/${courseId}/${materialId}`, config);
+                    setMaterials(prev => prev.filter(m => m._id !== materialId));
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    showAlert('Error', 'Failed to delete material', 'danger');
+                }
+            }
+        );
     };
 
     if (loading) return (
@@ -267,6 +304,54 @@ const CourseDetails = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Global Modal for Alerts & Confirmation */}
+            {modalConfig.isOpen && (
+                <div className="modal-overlay" onClick={closeModal}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>{modalConfig.title}</h2>
+                            <button onClick={closeModal} className="btn-close" style={{
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                cursor: 'pointer',
+                                padding: '0.6rem',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                transition: 'all 0.3s ease'
+                            }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>{modalConfig.message}</p>
+                        </div>
+                        <div className="modal-actions">
+                            {modalConfig.onConfirm ? (
+                                <>
+                                    <button onClick={closeModal} className="btn-modal-secondary">
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            modalConfig.onConfirm();
+                                            closeModal();
+                                        }} 
+                                        className={modalConfig.type === 'danger' ? 'btn-modal-danger' : 'btn-modal-primary'}
+                                    >
+                                        Delete
+                                    </button>
+                                </>
+                            ) : (
+                                <button onClick={closeModal} className="btn-modal-primary">
+                                    OK
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

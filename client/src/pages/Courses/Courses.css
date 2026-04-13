@@ -155,22 +155,16 @@
 
 .courses-page-wrapper .btn-left {
   right: 80px;
-  /*background: linear-gradient(135deg, #a855f7, #4f46e5);*/
-  /*background: linear-gradient(135deg, #c084fc, #9333ea);*/
   background: linear-gradient(135deg, #a855f7, #7e22ce, #581c87);
 }
 
 .courses-page-wrapper .btn-bottom {
   top: 80px;
-  /*background: linear-gradient(135deg, #a855f7, #4f46e5);*/
-  /*background: linear-gradient(135deg, #c084fc, #9333ea);*/
   background: linear-gradient(135deg, #a855f7, #7e22ce, #581c87);
 }
 
 .courses-page-wrapper .btn-right {
   left: 80px;
-  /*background: linear-gradient(135deg, #a855f7, #4f46e5);*/
-  /*background: linear-gradient(135deg, #c084fc, #9333ea);*/
   background: linear-gradient(135deg, #a855f7, #7e22ce, #581c87);
 }
 
@@ -237,6 +231,13 @@
   bottom: 0;
   width: 6px;
   border-radius: 1.5rem 0 0 1.5rem;
+}
+
+.courses-page-wrapper .card-main-content {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
 }
 
 .courses-page-wrapper .course-code {
@@ -317,7 +318,131 @@
   transform: scale(1.2);
 }
 
-/* Delete Confirmation Modal - Glassy Dark Theme */
+/* Selection Mode Specifics */
+.selection-bar-fixed-wrapper {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 1100px;
+  z-index: 1000;
+}
+
+.selection-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(11, 16, 32, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.5rem;
+  padding: 1.25rem 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
+              0 0 20px rgba(24, 34, 74, 0.4);
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.selected-count {
+  font-weight: 700;
+  color: #ffe9a6;
+  font-size: 1.1rem;
+}
+
+.btn-select-all {
+  background: none;
+  border: 1px solid rgba(255, 233, 166, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-select-all:hover {
+  background: rgba(255, 233, 166, 0.1);
+}
+
+.selection-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-cancel-selection {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete-selected {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete-selected:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.selection-checkbox-wrapper {
+  margin-right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-checkbox.checked {
+  background: #ffe9a6;
+  border-color: #ffe9a6;
+  color: #0b1020;
+}
+
+.course-card.selected {
+  background: rgba(255, 233, 166, 0.08);
+  border-color: rgba(255, 233, 166, 0.4);
+}
+
+.course-list.selection-active .course-card {
+  cursor: pointer;
+}
+
+.course-list.selection-active .course-card:hover {
+  transform: none;
+}
+
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -336,21 +461,15 @@
 .modal {
   background: radial-gradient(circle at 50% 0%, #18224a 0%, #0b1020 100%) !important;
   background-color: #0b1020 !important;
-
-  /* Glass effect */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-
-    /* Border & Shadow */
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 2rem;
   padding: 2.5rem;
   width: 90%;
   max-width: 480px;
-
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
               0 0 20px rgba(24, 34, 74, 0.6); 
-
   color: white !important;
   animation: modalSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -370,7 +489,6 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  display: inline-block;
 }
 
 .btn-close {
@@ -403,7 +521,6 @@
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 4px;
-  text-decoration-color: rgba(255, 233, 166, 0.3);
 }
 
 .modal-actions {
@@ -429,7 +546,7 @@
 }
 
 .btn-modal-danger {
-  background: linear-gradient(135deg, #a855f7, #7e22ce); /* Matches your purple action buttons theme */
+  background: linear-gradient(135deg, #a855f7, #7e22ce);
   border: none;
   color: white;
   padding: 0.8rem 1.8rem;
@@ -442,18 +559,7 @@
 
 .btn-modal-danger:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(126, 34, 206, 0.5),
-              0 0 15px rgba(168, 85, 247, 0.4);
-}
-
-.btn-modal-danger:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.btn-modal-danger:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+  box-shadow: 0 8px 25px rgba(126, 34, 206, 0.5);
 }
 
 @keyframes modalFadeIn {
@@ -464,4 +570,13 @@
 @keyframes modalSlideUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease forwards;
 }

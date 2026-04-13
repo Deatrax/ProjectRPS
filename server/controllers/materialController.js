@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Material = require('../models/Material');
 const Course = require('../models/Course');
+const Task = require('../models/Task');
 const cloudinary = require('../utils/cloudinary'); 
 
 const uploadMaterial = asyncHandler(async (req, res) => {
@@ -72,8 +73,76 @@ const getCourseMaterials = asyncHandler(async (req, res) => {
     res.json(materials);
 });
 
+// Task specific materials
+const uploadTaskMaterial = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+    const { title, description } = req.body;
+
+    if (!req.file) {
+        res.status(400);
+        throw new Error('No file uploaded');
+    }
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+        res.status(404);
+        throw new Error('Task not found');
+    }
+
+    if (task.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('Not authorized to add material to this task');
+    }
+
+    try {
+        const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+        
+        const result = await cloudinary.uploader.upload(dataUri, {
+            folder: `task_materials/${taskId}`, 
+            resource_type: 'auto', 
+            public_id: req.file.originalname.split('.')[0] + '-' + Date.now(), 
+        });
+
+        const newMaterial = await Material.create({
+            title,
+            description: description || '', 
+            fileUrl: result.secure_url,
+            publicId: result.public_id,
+            task: taskId,
+            course: task.course, // Link to course if available
+            user: req.user.id,
+        });
+
+        res.status(201).json(newMaterial);
+    } catch (error) {
+        console.error('Cloudinary upload or material save failed:', error);
+        res.status(500);
+        throw new Error('Material upload failed');
+    }
+});
+
+const getTaskMaterials = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+        res.status(404);
+        throw new Error('Task not found');
+    }
+
+    if (task.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('Not authorized to view materials for this task');
+    }
+
+    const materials = await Material.find({ task: taskId, user: req.user.id }).sort({ createdAt: -1 });
+    res.json(materials);
+});
+
 const deleteMaterial = asyncHandler(async (req, res) => {
-    const { courseId, materialId } = req.params;
+    const { materialId } = req.params; 
 
     const material = await Material.findById(materialId);
 
@@ -82,7 +151,7 @@ const deleteMaterial = asyncHandler(async (req, res) => {
         throw new Error('Material not found');
     }
 
-    if (material.course.toString() !== courseId || material.user.toString() !== req.user.id) {
+    if (material.user.toString() !== req.user.id) {
         res.status(401);
         throw new Error('Not authorized to delete this material');
     }
@@ -102,8 +171,16 @@ const deleteMaterial = asyncHandler(async (req, res) => {
     }
 });
 
+const getAllMaterials = asyncHandler(async (req, res) => {
+    const materials = await Material.find({ user: req.user.id });
+    res.json(materials);
+});
+
 module.exports = {
     uploadMaterial,
     getCourseMaterials,
+    uploadTaskMaterial,
+    getTaskMaterials,
     deleteMaterial,
+    getAllMaterials,
 };
