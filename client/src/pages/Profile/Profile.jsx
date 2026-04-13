@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
     User, BookOpen, CheckSquare, Clock, AlertTriangle,
     BarChart2, Mail, Calendar, Zap, ArrowLeft,
-    Award, Star, Flame, Trophy, Target, Shield, Crown, Moon, Layers, AlertCircle, ShieldAlert
+    Award, Star, Flame, Trophy, Target, Shield, Crown, Moon, Layers, AlertCircle, ShieldAlert,
+    BookHeart, ChevronDown, ChevronUp
 } from 'lucide-react';
 import './Profile.css';
 import achievementService from '../../services/achievementService';
@@ -53,6 +54,8 @@ export default function Profile() {
     const [achievements, setAchievements] = useState([]);
     const [achievementStats, setAchievementStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [letters, setLetters] = useState([]);
+    const [expandedLetter, setExpandedLetter] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -78,6 +81,14 @@ export default function Profile() {
         };
 
         fetchData();
+
+        // Load apology letters from server
+        fetch('http://localhost:5000/api/apologies', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(r => r.json())
+            .then(data => { if (Array.isArray(data)) setLetters(data); })
+            .catch(err => console.error('Failed to load letters:', err));
     }, []);
 
     if (loading) {
@@ -268,6 +279,60 @@ export default function Profile() {
                                     <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.85rem' }}>→</span>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* ── Letters to Self ── */}
+                        <div className="profile-card">
+                            <div className="card-label">
+                                <BookHeart size={12} /> Letters to Self
+                            </div>
+                            {letters.length === 0 ? (
+                                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem', margin: '0.5rem 0' }}>
+                                    No letters yet. Keep your deadlines or your shame will be immortalized here. 👁️
+                                </p>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+                                    {letters.map((letter, idx) => (
+                                        <div key={idx} style={{
+                                            background: 'rgba(255,233,166,0.04)',
+                                            border: '1px solid rgba(255,233,166,0.1)',
+                                            borderRadius: '0.75rem',
+                                            padding: '1rem',
+                                            cursor: 'pointer'
+                                        }} onClick={() => setExpandedLetter(expandedLetter === idx ? null : idx)}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,233,166,0.6)', display: 'block' }}>
+                                                        {new Date(letter.createdAt || letter.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                                    </span>
+                                                    {letter.overdueTasks?.length > 0 && (
+                                                        <span style={{ fontSize: '0.7rem', color: 'rgba(239,68,68,0.7)' }}>
+                                                            🔴 {letter.overdueTasks.join(', ')}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {expandedLetter === idx 
+                                                    ? <ChevronUp size={16} color="rgba(255,255,255,0.4)" />
+                                                    : <ChevronDown size={16} color="rgba(255,255,255,0.4)" />
+                                                }
+                                            </div>
+                                            {expandedLetter === idx && (
+                                                <p style={{
+                                                    marginTop: '0.75rem',
+                                                    paddingTop: '0.75rem',
+                                                    borderTop: '1px solid rgba(255,255,255,0.07)',
+                                                    fontSize: '0.95rem',
+                                                    lineHeight: '1.7',
+                                                    color: 'rgba(255,255,255,0.8)',
+                                                    whiteSpace: 'pre-wrap'
+                                                }}>
+                                                    {letter.text}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                     </div>

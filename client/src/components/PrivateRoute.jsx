@@ -89,6 +89,7 @@ const PrivateRoute = () => {
                 <ApologyModal
                     overdueTasks={overdueTasks}
                     onDismiss={() => setApologyDone(true)}
+                    token={localStorage.getItem('token')}
                 />
             )}
 

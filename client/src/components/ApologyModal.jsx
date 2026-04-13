@@ -33,7 +33,7 @@ const getTodayKey = () => {
  * @param {Array}    overdueTasks  – list of overdue task objects { id, name }
  * @param {Function} onDismiss     – called when the user successfully submits
  */
-export default function ApologyModal({ overdueTasks = [], onDismiss }) {
+export default function ApologyModal({ overdueTasks = [], onDismiss, token }) {
     const [text, setText] = useState('');
     const [dramaIdx, setDramaIdx] = useState(0);
     const [fading, setFading] = useState(false);
@@ -54,11 +54,30 @@ export default function ApologyModal({ overdueTasks = [], onDismiss }) {
     const wordCount = countWords(text);
     const enough = wordCount >= 50;
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!enough) return;
+
+        try {
+            await fetch('http://localhost:5000/api/apologies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    text: text.trim(),
+                    overdueTasks: overdueTasks.map(t => t.name)
+                })
+            });
+        } catch (err) {
+            console.error('Failed to save apology letter:', err);
+        }
+
+        // Mark today as done regardless (don't block user on network error)
         localStorage.setItem(getTodayKey(), 'true');
         onDismiss();
     };
+
 
     // Word count color tier
     const countClass = enough ? 'enough' : wordCount >= 35 ? 'close' : 'low';
