@@ -1,64 +1,100 @@
 /* ── Profile Page ────────────────────────────────────────────────────────── */
 
-.profile-page {
+.profile-page-wrapper {
+    margin: 0;
+    padding: 0;
     min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+}
+
+.profile-page-wrapper .container {
     width: 100%;
-    background: radial-gradient(1200px 700px at 50% 10%, #18224a 0%, #0b1020 60%);
-    color: rgba(255, 255, 255, 0.9);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    padding-bottom: 120px;
+    min-height: 100vh;
+    padding: 3rem 1rem 120px 1rem;
+    box-sizing: border-box;
+    background: transparent !important;
 }
 
-/* ── Header ──────────────────────────────────────────────────────────────── */
-.profile-header {
-    max-width: 720px;
+.profile-page-wrapper .content-limit {
+    max-width: 1000px; 
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 0;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
 }
 
-.back-btn {
+/* Header Section */
+.profile-page-wrapper .header-section {
+    width: 100%;
+}
+
+.profile-page-wrapper .header-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-bottom: 2rem;
+    width: 100%;
+    min-height: 80px;
+}
+
+.profile-page-wrapper .header-text {
+    text-align: center;
+}
+
+.profile-page-wrapper .header-text h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #ffe9a6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.profile-page-wrapper .header-text p {
+    color: var(--text-secondary);
+    margin: 0.75rem 0 0 0;
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.profile-page-wrapper .back-btn {
+    position: absolute;
+    left: 0;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
-    padding: 0.6rem;
+    padding: 0.8rem;
     border-radius: 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    z-index: 60;
+    text-decoration: none;
 }
 
-.back-btn:hover {
+.profile-page-wrapper .back-btn:hover {
     background: rgba(255, 255, 255, 0.1);
-    transform: translateX(-3px);
+    transform: translateX(-5px);
 }
 
-.profile-header h1 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    margin: 0;
-    background: linear-gradient(135deg, #fff 0%, #ffe9a6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+.profile-page-wrapper .thin-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 233, 166, 0.3), transparent);
+    margin-bottom: 3rem;
 }
 
 /* ── Content ─────────────────────────────────────────────────────────────── */
-.profile-content {
-    max-width: 720px;
-    margin: 2rem auto 0;
-    padding: 0 1.5rem;
+.profile-page-wrapper .profile-content {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
 /* ── Card ────────────────────────────────────────────────────────────────── */
-.profile-card {
+.profile-page-wrapper .profile-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
@@ -66,7 +102,7 @@
     backdrop-filter: blur(12px);
 }
 
-.card-label {
+.profile-page-wrapper .card-label {
     font-size: 0.72rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.4);
@@ -79,13 +115,13 @@
 }
 
 /* ── Avatar + Identity ───────────────────────────────────────────────────── */
-.profile-identity {
+.profile-page-wrapper .profile-identity {
     display: flex;
     align-items: center;
     gap: 1.25rem;
 }
 
-.profile-avatar {
+.profile-page-wrapper .profile-avatar {
     width: 70px;
     height: 70px;
     border-radius: 50%;
@@ -101,39 +137,40 @@
     letter-spacing: -0.02em;
 }
 
-.profile-name-group {
+.profile-page-wrapper .profile-name-group {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+    text-align: left;
 }
 
-.profile-name {
+.profile-page-wrapper .profile-name {
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
     color: rgba(255, 255, 255, 0.95);
 }
 
-.profile-email {
+.profile-page-wrapper .profile-email {
     font-size: 0.88rem;
     color: rgba(255, 255, 255, 0.45);
     margin: 0;
 }
 
-.profile-since {
+.profile-page-wrapper .profile-since {
     font-size: 0.78rem;
     color: rgba(255, 255, 255, 0.3);
     margin-top: 0.1rem;
 }
 
 /* ── Stats Grid ──────────────────────────────────────────────────────────── */
-.stats-grid {
+.profile-page-wrapper .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 1rem;
 }
 
-.stat-tile {
+.profile-page-wrapper .stat-tile {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
@@ -144,71 +181,71 @@
     transition: background 0.2s;
 }
 
-.stat-tile:hover {
+.profile-page-wrapper .stat-tile:hover {
     background: rgba(255, 255, 255, 0.08);
 }
 
-.stat-value {
+.profile-page-wrapper .stat-value {
     font-size: 2rem;
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.02em;
 }
 
-.stat-name {
+.profile-page-wrapper .stat-name {
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.45);
     font-weight: 500;
 }
 
 /* Tile color accents */
-.stat-tile.completed .stat-value {
+.profile-page-wrapper .stat-tile.completed .stat-value {
     color: #4ade80;
 }
 
-.stat-tile.overdue .stat-value {
+.profile-page-wrapper .stat-tile.overdue .stat-value {
     color: #f87171;
 }
 
-.stat-tile.inprogress .stat-value {
+.profile-page-wrapper .stat-tile.inprogress .stat-value {
     color: #60a5fa;
 }
 
-.stat-tile.pending .stat-value {
+.profile-page-wrapper .stat-tile.pending .stat-value {
     color: #fbbf24;
 }
 
-.stat-tile.total .stat-value {
+.profile-page-wrapper .stat-tile.total .stat-value {
     color: rgba(255, 255, 255, 0.85);
 }
 
 /* ── Completion Rate Bar ─────────────────────────────────────────────────── */
-.completion-row {
+.profile-page-wrapper .completion-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0.6rem;
 }
 
-.completion-label {
+.profile-page-wrapper .completion-label {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.6);
 }
 
-.completion-pct {
+.profile-page-wrapper .completion-pct {
     font-size: 1.1rem;
     font-weight: 800;
     color: #4ade80;
 }
 
-.completion-bar-bg {
+.profile-page-wrapper .completion-bar-bg {
     height: 8px;
     background: rgba(255, 255, 255, 0.07);
     border-radius: 99px;
     overflow: hidden;
 }
 
-.completion-bar-fill {
+.profile-page-wrapper .completion-bar-fill {
     height: 100%;
     border-radius: 99px;
     background: linear-gradient(90deg, #16a34a, #4ade80);
@@ -216,7 +253,7 @@
 }
 
 /* ── Info rows ───────────────────────────────────────────────────────────── */
-.info-row {
+.profile-page-wrapper .info-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -224,42 +261,42 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.info-row:last-child {
+.profile-page-wrapper .info-row:last-child {
     border-bottom: none;
     padding-bottom: 0;
 }
 
-.info-key {
+.profile-page-wrapper .info-key {
     font-size: 0.83rem;
     color: rgba(255, 255, 255, 0.4);
 }
 
-.info-val {
+.profile-page-wrapper .info-val {
     font-size: 0.88rem;
     color: rgba(255, 255, 255, 0.8);
     font-weight: 500;
 }
 
 /* ── Achievements Highlights ────────────────────────────────────────────── */
-.achievement-highlights {
+.profile-page-wrapper .achievement-highlights {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.achievement-badges-row {
+.profile-page-wrapper .achievement-badges-row {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
 }
 
-.mini-achievement-badge {
+.profile-page-wrapper .mini-achievement-badge {
     position: relative;
     cursor: default;
 }
 
-.mini-badge-icon {
+.profile-page-wrapper .mini-badge-icon {
     width: 42px;
     height: 42px;
     border-radius: 12px;
@@ -270,12 +307,12 @@
     transition: transform 0.2s ease;
 }
 
-.mini-achievement-badge:hover .mini-badge-icon {
+.profile-page-wrapper .mini-achievement-badge:hover .mini-badge-icon {
     transform: translateY(-3px);
     background: rgba(255, 255, 255, 0.08) !important;
 }
 
-.mini-achievement-badge.more {
+.profile-page-wrapper .mini-achievement-badge.more {
     width: 42px;
     height: 42px;
     border-radius: 12px;
@@ -290,37 +327,37 @@
     cursor: pointer;
 }
 
-.mini-achievement-badge.more:hover {
+.profile-page-wrapper .mini-achievement-badge.more:hover {
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
 
-.achievement-summary-row {
+.profile-page-wrapper .achievement-summary-row {
     display: flex;
     gap: 2rem;
     padding-top: 0.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.ach-stat {
+.profile-page-wrapper .ach-stat {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
 }
 
-.ach-val {
+.profile-page-wrapper .ach-val {
     font-size: 1.2rem;
     font-weight: 800;
     color: white;
 }
 
-.ach-val-small {
+.profile-page-wrapper .ach-val-small {
     font-size: 0.95rem;
     font-weight: 700;
     color: #ffe9a6;
 }
 
-.ach-lab {
+.profile-page-wrapper .ach-lab {
     font-size: 0.65rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.3);
@@ -328,7 +365,7 @@
     letter-spacing: 0.05em;
 }
 
-.empty-achievements {
+.profile-page-wrapper .empty-achievements {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.3);
     font-style: italic;
