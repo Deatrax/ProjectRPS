@@ -253,11 +253,11 @@
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    scrollbar-width: thin;
+    scrollbar-width: none;
     /* Firefox */
-    -ms-overflow-style: auto;
+    -ms-overflow-style: none;
     /* IE/Edge */
-    padding-bottom: 10px;
+    padding-bottom: 0px;
     /* space for scrollbar */
     padding-top: 20px;
     /* space for hover cards at top */
@@ -265,8 +265,7 @@
 
 /* Optional: Custom scrollbar for Webkit */
 .timeline-scroll-area::-webkit-scrollbar {
-    height: 6px;
-    display: block;
+    display: none;
 }
 
 .timeline-scroll-area::-webkit-scrollbar-track {
