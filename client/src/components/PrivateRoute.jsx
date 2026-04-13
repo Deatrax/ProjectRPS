@@ -7,18 +7,45 @@ import ApologyModal, { hasApologyForToday } from './ApologyModal';
 const API = 'http://localhost:5000/api';
 
 const PrivateRoute = () => {
-    const { user, loading } = useAuth();
+    const { user, loading, logout } = useAuth();
 
     const [overdueTasks, setOverdueTasks] = useState([]);
     const [apologyDone, setApologyDone] = useState(true); // start true to avoid flash
     const [tasksChecked, setTasksChecked] = useState(false);
 
+    // Automatically log out when the token expires (even if idle)
+    useEffect(() => {
+        if (user && user.token) {
+            try {
+                const payload = JSON.parse(atob(user.token.split('.')[1]));
+                const expirationTime = payload.exp * 1000;
+                const timeRemaining = expirationTime - Date.now();
+
+                if (timeRemaining <= 0) {
+                    console.warn("Session expired. Logging out...");
+                    logout();
+                } else {
+                    // Set a timer to automatically log out when idle
+                    const timer = setTimeout(() => {
+                        console.warn("Session expired while idle. Logging out...");
+                        logout();
+                    }, timeRemaining);
+
+                    return () => clearTimeout(timer); // Cleanup if component unmounts or user changes
+                }
+            } catch (e) {
+                console.error("Token decoding failed:", e);
+                logout();
+            }
+        }
+    }, [user, logout]);
+
     // deny access if not authenticated
-    if (!user) return <Navigate to="/" replace />;
+    if (!user && !loading) return <Navigate to="/" replace />;
 
     // Fetch tasks to detect overdue ones (only once, after login)
     useEffect(() => {
-        if (!user) return <Navigate to="/" replace />;
+        if (!user) return;
 
         // Check localStorage first — if already apologised today, skip fetch
         if (hasApologyForToday()) {
