@@ -542,7 +542,7 @@ const Dashboard = () => {
                                 </span>
                             </>
                         ) : (
-                            "Hi!"
+                            `Great to see you, ${user?.name || 'User'}!`
                         )}
                     </div>
                     <div className="bubble-dots">
@@ -551,7 +551,7 @@ const Dashboard = () => {
                         <div className="dot dot-1"></div>
                     </div>
                 </div>
-                <Panda />
+                <Panda reaction={overdueCount > 0 ? 'angry' : ''} />
             </div>
         </div>
     );
