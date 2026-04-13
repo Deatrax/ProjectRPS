@@ -113,6 +113,30 @@ const getCourseById = asyncHandler(async (req, res) => {
     res.json(course);
 });
 
+// Update course details
+const updateCourse = asyncHandler(async (req, res) => {
+    const { courseTitle, courseCode, color, semester } = req.body;
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    if (course.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    course.courseTitle = courseTitle || course.courseTitle;
+    course.courseCode = courseCode || course.courseCode;
+    course.color = color || course.color;
+    course.semester = semester || course.semester;
+
+    const updatedCourse = await course.save();
+    res.json(updatedCourse);
+});
+
 // Get all tasks for a course
 const getTasks = asyncHandler(async (req, res) => {
     const course = await Course.findById(req.params.id);
@@ -315,6 +339,7 @@ module.exports = {
     deleteCourse,
     deleteCourses,
     getCourseById,
+    updateCourse,
     getTasks,
     addTask,
     updateTask,

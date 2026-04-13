@@ -9,6 +9,7 @@ const {
     deleteCourse,
     deleteCourses,
     getCourseById,
+    updateCourse,
     getTasks,
     addTask,
     updateTask,
@@ -32,6 +33,7 @@ router.route('/bulk-delete')
 
 router.route('/:id')
     .get(protect, getCourseById)
+    .put(protect, updateCourse)
     .delete(protect, deleteCourse);
 
 router.route('/:id/archive')

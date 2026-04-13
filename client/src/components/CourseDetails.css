@@ -167,3 +167,154 @@
         font-size: 2.2rem !important;
     }
 }
+
+/* ── New header layout ───────────────────────────────────────────── */
+.course-details-root .cd-header-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 2rem;
+    min-height: 80px;
+    gap: 1rem;
+}
+
+.course-details-root .cd-header-actions {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.course-details-root .cd-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    white-space: nowrap;
+}
+
+.course-details-root .cd-action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.course-details-root .cd-btn-task {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+
+.course-details-root .cd-btn-task:hover {
+    box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+}
+
+.course-details-root .cd-btn-edit {
+    border-color: rgba(168,85,247,0.4);
+    color: #a855f7;
+    background: rgba(168,85,247,0.1);
+}
+
+.course-details-root .cd-btn-edit:hover {
+    background: rgba(168,85,247,0.2);
+    border-color: #a855f7;
+}
+
+.course-details-root .cd-btn-archive {
+    border-color: rgba(245,158,11,0.4);
+    color: #f59e0b;
+    background: rgba(245,158,11,0.1);
+}
+
+.course-details-root .cd-btn-archive:hover {
+    background: rgba(245,158,11,0.2);
+    border-color: #f59e0b;
+}
+
+.course-details-root .cd-btn-archive.is-archived {
+    border-color: rgba(16,185,129,0.4);
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+}
+
+.course-details-root .cd-btn-archive.is-archived:hover {
+    background: rgba(16,185,129,0.2);
+    border-color: #10b981;
+}
+
+.course-details-root .cd-btn-archive:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Edit modal ──────────────────────────────────────────────────── */
+.cd-edit-modal {
+    max-width: 30rem;
+    width: 90%;
+}
+
+.cd-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.cd-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cd-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.cd-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(0,0,0,0.4);
+}
+
+.cd-color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+}
+
+.cd-color-box {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.cd-color-box:hover {
+    transform: scale(1.1);
+}
+
+.cd-color-box.active {
+    border-color: white;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(255,255,255,0.4);
+}

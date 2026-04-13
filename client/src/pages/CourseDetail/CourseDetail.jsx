@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, CheckSquare, FileText, FolderOpen, X, ArrowLeft, Archive, ArchiveRestore } from 'lucide-react';
+import { Plus, CheckSquare, FileText, FolderOpen, X, ArrowLeft, Archive, ArchiveRestore, Edit } from 'lucide-react';
 import './CourseDetail.css';
 
 export default function CourseDetails() {
@@ -32,6 +32,19 @@ export default function CourseDetails() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [archiveLoading, setArchiveLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    courseTitle: '',
+    courseCode: '',
+    semester: '',
+    color: ''
+  });
+
+  const colors = [
+    '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', 
+    '#f59e0b', '#10b981', '#06b6d4', '#14b8a6', '#64748b'
+  ];
 
   const fileInputRef = useRef(null);
 
@@ -86,6 +99,37 @@ export default function CourseDetails() {
       console.error('Archive toggle failed:', err);
     } finally {
       setArchiveLoading(false);
+    }
+  };
+
+  const openEditModal = () => {
+    setEditFormData({
+      courseTitle: courseDetails.courseTitle || '',
+      courseCode: courseDetails.courseCode || '',
+      semester: courseDetails.semester || '',
+      color: courseDetails.color || '#3b82f6'
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCourse = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      const response = await axios.put(`http://localhost:5000/api/courses/${id}`, editFormData, config);
+      setCourseDetails(response.data);
+      setShowEditModal(false);
+    } catch (err) {
+      console.error('Update course failed:', err);
+      // Optional: show error message
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -306,20 +350,40 @@ export default function CourseDetails() {
 
         <div className="course-detail-header">
           <div className="course-detail-header-top">
-            <div>
-              <h1>{courseDetails.courseTitle || courseDetails.name}</h1>
-              <p>{courseDetails.courseCode || courseDetails.description}</p>
+            <div className="header-info">
+              <h1 className="course-title-display" style={{ color: courseDetails.color || 'white' }}>
+                {courseDetails.courseTitle || courseDetails.name}
+              </h1>
+              <p className="course-subtitle-display">{courseDetails.courseCode} • {courseDetails.semester}</p>
             </div>
-            <button
-              className={`btn-archive-course ${courseDetails.archived ? 'is-archived' : ''}`}
-              onClick={handleArchiveToggle}
-              disabled={archiveLoading}
-              title={courseDetails.archived ? 'Restore this course' : 'Archive this course'}
-            >
-              {courseDetails.archived
-                ? <><ArchiveRestore size={16} /> {archiveLoading ? 'Restoring...' : 'Restore'}</>
-                : <><Archive size={16} /> {archiveLoading ? 'Archiving...' : 'Archive'}</>}
-            </button>
+            <div className="header-actions">
+              <button 
+                className="btn-header-action btn-add-task-header"
+                onClick={() => setShowAddItem('tasks')}
+                title="Add Task"
+              >
+                <Plus size={18} /> Add Task
+              </button>
+              
+              <button 
+                className="btn-header-action btn-edit-course-header"
+                onClick={openEditModal}
+                title="Edit Course"
+              >
+                <Edit size={18} /> Edit
+              </button>
+
+              <button
+                className={`btn-header-action btn-archive-course ${courseDetails.archived ? 'is-archived' : ''}`}
+                onClick={handleArchiveToggle}
+                disabled={archiveLoading}
+                title={courseDetails.archived ? 'Restore this course' : 'Archive this course'}
+              >
+                {courseDetails.archived
+                  ? <><ArchiveRestore size={16} /> Restore</>
+                  : <><Archive size={16} /> Archive</>}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -344,33 +408,70 @@ export default function CourseDetails() {
 
 
 
-        {showAddItem && (
+        )}
+
+        {showEditModal && (
           <div className="modal-overlay">
-            <div className="modal">
+            <div className="modal edit-course-modal">
               <div className="modal-header">
-                <h2>New {showAddItem.charAt(0).toUpperCase() + showAddItem.slice(1, -1)}</h2>
-                <button onClick={() => {setShowAddItem(null); setNewItemTitle(''); setNewItemDesc(''); setItemError(null);}} className="btn-close">
+                <h2>Edit Course</h2>
+                <button onClick={() => setShowEditModal(false)} className="btn-close">
                   <X size={24} />
                 </button>
               </div>
-              <input
-                type="text"
-                placeholder="Title"
-                value={newItemTitle}
-                onChange={(e) => setNewItemTitle(e.target.value)}
-                className="input-field"
-              />
-              <textarea
-                placeholder="Description"
-                value={newItemDesc}
-                onChange={(e) => setNewItemDesc(e.target.value)}
-                className="textarea-field"
-                rows="3"
-              />
-              <button onClick={() => addItem(showAddItem)} className="btn-submit" disabled={itemAddingLoading}>
-                {itemAddingLoading ? 'Adding...' : `Add ${showAddItem.charAt(0).toUpperCase() + showAddItem.slice(1, -1)}`}
-              </button>
-              {itemError && <p className="error-message">{itemError}</p>}
+              <form onSubmit={handleUpdateCourse}>
+                <div className="form-group-wrap">
+                  <label>Course Title</label>
+                  <input
+                    type="text"
+                    value={editFormData.courseTitle}
+                    onChange={(e) => setEditFormData({ ...editFormData, courseTitle: e.target.value })}
+                    className="input-field"
+                    required
+                  />
+                </div>
+                <div className="form-group-wrap">
+                  <label>Course Code</label>
+                  <input
+                    type="text"
+                    value={editFormData.courseCode}
+                    onChange={(e) => setEditFormData({ ...editFormData, courseCode: e.target.value })}
+                    className="input-field"
+                    required
+                  />
+                </div>
+                <div className="form-group-wrap">
+                  <label>Semester</label>
+                  <input
+                    type="text"
+                    value={editFormData.semester}
+                    onChange={(e) => setEditFormData({ ...editFormData, semester: e.target.value })}
+                    className="input-field"
+                    required
+                  />
+                </div>
+                
+                <div className="form-group-wrap">
+                  <label>Course Color</label>
+                  <div className="color-grid-picker">
+                    {colors.map((c) => (
+                      <div
+                        key={c}
+                        className={`color-box ${editFormData.color === c ? 'active' : ''}`}
+                        style={{ backgroundColor: c }}
+                        onClick={() => setEditFormData({ ...editFormData, color: c })}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button type="button" onClick={() => setShowEditModal(false)} className="btn-secondary">Cancel</button>
+                  <button type="submit" className="btn-primary" disabled={editLoading}>
+                    {editLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
