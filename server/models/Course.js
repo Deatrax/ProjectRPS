@@ -21,6 +21,10 @@ const courseSchema = new mongoose.Schema({
     semester: {
         type: String,
         default: 'Current'
+    },
+    archived: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

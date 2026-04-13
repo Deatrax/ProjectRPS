@@ -1,11 +1,59 @@
 const Course = require('../models/Course');
 const asyncHandler = require('express-async-handler');
 
-// Get all courses
+// Get all active (non-archived) courses
 const getCourses = asyncHandler(async (req, res) => {
-    const courses = await Course.find({ user: req.user.id });
+    // Use $ne: true to also include legacy docs that don't have the archived field yet
+    const courses = await Course.find({ user: req.user.id, archived: { $ne: true } });
     res.json(courses);
 });
+
+// Get all archived courses
+const getArchivedCourses = asyncHandler(async (req, res) => {
+    const courses = await Course.find({ user: req.user.id, archived: true });
+    res.json(courses);
+});
+
+// Archive a course
+const archiveCourse = asyncHandler(async (req, res) => {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    if (course.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    course.archived = true;
+    await course.save();
+
+    res.json({ message: 'Course archived' });
+});
+
+// Unarchive a course
+const unarchiveCourse = asyncHandler(async (req, res) => {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    if (course.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    course.archived = false;
+    await course.save();
+
+    res.json({ message: 'Course unarchived' });
+});
+
 
 
 const createCourse = asyncHandler(async (req, res) => {
@@ -63,6 +111,30 @@ const getCourseById = asyncHandler(async (req, res) => {
     }
 
     res.json(course);
+});
+
+// Update course details
+const updateCourse = asyncHandler(async (req, res) => {
+    const { courseTitle, courseCode, color, semester } = req.body;
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    if (course.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    course.courseTitle = courseTitle || course.courseTitle;
+    course.courseCode = courseCode || course.courseCode;
+    course.color = color || course.color;
+    course.semester = semester || course.semester;
+
+    const updatedCourse = await course.save();
+    res.json(updatedCourse);
 });
 
 // Get all tasks for a course
@@ -260,10 +332,14 @@ const deleteCourses = asyncHandler(async (req, res) => {
 
 module.exports = {
     getCourses,
+    getArchivedCourses,
+    archiveCourse,
+    unarchiveCourse,
     createCourse,
     deleteCourse,
     deleteCourses,
     getCourseById,
+    updateCourse,
     getTasks,
     addTask,
     updateTask,

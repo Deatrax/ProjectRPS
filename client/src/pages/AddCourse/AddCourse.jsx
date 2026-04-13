@@ -117,16 +117,15 @@ const AddCourse = () => {
 
                     <div className="form-group">
                         <label className="form-label">Semester</label>
-                        <select
+                        <input
+                            type="text"
                             name="semester"
                             className="form-input"
+                            placeholder="e.g. Spring 2026"
                             value={formData.semester}
                             onChange={handleChange}
-                        >
-                            <option value="Spring 2026">Spring 2026</option>
-                            <option value="Fall 2025">Fall 2025</option>
-                            <option value="Summer 2026">Summer 2026</option>
-                        </select>
+                            required
+                        />
                     </div>
 
                     <div className="form-group">

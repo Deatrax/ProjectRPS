@@ -22,13 +22,15 @@ const PrivateRoute = () => {
                 const timeRemaining = expirationTime - Date.now();
 
                 if (timeRemaining <= 0) {
-                    console.warn("Session expired. Logging out...");
+                    alert("Session expired. Logging out...");
                     logout();
+                    window.location.href = "/"; // Force redirect to root
                 } else {
                     // Set a timer to automatically log out when idle
                     const timer = setTimeout(() => {
-                        console.warn("Session expired while idle. Logging out...");
+                        alert("Session expired while idle. Logging out...");
                         logout();
+                        window.location.href = "/"; // Force redirect to root
                     }, timeRemaining);
 
                     return () => clearTimeout(timer); // Cleanup if component unmounts or user changes
