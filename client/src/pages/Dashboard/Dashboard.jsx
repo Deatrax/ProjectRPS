@@ -542,7 +542,7 @@ const Dashboard = () => {
                                 </span>
                             </>
                         ) : (
-                            "Hi!"
+                            `Great to see you, ${user?.name || 'User'}!`
                         )}
                     </div>
                     <div className="bubble-dots">
