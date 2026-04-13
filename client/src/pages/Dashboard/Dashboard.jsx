@@ -64,7 +64,14 @@ const Dashboard = () => {
                         pomoDraftSeconds: task.pomoDraftSeconds || null,
                         pomoPlannedSeconds: task.pomoPlannedSeconds || null,
                         createdAt: task.createdAt
-                    }));
+                    })).sort((a, b) => {
+                        // First group by status (incomplete first)
+                        if (a.completed !== b.completed) {
+                            return a.completed ? 1 : -1;
+                        }
+                        // Then sort by deadline
+                        return new Date(a.deadline) - new Date(b.deadline);
+                    });
 
                     setTasks(formattedTasks);
                     calculatePainScore(formattedTasks);
