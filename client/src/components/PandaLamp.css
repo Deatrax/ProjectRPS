@@ -454,6 +454,32 @@ body {
   transform: rotate(-25deg) translate(-5px, 0px);
 }
 
+/* --- WELCOME CARD VISIBILITY FIX --- */
+/* The welcome card sits on the white panda, so we need dark text for contrast */
+.card.welcome h2 {
+  color: #0d0f12; /* Match panda's dark features */
+}
+
+.card.welcome p {
+  color: rgba(13, 15, 18, 0.8);
+}
+
+.card.welcome .primary {
+  background: rgba(0, 0, 0, 0.08);
+  color: #0d0f12;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.card.welcome .primary:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.card.welcome {
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
 .state-login .panda {
   opacity: 1;
   transform: translate(calc(-50% - 220px), -100px);
