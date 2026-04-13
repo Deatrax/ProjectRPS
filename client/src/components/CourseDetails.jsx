@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { 
     ArrowLeft, CheckSquare, FileText, Download, 
     Trash2, Clock, BookOpen, LayoutGrid, 
-    MoreVertical, Plus, ExternalLink, X, Upload
+    MoreVertical, Plus, ExternalLink, X, Upload,
+    Archive, ArchiveRestore, Edit
 } from 'lucide-react';
 import './CourseDetails.css';
 
@@ -29,8 +30,31 @@ const CourseDetails = () => {
         title: '',
         message: '',
         onConfirm: null,
-        type: 'info' // 'info' or 'danger'
+        type: 'info'
     });
+
+    // Archive state
+    const [archiveLoading, setArchiveLoading] = useState(false);
+
+    // Edit modal state
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
+    const [editFormData, setEditFormData] = useState({ courseTitle: '', courseCode: '', semester: '', color: '' });
+    const colors = ['#3b82f6','#6366f1','#8b5cf6','#ec4899','#ef4444','#f59e0b','#10b981','#06b6d4','#14b8a6','#64748b'];
+
+    // Floating action menu state
+    const [isHovered, setIsHovered] = useState(false);
+    const [hoveredButton, setHoveredButton] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isMenuOpen && !event.target.closest('.floating-button-wrapper')) setIsMenuOpen(false);
+        };
+        if (isMenuOpen) document.addEventListener('click', handleClickOutside);
+        else document.removeEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [isMenuOpen]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -83,6 +107,50 @@ const CourseDetails = () => {
 
     const closeModal = () => {
         setModalConfig(prev => ({ ...prev, isOpen: false }));
+    };
+
+    const handleArchiveToggle = async () => {
+        if (!user?.token || !course) return;
+        setArchiveLoading(true);
+        const endpoint = course.archived ? 'unarchive' : 'archive';
+        try {
+            await axios.patch(`http://localhost:5000/api/courses/${courseId}/${endpoint}`, {}, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setCourse(prev => ({ ...prev, archived: !prev.archived }));
+        } catch (err) {
+            console.error('Archive toggle failed:', err);
+            showAlert('Error', 'Failed to update archive status.', 'danger');
+        } finally {
+            setArchiveLoading(false);
+        }
+    };
+
+    const openEditModal = () => {
+        setEditFormData({
+            courseTitle: course.courseTitle || '',
+            courseCode: course.courseCode || '',
+            semester: course.semester || '',
+            color: course.color || '#3b82f6'
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateCourse = async (e) => {
+        e.preventDefault();
+        setEditLoading(true);
+        try {
+            const res = await axios.put(`http://localhost:5000/api/courses/${courseId}`, editFormData, {
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` }
+            });
+            setCourse(res.data);
+            setShowEditModal(false);
+        } catch (err) {
+            console.error('Update failed:', err);
+            showAlert('Error', 'Failed to update course.', 'danger');
+        } finally {
+            setEditLoading(false);
+        }
     };
 
     const handleFileUpload = async (e) => {
@@ -158,13 +226,59 @@ const CourseDetails = () => {
             <div className="container">
                 <div className="content-limit">
                     
-                    <div className="header-section" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', marginBottom: '2rem', minHeight: '80px'}}>
+                    <div className="cd-header-section">
                         <Link to="/courses" className="back-btn" style={{position: 'absolute', left: 0}}>
                             <ArrowLeft size={20} />
                         </Link>
                         <div className="header-text" style={{textAlign: 'center'}}>
-                            <h1 className="header-title" style={{fontSize: '3rem', fontWeight: '800', margin: 0, background: 'linear-gradient(135deg, #ffffff 0%, var(--light-accent) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>{course.courseTitle}</h1>
+                            <h1 className="header-title" style={{fontSize: '3rem', fontWeight: '800', margin: 0, color: course.color || 'white'}}>{course.courseTitle}</h1>
                             <p className="header-description" style={{color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '1.1rem'}}>{course.courseCode} • {course.semester}</p>
+                        </div>
+                        <div 
+                            className="floating-button-wrapper"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => { setIsHovered(false); setHoveredButton(null); }}
+                        >
+                            <button 
+                                className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            >
+                                <Edit size={28} />
+                            </button>
+
+                            {(isHovered || isMenuOpen) && (
+                                <>
+                                    <button 
+                                        className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(1)}
+                                        onClick={() => navigate(`/taskpicker?courseId=${courseId}`)}
+                                        title="Add Task"
+                                    >
+                                        <Plus size={18} /> Add Task
+                                    </button>
+
+                                    <button 
+                                        className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(2)}
+                                        onClick={() => { openEditModal(); setIsMenuOpen(false); }}
+                                        title="Edit Course"
+                                    >
+                                        <Edit size={18} /> Edit
+                                    </button>
+
+                                    <button 
+                                        className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(3)}
+                                        onClick={() => { handleArchiveToggle(); setIsMenuOpen(false); }}
+                                        title={course.archived ? 'Restore' : 'Archive'}
+                                        disabled={archiveLoading}
+                                    >
+                                        {course.archived
+                                            ? <><ArchiveRestore size={18} /> Restore</>
+                                            : <><Archive size={18} /> Archive</>}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -349,6 +463,45 @@ const CourseDetails = () => {
                                 </button>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Edit Course Modal */}
+            {showEditModal && (
+                <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+                    <div className="modal cd-edit-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Edit Course</h2>
+                            <button onClick={() => setShowEditModal(false)} className="btn-close" style={{background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.5)', cursor:'pointer', padding:'0.6rem', borderRadius:'50%', display:'flex', transition:'all 0.3s ease'}}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdateCourse}>
+                            <div className="cd-form-group">
+                                <label>Course Title</label>
+                                <input type="text" value={editFormData.courseTitle} onChange={(e) => setEditFormData({...editFormData, courseTitle: e.target.value})} className="cd-input" required />
+                            </div>
+                            <div className="cd-form-group">
+                                <label>Course Code</label>
+                                <input type="text" value={editFormData.courseCode} onChange={(e) => setEditFormData({...editFormData, courseCode: e.target.value})} className="cd-input" required />
+                            </div>
+                            <div className="cd-form-group">
+                                <label>Semester</label>
+                                <input type="text" value={editFormData.semester} onChange={(e) => setEditFormData({...editFormData, semester: e.target.value})} className="cd-input" required />
+                            </div>
+                            <div className="cd-form-group">
+                                <label>Color</label>
+                                <div className="cd-color-grid">
+                                    {colors.map(c => (
+                                        <div key={c} className={`cd-color-box ${editFormData.color === c ? 'active' : ''}`} style={{backgroundColor: c}} onClick={() => setEditFormData({...editFormData, color: c})} />
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setShowEditModal(false)} className="btn-modal-secondary">Cancel</button>
+                                <button type="submit" className="btn-modal-primary" disabled={editLoading}>{editLoading ? 'Saving...' : 'Save Changes'}</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

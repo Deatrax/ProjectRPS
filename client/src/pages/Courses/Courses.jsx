@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Edit, BookOpen, FileText, CheckSquare, Trash2, X, ArrowLeft, Plus, Check } from 'lucide-react';
+import { Edit, BookOpen, FileText, CheckSquare, Trash2, X, ArrowLeft, Plus, Check, Archive, ArchiveRestore } from 'lucide-react';
 import './Courses.css';
 import axios from 'axios';
+
+const API = 'http://localhost:5000/api';
 
 const Courses = () => {
   const navigate = useNavigate();
@@ -18,68 +20,67 @@ const Courses = () => {
   const [hoveredButton, setHoveredButton] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Selection Mode State
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  // View mode: 'active' | 'archived'
+  const [viewMode, setViewMode] = useState('active');
+
+  // Selection Mode State (shared by delete & archive)
+  const [selectionMode, setSelectionMode] = useState(null); // null | 'delete' | 'archive'
   const [selectedCourses, setSelectedCourses] = useState([]);
 
+  const authConfig = {
+    headers: { Authorization: `Bearer ${user?.token}` },
+  };
+
+  const fetchCourses = async (mode = viewMode) => {
+    if (!user?.token) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const endpoint = mode === 'archived' ? `${API}/courses/archived` : `${API}/courses`;
+      const [coursesRes, tasksRes, materialsRes] = await Promise.all([
+        axios.get(endpoint, authConfig),
+        axios.get(`${API}/tasks`, authConfig),
+        axios.get(`${API}/materials/all`, authConfig),
+      ]);
+
+      setCourses(coursesRes.data);
+
+      const tCounts = tasksRes.data.reduce((acc, task) => {
+        if (task.course) {
+          const id = task.course._id || task.course;
+          acc[id] = (acc[id] || 0) + 1;
+        }
+        return acc;
+      }, {});
+      setTaskCounts(tCounts);
+
+      const fCounts = materialsRes.data.reduce((acc, mat) => {
+        if (mat.course) {
+          const id = mat.course._id || mat.course;
+          acc[id] = (acc[id] || 0) + 1;
+        }
+        return acc;
+      }, {});
+      setFileCounts(fCounts);
+    } catch (err) {
+      setError('Failed to fetch courses.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCoursesTasksAndMaterials = async () => {
-      if (!user || !user.token) {
-        setLoading(false);
-        setError('User not authenticated.');
-        return;
-      }
+    fetchCourses(viewMode);
+  }, [user, viewMode]);
 
-      setLoading(true);
-      setError(null);
+  const handleSwitchView = () => {
+    const next = viewMode === 'active' ? 'archived' : 'active';
+    setViewMode(next);
+    setSelectionMode(null);
+    setSelectedCourses([]);
+  };
 
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        };
-
-        // Fetch courses, tasks, and all materials in parallel
-        const [coursesResponse, tasksResponse, materialsResponse] = await Promise.all([
-          axios.get('http://localhost:5000/api/courses', config),
-          axios.get('http://localhost:5000/api/tasks', config),
-          axios.get('http://localhost:5000/api/materials/all', config)
-        ]);
-        
-        setCourses(coursesResponse.data);
-
-        // Process tasks to get counts per course
-        const tCounts = tasksResponse.data.reduce((acc, task) => {
-          if (task.course) {
-            const courseId = task.course._id || task.course;
-            acc[courseId] = (acc[courseId] || 0) + 1;
-          }
-          return acc;
-        }, {});
-        setTaskCounts(tCounts);
-
-        // Process materials to get counts per course
-        const fCounts = materialsResponse.data.reduce((acc, mat) => {
-          if (mat.course) {
-            const courseId = mat.course._id || mat.course;
-            acc[courseId] = (acc[courseId] || 0) + 1;
-          }
-          return acc;
-        }, {});
-        setFileCounts(fCounts);
-
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to fetch courses, tasks, or materials.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCoursesTasksAndMaterials();
-  }, [user]);
-
+  // ── Delete ──────────────────────────────────────────────────────────────────
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
   const [isBulkDelete, setIsBulkDelete] = useState(false);
@@ -91,116 +92,119 @@ const Courses = () => {
   };
 
   const handleBulkDeleteInitiate = () => {
-    if (selectedCourses.length === 0) {
-      setError('Please select at least one course to delete.');
-      return;
-    }
+    if (selectedCourses.length === 0) return;
     setIsBulkDelete(true);
     setShowDeleteConfirm(true);
   };
 
   const confirmDelete = async () => {
-    if (!user || !user.token) {
-      setError('User not identified for deletion.');
-      setShowDeleteConfirm(false);
-      return;
-    }
-
     setLoading(true);
     setError(null);
-
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-
       if (isBulkDelete) {
-        await axios.post('http://localhost:5000/api/courses/bulk-delete', { courseIds: selectedCourses }, config);
-        setCourses(courses.filter((course) => !selectedCourses.includes(course._id)));
+        await axios.post(`${API}/courses/bulk-delete`, { courseIds: selectedCourses }, authConfig);
+        setCourses(courses.filter((c) => !selectedCourses.includes(c._id)));
         setSelectedCourses([]);
-        setIsSelectionMode(false);
+        setSelectionMode(null);
       } else if (courseToDelete) {
-        await axios.delete(`http://localhost:5000/api/courses/${courseToDelete._id}`, config);
-        setCourses(courses.filter((course) => course._id !== courseToDelete._id));
+        await axios.delete(`${API}/courses/${courseToDelete._id}`, authConfig);
+        setCourses(courses.filter((c) => c._id !== courseToDelete._id));
       }
-      
       setShowDeleteConfirm(false);
       setCourseToDelete(null);
       setIsBulkDelete(false);
     } catch (err) {
-      console.error('Error deleting course(s):', err);
       setError(err.response?.data?.message || 'Failed to delete course(s).');
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleCourseSelection = (courseId) => {
-    if (selectedCourses.includes(courseId)) {
-      setSelectedCourses(selectedCourses.filter(id => id !== courseId));
-    } else {
-      setSelectedCourses([...selectedCourses, courseId]);
+  // ── Archive ─────────────────────────────────────────────────────────────────
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+
+  const handleBulkArchiveInitiate = () => {
+    if (selectedCourses.length === 0) return;
+    setShowArchiveConfirm(true);
+  };
+
+  const confirmArchive = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await Promise.all(
+        selectedCourses.map((id) => axios.patch(`${API}/courses/${id}/archive`, {}, authConfig))
+      );
+      setCourses(courses.filter((c) => !selectedCourses.includes(c._id)));
+      setSelectedCourses([]);
+      setSelectionMode(null);
+      setShowArchiveConfirm(false);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to archive course(s).');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // ── Restore ──────────────────────────────────────────────────────────────────
+  const handleRestoreCourse = async (courseId) => {
+    try {
+      await axios.patch(`${API}/courses/${courseId}/unarchive`, {}, authConfig);
+      setCourses(courses.filter((c) => c._id !== courseId));
+    } catch (err) {
+      setError('Failed to restore course.');
+    }
+  };
+
+  // ── Selection helpers ────────────────────────────────────────────────────────
+  const toggleCourseSelection = (courseId) => {
+    setSelectedCourses((prev) =>
+      prev.includes(courseId) ? prev.filter((id) => id !== courseId) : [...prev, courseId]
+    );
   };
 
   const handleSelectAll = () => {
-    if (selectedCourses.length === courses.length) {
-      setSelectedCourses([]);
-    } else {
-      setSelectedCourses(courses.map(c => c._id));
-    }
+    setSelectedCourses(selectedCourses.length === courses.length ? [] : courses.map((c) => c._id));
   };
 
   const cancelSelectionMode = () => {
-    setIsSelectionMode(false);
+    setSelectionMode(null);
     setSelectedCourses([]);
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMenuOpen && !event.target.closest('.floating-button-wrapper')) {
-        setIsMenuOpen(false);
-      }
+      if (isMenuOpen && !event.target.closest('.floating-button-wrapper')) setIsMenuOpen(false);
     };
-
-    if (isMenuOpen) {
-      document.addEventListener('click', handleClickOutside);
-    } else {
-      document.removeEventListener('click', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
+    if (isMenuOpen) document.addEventListener('click', handleClickOutside);
+    else document.removeEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, [isMenuOpen]);
 
+  const isSelectionMode = selectionMode !== null;
 
   return (
     <div className="courses-page-wrapper">
       <div className="container">
         <div className="content-limit">
 
-          {/* Header Section */}
+          {/* Header */}
           <div className="header-section">
             <div className="header-content">
               <Link to="/dashboard" className="back-btn">
-                <ArrowLeft size={20}/>
+                <ArrowLeft size={20} />
               </Link>
               <div className="header-text">
-                <h1>My Courses</h1>
-                <p>Manage your courses and learning materials</p>
+                <h1>{viewMode === 'archived' ? 'Archived Courses' : 'My Courses'}</h1>
+                <p>{viewMode === 'archived' ? 'Restore courses to make them active again' : 'Manage your courses and learning materials'}</p>
               </div>
 
-              {!isSelectionMode && (
+              {/* Floating action menu — hidden in archived view and selection mode */}
+              {!isSelectionMode && viewMode === 'active' && (
                 <div
                   className="floating-button-wrapper"
                   onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => {
-                    setIsHovered(false);
-                    setHoveredButton(null);
-                  }}
+                  onMouseLeave={() => { setIsHovered(false); setHoveredButton(null); }}
                 >
                   <button
                     className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
@@ -209,7 +213,7 @@ const Courses = () => {
                     <Edit size={28} />
                   </button>
 
-                  {isHovered || isMenuOpen ? (
+                  {(isHovered || isMenuOpen) && (
                     <>
                       <button
                         className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
@@ -230,12 +234,20 @@ const Courses = () => {
                       <button
                         className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
                         onMouseEnter={() => setHoveredButton(3)}
-                        onClick={() => setIsSelectionMode(true)}
+                        onClick={() => { setSelectionMode('delete'); setIsMenuOpen(false); }}
                       >
                         <Trash2 size={18} /> Delete Course
                       </button>
+
+                      <button
+                        className={`action-btn btn-top ${hoveredButton === 4 ? 'is-hovered' : ''}`}
+                        onMouseEnter={() => setHoveredButton(4)}
+                        onClick={() => { setSelectionMode('archive'); setIsMenuOpen(false); }}
+                      >
+                        <Archive size={18} /> Archive Course
+                      </button>
                     </>
-                  ) : null}
+                  )}
                 </div>
               )}
             </div>
@@ -258,13 +270,11 @@ const Courses = () => {
                   {isBulkDelete ? (
                     <p>Are you sure you want to delete <span className="highlight-text">{selectedCourses.length}</span> courses? This action cannot be undone.</p>
                   ) : (
-                    courseToDelete && <p>Are you sure you want to delete the course <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
+                    courseToDelete && <p>Are you sure you want to delete <span className="highlight-text">"{courseToDelete.courseTitle}"</span>?</p>
                   )}
                 </div>
                 <div className="modal-actions">
-                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); setIsBulkDelete(false); }} className="btn-modal-secondary">
-                    Cancel
-                  </button>
+                  <button onClick={() => { setShowDeleteConfirm(false); setCourseToDelete(null); setIsBulkDelete(false); }} className="btn-modal-secondary">Cancel</button>
                   <button onClick={confirmDelete} className="btn-modal-danger" disabled={loading}>
                     {loading ? 'Deleting...' : isBulkDelete ? 'Delete Selected' : 'Delete Course'}
                   </button>
@@ -273,17 +283,47 @@ const Courses = () => {
             </div>
           )}
 
-          {/* Course Rows */}
+          {/* Archive Confirmation Modal */}
+          {showArchiveConfirm && (
+            <div className="modal-overlay">
+              <div className="modal">
+                <div className="modal-header">
+                  <h2>Archive Courses</h2>
+                  <button onClick={() => setShowArchiveConfirm(false)} className="btn-close">
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className="modal-body">
+                  {error && <p className="error-message">{error}</p>}
+                  <p>Archive <span className="highlight-text">{selectedCourses.length}</span> course{selectedCourses.length !== 1 ? 's' : ''}? You can restore them later from the archived view.</p>
+                </div>
+                <div className="modal-actions">
+                  <button onClick={() => setShowArchiveConfirm(false)} className="btn-modal-secondary">Cancel</button>
+                  <button onClick={confirmArchive} className="btn-modal-archive" disabled={loading}>
+                    {loading ? 'Archiving...' : 'Archive Selected'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Course List */}
           <div className={`course-list ${isSelectionMode ? 'selection-active' : ''}`}>
-            {courses.map(course => (
+            {loading && <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '2rem' }}>Loading...</p>}
+            {!loading && courses.length === 0 && (
+              <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '3rem 0' }}>
+                {viewMode === 'archived' ? 'No archived courses.' : 'No courses yet. Add one to get started!'}
+              </p>
+            )}
+            {courses.map((course) => (
               <div
                 key={course._id}
                 className={`course-card ${selectedCourses.includes(course._id) ? 'selected' : ''}`}
-                onClick={() => isSelectionMode ? toggleCourseSelection(course._id) : window.location.href = `/coursedetails?id=${course._id}`}
+                onClick={() => isSelectionMode ? toggleCourseSelection(course._id) : (window.location.href = `/coursedetails?id=${course._id}`)}
                 style={{ '--course-color': course.color }}
               >
                 <div className="course-accent" style={{ backgroundColor: course.color }}></div>
-                
+
                 <div className="card-main-content">
                   {isSelectionMode && (
                     <div className="selection-checkbox-wrapper" onClick={(e) => { e.stopPropagation(); toggleCourseSelection(course._id); }}>
@@ -308,16 +348,22 @@ const Courses = () => {
                     <div className="stat-icon material-bg"><FileText size={18} /></div>
                     <span className="stat-count">{fileCounts[course._id] || 0}</span>
                   </div>
-                  {!isSelectionMode && (
+                  {!isSelectionMode && viewMode === 'active' && (
                     <button
                       className="delete-row-btn"
                       title="Delete Course"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCourse(course);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteCourse(course); }}
                     >
                       <Trash2 size={20} />
+                    </button>
+                  )}
+                  {!isSelectionMode && viewMode === 'archived' && (
+                    <button
+                      className="restore-row-btn"
+                      title="Restore Course"
+                      onClick={(e) => { e.stopPropagation(); handleRestoreCourse(course._id); }}
+                    >
+                      <ArchiveRestore size={20} />
                     </button>
                   )}
                 </div>
@@ -325,7 +371,7 @@ const Courses = () => {
             ))}
           </div>
 
-          {/* Selection Bar at the end */}
+          {/* Selection Bar */}
           {isSelectionMode && (
             <div className="selection-bar animate-slide-up">
               <div className="selection-info">
@@ -335,23 +381,38 @@ const Courses = () => {
                 </button>
               </div>
               <div className="selection-actions">
-                <button className="btn-cancel-selection" onClick={cancelSelectionMode}>
-                  Cancel
-                </button>
-                <button 
-                  className="btn-delete-selected" 
-                  onClick={handleBulkDeleteInitiate}
-                  disabled={selectedCourses.length === 0}
-                >
-                  Delete
-                </button>
+                <button className="btn-cancel-selection" onClick={cancelSelectionMode}>Cancel</button>
+                {selectionMode === 'delete' && (
+                  <button className="btn-delete-selected" onClick={handleBulkDeleteInitiate} disabled={selectedCourses.length === 0}>
+                    Delete
+                  </button>
+                )}
+                {selectionMode === 'archive' && (
+                  <button className="btn-archive-selected" onClick={handleBulkArchiveInitiate} disabled={selectedCourses.length === 0}>
+                    Archive
+                  </button>
+                )}
               </div>
             </div>
           )}
+
+          {/* Archived Toggle — bottom of page */}
+          {!isSelectionMode && (
+            <div className="archived-toggle-wrapper">
+              <button className="btn-archived-toggle" onClick={handleSwitchView}>
+                {viewMode === 'active' ? (
+                  <><Archive size={16} /> View Archived Courses</>
+                ) : (
+                  <><ArchiveRestore size={16} /> Back to Active Courses</>
+                )}
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Courses;

@@ -1,11 +1,63 @@
 const Course = require('../models/Course');
+const Task = require('../models/Task');
+const Material = require('../models/Material');
+const PomodoroSession = require('../models/PomodoroSession');
+const cloudinary = require('../utils/cloudinary');
 const asyncHandler = require('express-async-handler');
 
-// Get all courses
+// Get all active (non-archived) courses
 const getCourses = asyncHandler(async (req, res) => {
-    const courses = await Course.find({ user: req.user.id });
+    // Use $ne: true to also include legacy docs that don't have the archived field yet
+    const courses = await Course.find({ user: req.user.id, archived: { $ne: true } });
     res.json(courses);
 });
+
+// Get all archived courses
+const getArchivedCourses = asyncHandler(async (req, res) => {
+    const courses = await Course.find({ user: req.user.id, archived: true });
+    res.json(courses);
+});
+
+// Archive a course
+const archiveCourse = asyncHandler(async (req, res) => {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    if (course.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    course.archived = true;
+    await course.save();
+
+    res.json({ message: 'Course archived' });
+});
+
+// Unarchive a course
+const unarchiveCourse = asyncHandler(async (req, res) => {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    if (course.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    course.archived = false;
+    await course.save();
+
+    res.json({ message: 'Course unarchived' });
+});
+
 
 
 const createCourse = asyncHandler(async (req, res) => {
@@ -31,7 +83,7 @@ const createCourse = asyncHandler(async (req, res) => {
 
 // Delete a course
 const deleteCourse = asyncHandler(async (req, res) => {
-    let course = await Course.findById(req.params.id);
+    const course = await Course.findById(req.params.id);
 
     if (!course) {
         res.status(404);
@@ -43,9 +95,56 @@ const deleteCourse = asyncHandler(async (req, res) => {
         throw new Error('User not authorized');
     }
 
+    // 1. Find all tasks related to this course
+    const tasks = await Task.find({ course: req.params.id });
+    const taskIds = tasks.map(task => task._id);
+
+    // 2. Find all materials related to this course OR its tasks
+    const materials = await Material.find({
+        $or: [
+            { course: req.params.id },
+            { task: { $in: taskIds } }
+        ]
+    });
+
+    // 3. Delete files from Cloudinary
+    if (materials.length > 0) {
+        const publicIds = materials.map(m => m.publicId);
+        try {
+            // Cloudinary limit is 100 per call, if more we might need to chunk
+            if (publicIds.length <= 100) {
+                await cloudinary.api.delete_resources(publicIds);
+            } else {
+                for (let i = 0; i < publicIds.length; i += 100) {
+                    await cloudinary.api.delete_resources(publicIds.slice(i, i + 100));
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting resources from Cloudinary:', error);
+            // Continue deletion even if Cloudinary fails
+        }
+    }
+
+    // 4. Delete Pomodoro sessions for related tasks
+    if (taskIds.length > 0) {
+        await PomodoroSession.deleteMany({ task: { $in: taskIds } });
+    }
+
+    // 5. Delete materials from database
+    await Material.deleteMany({
+        $or: [
+            { course: req.params.id },
+            { task: { $in: taskIds } }
+        ]
+    });
+
+    // 6. Delete tasks from database
+    await Task.deleteMany({ course: req.params.id });
+
+    // 7. Delete the course
     await Course.findByIdAndDelete(req.params.id);
 
-    res.json({ message: 'Course removed' });
+    res.json({ message: 'Course and all related tasks, materials, and sessions removed' });
 });
 
 // Get course by ID
@@ -63,6 +162,30 @@ const getCourseById = asyncHandler(async (req, res) => {
     }
 
     res.json(course);
+});
+
+// Update course details
+const updateCourse = asyncHandler(async (req, res) => {
+    const { courseTitle, courseCode, color, semester } = req.body;
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    if (course.user.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    course.courseTitle = courseTitle || course.courseTitle;
+    course.courseCode = courseCode || course.courseCode;
+    course.color = color || course.color;
+    course.semester = semester || course.semester;
+
+    const updatedCourse = await course.save();
+    res.json(updatedCourse);
 });
 
 // Get all tasks for a course
@@ -249,21 +372,80 @@ const deleteCourses = asyncHandler(async (req, res) => {
         throw new Error('Invalid course IDs');
     }
 
-    // Only delete courses that belong to the user
-    const result = await Course.deleteMany({ 
+    // Only handle courses that belong to the user
+    const coursesToDelete = await Course.find({ 
         _id: { $in: courseIds }, 
         user: req.user.id 
     });
 
-    res.json({ message: `${result.deletedCount} courses removed` });
+    const actualCourseIds = coursesToDelete.map(c => c._id);
+
+    if (actualCourseIds.length === 0) {
+        return res.json({ message: 'No courses to remove' });
+    }
+
+    // 1. Find all tasks related to these courses
+    const tasks = await Task.find({ course: { $in: actualCourseIds } });
+    const taskIds = tasks.map(task => task._id);
+
+    // 2. Find all materials related to these courses OR their tasks
+    const materials = await Material.find({
+        $or: [
+            { course: { $in: actualCourseIds } },
+            { task: { $in: taskIds } }
+        ]
+    });
+
+    // 3. Delete files from Cloudinary
+    if (materials.length > 0) {
+        const publicIds = materials.map(m => m.publicId);
+        try {
+            if (publicIds.length <= 100) {
+                await cloudinary.api.delete_resources(publicIds);
+            } else {
+                for (let i = 0; i < publicIds.length; i += 100) {
+                    await cloudinary.api.delete_resources(publicIds.slice(i, i + 100));
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting resources from Cloudinary:', error);
+        }
+    }
+
+    // 4. Delete Pomodoro sessions for related tasks
+    if (taskIds.length > 0) {
+        await PomodoroSession.deleteMany({ task: { $in: taskIds } });
+    }
+
+    // 5. Delete materials from database
+    await Material.deleteMany({
+        $or: [
+            { course: { $in: actualCourseIds } },
+            { task: { $in: taskIds } }
+        ]
+    });
+
+    // 6. Delete tasks from database
+    await Task.deleteMany({ course: { $in: actualCourseIds } });
+
+    // 7. Delete the courses
+    const result = await Course.deleteMany({ 
+        _id: { $in: actualCourseIds }
+    });
+
+    res.json({ message: `${result.deletedCount} courses and all their related tasks, materials, and sessions removed` });
 });
 
 module.exports = {
     getCourses,
+    getArchivedCourses,
+    archiveCourse,
+    unarchiveCourse,
     createCourse,
     deleteCourse,
     deleteCourses,
     getCourseById,
+    updateCourse,
     getTasks,
     addTask,
     updateTask,

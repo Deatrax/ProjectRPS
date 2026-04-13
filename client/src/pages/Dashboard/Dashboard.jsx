@@ -264,7 +264,7 @@ const Dashboard = () => {
                 </div>
                 <div className="header-controls">
                     {/* User Badge */}
-                    <div className="user-badge">
+                    <div className="user-badge" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
                         <div className="user-avatar">{user?.name ? user.name.substring(0, 2).toUpperCase() : 'U'}</div>
                         <span className="user-name">{user?.name || 'User'}</span>
                     </div>
@@ -542,7 +542,7 @@ const Dashboard = () => {
                                 </span>
                             </>
                         ) : (
-                            "Hi!"
+                            `Great to see you, ${user?.name || 'User'}!`
                         )}
                     </div>
                     <div className="bubble-dots">
@@ -551,7 +551,7 @@ const Dashboard = () => {
                         <div className="dot dot-1"></div>
                     </div>
                 </div>
-                <Panda />
+                <Panda reaction={overdueCount > 0 ? 'angry' : ''} />
             </div>
         </div>
     );

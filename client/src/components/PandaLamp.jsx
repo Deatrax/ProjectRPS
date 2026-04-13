@@ -71,21 +71,25 @@ const PandaLamp = () => {
             IMPORTANT: We render components without {&&} 
             so that CSS transitions work correctly. 
         */}
-        <Panda currentState={getSceneClasses()} />
+        <section className="panda-area" aria-hidden="true">
+          <Panda parts="body" noWrapper />
 
-        <Card onGetStarted={handleGetStarted} />
+          <Card onGetStarted={handleGetStarted} />
 
-        <PandaLogin
-          onSignupClick={() => setView('signup')}
-          onPasswordFocus={() => setIsCoveringEyes(true)}
-          onPasswordBlur={() => setIsCoveringEyes(false)}
-        />
+          <PandaLogin
+            onSignupClick={() => setView('signup')}
+            onPasswordFocus={() => setIsCoveringEyes(true)}
+            onPasswordBlur={() => setIsCoveringEyes(false)}
+          />
 
-        <PandaSignup
-          onLoginClick={() => setView('login')}
-          onPasswordFocus={() => setIsCoveringEyes(true)}
-          onPasswordBlur={() => setIsCoveringEyes(false)}
-        />
+          <PandaSignup
+            onLoginClick={() => setView('login')}
+            onPasswordFocus={() => setIsCoveringEyes(true)}
+            onPasswordBlur={() => setIsCoveringEyes(false)}
+          />
+
+          <Panda parts="arms" noWrapper />
+        </section>
 
         {hintVisible && <div className="hint" id="hint">Hint: Click the lamp to get started!</div>}
       </main>

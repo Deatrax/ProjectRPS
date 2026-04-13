@@ -2,10 +2,14 @@ const express = require('express');
 const router = express.Router();
 const {
     getCourses,
+    getArchivedCourses,
+    archiveCourse,
+    unarchiveCourse,
     createCourse,
     deleteCourse,
     deleteCourses,
     getCourseById,
+    updateCourse,
     getTasks,
     addTask,
     updateTask,
@@ -16,16 +20,27 @@ const {
 } = require('../controllers/courseController');
 const { protect } = require('../middleware/authMiddleware');
 
+// NOTE: Static routes (/archived, /bulk-delete) must be defined before /:id
 router.route('/')
     .get(protect, getCourses)
     .post(protect, createCourse);
+
+router.route('/archived')
+    .get(protect, getArchivedCourses);
 
 router.route('/bulk-delete')
     .post(protect, deleteCourses);
 
 router.route('/:id')
     .get(protect, getCourseById)
+    .put(protect, updateCourse)
     .delete(protect, deleteCourse);
+
+router.route('/:id/archive')
+    .patch(protect, archiveCourse);
+
+router.route('/:id/unarchive')
+    .patch(protect, unarchiveCourse);
 
 // Task routes
 router.route('/:id/tasks')
@@ -45,3 +60,4 @@ router.route('/:id/assignments/:assignmentId')
     .delete(protect, deleteAssignment);
 
 module.exports = router;
+

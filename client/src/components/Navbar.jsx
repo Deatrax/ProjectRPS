@@ -14,7 +14,7 @@ const Navbar = () => {
 
     const handleLogout = () => {
         logout();
-        // Since useAuth already clears localStorage and updates state, App.jsx will rerender and handle redirection
+        navigate('/');
     };
 
     // Dock items configuration
@@ -25,7 +25,7 @@ const Navbar = () => {
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
         { icon: Timer, label: 'Pomodoro', path: '/pomodoro' },
         { icon: Award, label: 'Achievements', path: '/achievements' },   // Updated path
-        { icon: Settings, label: 'Settings', path: '/dashboard' }, // Placeholder paths as in original
+        // { icon: Settings, label: 'Settings', path: '/dashboard' }, // Placeholder paths as in original
         { icon: UserCircle, label: 'Profile', path: '/profile' },
         { icon: LogOut, label: 'Logout', action: handleLogout },
     ];

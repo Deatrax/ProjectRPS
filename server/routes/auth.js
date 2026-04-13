@@ -35,7 +35,7 @@ router.post("/signup", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, name: user.name },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1d" }
     );
 
     // Send response with the token
@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, name: user.name },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1d" }
     );
 
     // Send response with JWT
