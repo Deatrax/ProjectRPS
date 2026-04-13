@@ -240,10 +240,29 @@ const deleteAssignment = asyncHandler(async (req, res) => {
     res.json({ message: 'Assignment removed' });
 });
 
+// Delete multiple courses
+const deleteCourses = asyncHandler(async (req, res) => {
+    const { courseIds } = req.body;
+
+    if (!courseIds || !Array.isArray(courseIds)) {
+        res.status(400);
+        throw new Error('Invalid course IDs');
+    }
+
+    // Only delete courses that belong to the user
+    const result = await Course.deleteMany({ 
+        _id: { $in: courseIds }, 
+        user: req.user.id 
+    });
+
+    res.json({ message: `${result.deletedCount} courses removed` });
+});
+
 module.exports = {
     getCourses,
     createCourse,
     deleteCourse,
+    deleteCourses,
     getCourseById,
     getTasks,
     addTask,

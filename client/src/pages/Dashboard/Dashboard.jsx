@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     BookOpen, CheckSquare,
-    Plus, Calendar, Clock, Moon, Sun
+    Plus, Calendar, Clock, Timer
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import PomodoroWidget, { timeAgo } from '../../components/PomodoroWidget';
+import Panda from '../../components/Panda';
 import './Dashboard.css';
+import '../../components/PandaAnchor.css';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -15,6 +18,8 @@ const Dashboard = () => {
     const [tasks, setTasks] = useState([]);
     const [painScore, setPainScore] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [multiplier, setMultiplier] = useState(1.0);
+    const [dramaMsg] = useState(() => Math.floor(Math.random() * 5));
 
     // Mode Configuration
     const getModeConfig = (score) => {
@@ -45,13 +50,19 @@ const Dashboard = () => {
                     // Transform data to match UI needs
                     const formattedTasks = data.map(task => ({
                         id: task._id,
+                        _id: task._id,
                         name: task.title,
-                        deadline: task.deadline ? task.deadline.split('T')[0] : '', // Format date string
+                        deadline: task.deadline ? task.deadline.split('T')[0] : '',
                         difficulty: task.difficulty,
                         weight: task.weight,
                         course: task.course ? task.course.courseCode : task.category || 'General',
-                        courseColor: task.course ? task.course.color : '#6b7280', // Default gray for general
+                        courseColor: task.course ? task.course.color : '#6b7280',
                         completed: task.status === 'completed',
+                        overdue: task.status === 'overdue',
+                        status: task.status,
+                        lastAttemptedAt: task.lastAttemptedAt || null,
+                        pomoDraftSeconds: task.pomoDraftSeconds || null,
+                        pomoPlannedSeconds: task.pomoPlannedSeconds || null,
                         createdAt: task.createdAt
                     }));
 
@@ -68,87 +79,108 @@ const Dashboard = () => {
         fetchTasks();
     }, []);
 
+    // Fetch speed multiplier for the widget
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:5000/api/pomodoro/speed-multiplier', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(r => r.json())
+            .then(d => setMultiplier(d.multiplier ?? 1.0))
+            .catch(() => { });
+    }, []);
 
-//Pain score formula
-const calculatePainScore = (taskList) => {
-    const activeTasks = taskList.filter(t => !t.completed);
+    // Dramatic cycling banner
+    const DRAMA = [
+        '"Your task weeps in your absence…"',
+        '"The database is disappointed in you."',
+        '"Time waits for no one. Especially not you."',
+        '"Your future self is filing a complaint."',
+        '"Even the compiler gave up on you."',
+    ];
+    const overdueCount = tasks.filter(t => t.overdue).length;
 
-    if (activeTasks.length === 0) {
-        setPainScore(0);
-        return;
-    }
 
-    const MAX_DIFFICULTY = 5;
-    const REFERENCE_TASK_COUNT = 10;
+    //Pain score formula
+    const calculatePainScore = (taskList) => {
+        const activeTasks = taskList.filter(t => !t.completed);
 
-    const taskCount = activeTasks.length;
+        if (activeTasks.length === 0) {
+            setPainScore(0);
+            return;
+        }
 
-    let totalDifficulty = 0;
-    let urgencySum = 0;
-    let procrastinationSum = 0;
+        const MAX_DIFFICULTY = 5;
+        const REFERENCE_TASK_COUNT = 10;
 
-    const now = new Date();
+        const taskCount = activeTasks.length;
 
-    activeTasks.forEach(task => {
+        let totalDifficulty = 0;
+        let urgencySum = 0;
+        let procrastinationSum = 0;
 
-        const difficultyNorm = (task.difficulty || 1) / MAX_DIFFICULTY;
-        const weightNorm = (task.weight || 1) / 100;  
+        const now = new Date();
 
-        totalDifficulty += difficultyNorm;
+        activeTasks.forEach(task => {
 
-        const deadlineDate = new Date(task.deadline || now);
-        const timeDiff = deadlineDate - now;
-        const daysRemaining = Math.max(
-            1,
-            Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
-        );
+            const difficultyNorm = (task.difficulty || 1) / MAX_DIFFICULTY;
+            const weightNorm = (task.weight || 1) / 100;
 
-        // Softer urgency growth
-        const urgency =
-            difficultyNorm *
-            weightNorm *
-            (1 / Math.sqrt(daysRemaining));
+            totalDifficulty += difficultyNorm;
 
-        urgencySum += urgency;
+            const deadlineDate = new Date(task.deadline || now);
+            const timeDiff = deadlineDate - now;
+            const daysRemaining = Math.max(
+                1,
+                Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
+            );
 
-        // Panic boost when very close
-        if (daysRemaining <= 2) {
-            const procrastination =
+            // Softer urgency growth
+            const urgency =
                 difficultyNorm *
                 weightNorm *
                 (1 / Math.sqrt(daysRemaining));
 
-            procrastinationSum += procrastination;
-        }
-    });
+            urgencySum += urgency;
 
-    const avgDifficulty = totalDifficulty / taskCount;
-    const avgUrgency = urgencySum / taskCount;
-    const avgProcrastination = procrastinationSum / taskCount;
+            // Panic boost when very close
+            if (daysRemaining <= 2) {
+                const procrastination =
+                    difficultyNorm *
+                    weightNorm *
+                    (1 / Math.sqrt(daysRemaining));
 
-    // Workload grows slowly with more tasks
-    const workloadPressure =
-        Math.log(taskCount + 1) /
-        Math.log(REFERENCE_TASK_COUNT + 1);
+                procrastinationSum += procrastination;
+            }
+        });
 
-    const combined =
-          (0.30 * avgDifficulty)
-        + (0.35 * avgUrgency)
-        + (0.25 * workloadPressure)
-        + (0.10 * avgProcrastination);
+        const avgDifficulty = totalDifficulty / taskCount;
+        const avgUrgency = urgencySum / taskCount;
+        const avgProcrastination = procrastinationSum / taskCount;
 
-    // Compression curve so 100 is rare
-    let finalScore = Math.pow(combined, 0.8) * 100;
+        // Workload grows slowly with more tasks
+        const workloadPressure =
+            Math.log(taskCount + 1) /
+            Math.log(REFERENCE_TASK_COUNT + 1);
 
-    finalScore = Math.round(finalScore);
-    finalScore = Math.min(100, Math.max(1, finalScore));
+        const combined =
+            (0.30 * avgDifficulty)
+            + (0.35 * avgUrgency)
+            + (0.25 * workloadPressure)
+            + (0.10 * avgProcrastination);
 
-    setPainScore(finalScore);
-};
+        // Compression curve so 100 is rare
+        let finalScore = Math.pow(combined, 0.8) * 100;
+
+        finalScore = Math.round(finalScore);
+        finalScore = Math.min(100, Math.max(1, finalScore));
+
+        setPainScore(finalScore);
+    };
 
     // Toggle task completion
     const toggleTask = async (taskId, currentStatus) => {
-       
+
         const updatedTasks = tasks.map(task =>
             task.id === taskId ? { ...task, completed: !currentStatus } : task
         );
@@ -239,6 +271,7 @@ const calculatePainScore = (taskList) => {
                 </div>
             </header>
 
+
             <div className="main-content">
                 {/* Hero Status - Notion Style */}
                 <div className="hero-section">
@@ -265,6 +298,12 @@ const calculatePainScore = (taskList) => {
                         {tasks.filter(t => !t.completed).length} active tasks across your courses
                     </p>
                 </div>
+
+                {/* Pomodoro Widget */}
+                <PomodoroWidget
+                    tasks={tasks.filter(t => !t.completed)}
+                    multiplier={multiplier}
+                />
 
                 {/* Quick Actions - Minimal Style */}
                 <div className="quick-actions">
@@ -425,7 +464,9 @@ const calculatePainScore = (taskList) => {
                         {tasks.slice(0, 10).map((task, index) => (
                             <div
                                 key={task.id}
-                                className={`task-item ${task.completed ? 'completed' : ''}`}
+                                className={`task-item ${task.completed ? 'completed' : ''
+                                    } ${task.overdue ? 'overdue' : ''
+                                    }`}
                                 onClick={() => navigate(`/tasks/${task.id}`)}
                                 style={{ cursor: 'pointer' }}
                             >
@@ -433,28 +474,37 @@ const calculatePainScore = (taskList) => {
                                 <input
                                     type="checkbox"
                                     checked={task.completed}
-                                    onChange={(e) => {
-                                        e.stopPropagation();
-                                        toggleTask(task.id, task.completed);
-                                    }}
+                                    onChange={() => toggleTask(task.id, task.completed)}
+                                    onClick={(e) => e.stopPropagation()}
                                     className="task-checkbox"
                                 />
 
                                 {/* Course Color */}
                                 <div
                                     className="task-course-dot"
-                                    style={{ backgroundColor: task.courseColor }}
+                                    style={{ backgroundColor: task.overdue ? '#ef4444' : task.courseColor }}
                                 ></div>
 
                                 {/* Task Info */}
                                 <div className="task-content">
                                     <div className="task-title">
+                                        {task.overdue && <span className="overdue-badge">🔴 Overdue</span>}
                                         {task.name}
                                     </div>
                                     <div className="task-subtitle">
                                         <span>{task.course}</span>
                                         <span>•</span>
                                         <span>{task.deadline}</span>
+                                        <span>•</span>
+                                        <span className="last-attempted">
+                                            {timeAgo(task.lastAttemptedAt)}
+                                        </span>
+                                        {task.pomoDraftSeconds && (
+                                            <>
+                                                <span>•</span>
+                                                <span className="draft-chip-sm">💾 Draft</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
@@ -480,6 +530,29 @@ const calculatePainScore = (taskList) => {
                 </div>
             </div>
 
+            {/* Fixed Panda Character (Small consistent size) */}
+            <div className="panda-dashboard-anchor">
+                <div className="panda-speech-bubble">
+                    <div className={overdueCount > 0 ? "bubble-box drama" : "bubble-box"}>
+                        {overdueCount > 0 ? (
+                            <>
+                                <span>{DRAMA[dramaMsg]}</span>
+                                <span className="bubble-drama-count">
+                                    {overdueCount} overdue task{overdueCount !== 1 ? 's' : ''}
+                                </span>
+                            </>
+                        ) : (
+                            "Hi!"
+                        )}
+                    </div>
+                    <div className="bubble-dots">
+                        <div className="dot dot-3"></div>
+                        <div className="dot dot-2"></div>
+                        <div className="dot dot-1"></div>
+                    </div>
+                </div>
+                <Panda />
+            </div>
         </div>
     );
 };
