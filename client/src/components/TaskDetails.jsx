@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-    ArrowLeft, Calendar, FileText, BarChart2, Tag, 
+import {
+    ArrowLeft, Calendar, FileText, BarChart2, Tag,
     CheckCircle, Clock, Plus, X, Upload, Trash2,
     Info, LayoutGrid, Download, ExternalLink
 } from 'lucide-react';
@@ -40,7 +40,7 @@ const TaskDetails = () => {
                 const config = {
                     headers: { Authorization: `Bearer ${user.token}` }
                 };
-                
+
                 // Fetch task details
                 const res = await fetch(`http://localhost:5000/api/tasks/${id}`, config);
                 if (!res.ok) throw new Error('Failed to fetch task');
@@ -123,7 +123,7 @@ const TaskDetails = () => {
 
             const newMaterial = await res.json();
             setTaskMaterials(prev => [newMaterial, ...prev]);
-            
+
             // Reset upload state
             setFile(null);
             setDisplayFileName('');
@@ -246,13 +246,13 @@ const TaskDetails = () => {
                     <div className="glass-panel">
                         {/* Tab Toggle - Exactly like CourseDetails */}
                         <div className="toggle-container">
-                            <button 
+                            <button
                                 className={`toggle-btn ${activeTab === 'details' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('details')}
                             >
                                 Task Details
                             </button>
-                            <button 
+                            <button
                                 className={`toggle-btn ${activeTab === 'materials' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('materials')}
                             >
@@ -272,9 +272,9 @@ const TaskDetails = () => {
                                             </span>
                                         </div>
                                         <p className="description-text">{task.description || 'No description provided for this task.'}</p>
-                                        
+
                                         <div className="info-divider"></div>
-                                        
+
                                         <div className="meta-info-grid">
                                             <div className="meta-box">
                                                 <Calendar size={18} className="meta-icon" />
@@ -314,21 +314,21 @@ const TaskDetails = () => {
                                 </div>
                             ) : (
                                 <div className="materials-tab-content">
-                                    <input 
-                                        type="file" 
-                                        ref={fileInputRef} 
-                                        style={{ display: 'none' }} 
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
                                         onChange={handleFileChange}
                                         accept=".pdf,.doc,.docx,image/*"
                                     />
-                                    
-                                    <div 
+
+                                    <div
                                         className="upload-placeholder-item"
                                         onClick={() => fileInputRef.current.click()}
                                     >
                                         {uploading ? (
                                             <span className="upload-status">
-                                                <Upload size={20} className="pulse-icon"/> Uploading...
+                                                <Upload size={20} className="pulse-icon" /> Uploading...
                                             </span>
                                         ) : displayFileName ? (
                                             <div className="preview-mode">
@@ -337,15 +337,15 @@ const TaskDetails = () => {
                                                     <span className="file-name-text">{displayFileName}</span>
                                                 </div>
                                                 <div className="preview-actions">
-                                                    <button 
-                                                        onClick={(e) => {e.stopPropagation(); setFile(null); setDisplayFileName('');}} 
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setFile(null); setDisplayFileName(''); }}
                                                         className="preview-btn-icon cancel"
                                                         title="Cancel"
                                                     >
                                                         <X size={18} />
                                                     </button>
-                                                    <button 
-                                                        onClick={(e) => {e.stopPropagation(); handleUploadMaterial();}} 
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleUploadMaterial(); }}
                                                         className="preview-btn-icon confirm"
                                                         title="Upload"
                                                     >
@@ -378,10 +378,10 @@ const TaskDetails = () => {
                                                         <span className="mat-date">Uploaded {new Date(mat.createdAt).toLocaleDateString()}</span>
                                                     </div>
                                                     <div className="mat-actions">
-                                                        <a 
-                                                            href={mat.fileUrl.replace('/upload/', '/upload/fl_attachment/')} 
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer" 
+                                                        <a
+                                                            href={mat.fileUrl.replace('/upload/', '/upload/fl_attachment/')}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
                                                             className="mat-btn-circle"
                                                             download={mat.title}
                                                         >
@@ -430,11 +430,11 @@ const TaskDetails = () => {
                                     <button onClick={closeModal} className="btn-modal-secondary">
                                         Cancel
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             modalConfig.onConfirm();
                                             closeModal();
-                                        }} 
+                                        }}
                                         className={modalConfig.type === 'danger' ? 'btn-modal-danger' : 'btn-modal-primary'}
                                     >
                                         Delete

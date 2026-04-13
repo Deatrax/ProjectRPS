@@ -42,6 +42,20 @@ const CourseDetails = () => {
     const [editFormData, setEditFormData] = useState({ courseTitle: '', courseCode: '', semester: '', color: '' });
     const colors = ['#3b82f6','#6366f1','#8b5cf6','#ec4899','#ef4444','#f59e0b','#10b981','#06b6d4','#14b8a6','#64748b'];
 
+    // Floating action menu state
+    const [isHovered, setIsHovered] = useState(false);
+    const [hoveredButton, setHoveredButton] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isMenuOpen && !event.target.closest('.floating-button-wrapper')) setIsMenuOpen(false);
+        };
+        if (isMenuOpen) document.addEventListener('click', handleClickOutside);
+        else document.removeEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [isMenuOpen]);
+
     useEffect(() => {
         const fetchData = async () => {
             if (!user || !user.token || !courseId) return;
@@ -220,22 +234,51 @@ const CourseDetails = () => {
                             <h1 className="header-title" style={{fontSize: '3rem', fontWeight: '800', margin: 0, color: course.color || 'white'}}>{course.courseTitle}</h1>
                             <p className="header-description" style={{color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '1.1rem'}}>{course.courseCode} • {course.semester}</p>
                         </div>
-                        <div className="cd-header-actions">
-                            <button className="cd-action-btn cd-btn-task" onClick={() => navigate(`/taskpicker?courseId=${courseId}`)} title="Add Task">
-                                <Plus size={16} /> Add Task
-                            </button>
-                            <button className="cd-action-btn cd-btn-edit" onClick={openEditModal} title="Edit Course">
-                                <Edit size={16} /> Edit
-                            </button>
+                        <div 
+                            className="floating-button-wrapper"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => { setIsHovered(false); setHoveredButton(null); }}
+                        >
                             <button 
-                                className={`cd-action-btn cd-btn-archive ${course.archived ? 'is-archived' : ''}`}
-                                onClick={handleArchiveToggle}
-                                disabled={archiveLoading}
+                                className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
                             >
-                                {course.archived
-                                    ? <><ArchiveRestore size={16} /> Restore</>
-                                    : <><Archive size={16} /> Archive</>}
+                                <Edit size={28} />
                             </button>
+
+                            {(isHovered || isMenuOpen) && (
+                                <>
+                                    <button 
+                                        className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(1)}
+                                        onClick={() => navigate(`/taskpicker?courseId=${courseId}`)}
+                                        title="Add Task"
+                                    >
+                                        <Plus size={18} /> Add Task
+                                    </button>
+
+                                    <button 
+                                        className={`action-btn btn-bottom ${hoveredButton === 2 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(2)}
+                                        onClick={() => { openEditModal(); setIsMenuOpen(false); }}
+                                        title="Edit Course"
+                                    >
+                                        <Edit size={18} /> Edit
+                                    </button>
+
+                                    <button 
+                                        className={`action-btn btn-right ${hoveredButton === 3 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(3)}
+                                        onClick={() => { handleArchiveToggle(); setIsMenuOpen(false); }}
+                                        title={course.archived ? 'Restore' : 'Archive'}
+                                        disabled={archiveLoading}
+                                    >
+                                        {course.archived
+                                            ? <><ArchiveRestore size={18} /> Restore</>
+                                            : <><Archive size={18} /> Archive</>}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
