@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, FileText, BarChart2, Tag,
-    CheckCircle, Clock, Plus, X, Upload, Trash2,
+    CheckCircle, Clock, Plus, X, Upload, Trash2, Edit,
     Info, LayoutGrid, Download, ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -31,6 +31,32 @@ const TaskDetails = () => {
         onConfirm: null,
         type: 'info' // 'info' or 'danger'
     });
+
+    // Edit modal state
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
+    const [editFormData, setEditFormData] = useState({ 
+        title: '', 
+        description: '', 
+        category: '', 
+        difficulty: 5, 
+        weight: 0, 
+        deadline: '' 
+    });
+
+    // Floating action menu state
+    const [isHovered, setIsHovered] = useState(false);
+    const [hoveredButton, setHoveredButton] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isMenuOpen && !event.target.closest('.floating-button-wrapper')) setIsMenuOpen(false);
+        };
+        if (isMenuOpen) document.addEventListener('click', handleClickOutside);
+        else document.removeEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [isMenuOpen]);
 
     useEffect(() => {
         const fetchTaskData = async () => {
@@ -165,6 +191,103 @@ const TaskDetails = () => {
         );
     };
 
+    const handleDeleteTask = async () => {
+        showConfirm(
+            'Delete Task',
+            'Are you sure you want to delete this task? This will permanently remove all associated materials and comments.',
+            async () => {
+                try {
+                    const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            Authorization: `Bearer ${user.token}`
+                        }
+                    });
+
+                    if (res.ok) {
+                        // Navigate back to course details if possible, or dashboard
+                        if (task.course) {
+                            navigate(`/coursedetails?id=${task.course._id}`);
+                        } else {
+                            navigate('/dashboard');
+                        }
+                    } else {
+                        throw new Error('Failed to delete task');
+                    }
+                } catch (err) {
+                    console.error("Error deleting task:", err);
+                    showAlert('Error', 'Failed to delete task', 'danger');
+                }
+            }
+        );
+    };
+
+    const openEditModal = () => {
+        setEditFormData({
+            title: task.title || '',
+            description: task.description || '',
+            category: task.category || '',
+            difficulty: task.difficulty || 5,
+            weight: task.weight || 0,
+            deadline: task.deadline ? task.deadline.split('T')[0] : ''
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateTask = async (e) => {
+        e.preventDefault();
+        setEditLoading(true);
+        try {
+            const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify(editFormData)
+            });
+
+            if (res.ok) {
+                const updatedTask = await res.json();
+                setTask(updatedTask);
+                setShowEditModal(false);
+                showAlert('Success', 'Task updated successfully!');
+            } else {
+                throw new Error('Update failed');
+            }
+        } catch (err) {
+            console.error("Error updating task:", err);
+            showAlert('Error', 'Failed to update task', 'danger');
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
+    const handleToggleStatus = async () => {
+        const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+        try {
+            const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (res.ok) {
+                const updatedTask = await res.json();
+                setTask(updatedTask);
+                showAlert('Success', `Task marked as ${newStatus}!`);
+            } else {
+                throw new Error('Status update failed');
+            }
+        } catch (err) {
+            console.error("Error updating status:", err);
+            showAlert('Error', 'Failed to update task status', 'danger');
+        }
+    };
+
     if (loading) return (
         <div className="task-details-root">
             <div className="container">
@@ -215,6 +338,52 @@ const TaskDetails = () => {
                             <p className="header-description">
                                 {task.course ? `${task.course.courseCode} • ${task.course.courseTitle}` : task.category || 'General Task'}
                             </p>
+                        </div>
+                        
+                        <div 
+                            className="floating-button-wrapper"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => { setIsHovered(false); setHoveredButton(null); }}
+                        >
+                            <button 
+                                className={`add-button ${isHovered || isMenuOpen ? 'plus-active' : ''}`}
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            >
+                                <Edit size={28} />
+                            </button>
+
+                            {(isHovered || isMenuOpen) && (
+                                <>
+                                    <button 
+                                        className={`action-btn btn-left ${hoveredButton === 1 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(1)}
+                                        onClick={() => { openEditModal(); setIsMenuOpen(false); }}
+                                        title="Edit Task"
+                                    >
+                                        <Edit size={18} /> Edit
+                                    </button>
+
+                                    <button 
+                                        className={`action-btn btn-right ${hoveredButton === 2 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(2)}
+                                        onClick={() => { handleDeleteTask(); setIsMenuOpen(false); }}
+                                        title="Delete Task"
+                                    >
+                                        <Trash2 size={18} /> Delete
+                                    </button>
+
+                                    <button 
+                                        className={`action-btn btn-bottom ${hoveredButton === 3 ? 'is-hovered' : ''}`}
+                                        onMouseEnter={() => setHoveredButton(3)}
+                                        onClick={() => { handleToggleStatus(); setIsMenuOpen(false); }}
+                                        title={task.status === 'completed' ? 'Mark as Pending' : 'Mark as Complete'}
+                                    >
+                                        {task.status === 'completed' 
+                                            ? <><Clock size={18} /> Pending</> 
+                                            : <><CheckCircle size={18} /> Complete</>}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -446,6 +615,104 @@ const TaskDetails = () => {
                                 </button>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Edit Task Modal */}
+            {showEditModal && (
+                <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+                    <div className="modal cd-edit-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Edit Task</h2>
+                            <button onClick={() => setShowEditModal(false)} className="btn-close">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdateTask}>
+                            <div className="modal-body">
+                                <div className="cd-form-group">
+                                    <label>Task Title</label>
+                                    <input
+                                        type="text"
+                                        className="cd-input"
+                                        value={editFormData.title}
+                                        onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="cd-form-group">
+                                    <label>Category</label>
+                                    <select
+                                        className="cd-input"
+                                        value={editFormData.category}
+                                        onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
+                                    >
+                                        {['Exam', 'Assignment', 'Lab Task', 'Presentation', 'Project', 'General'].map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="cd-form-group">
+                                    <label>Description</label>
+                                    <textarea
+                                        className="cd-input"
+                                        rows="3"
+                                        value={editFormData.description}
+                                        onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                        style={{ resize: 'none' }}
+                                    ></textarea>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="cd-form-group">
+                                        <label>Difficulty (1-10)</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="10"
+                                            className="cd-input"
+                                            value={editFormData.difficulty}
+                                            onChange={(e) => setEditFormData({ ...editFormData, difficulty: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="cd-form-group">
+                                        <label>Weight (%)</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            className="cd-input"
+                                            value={editFormData.weight}
+                                            onChange={(e) => setEditFormData({ ...editFormData, weight: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="cd-form-group">
+                                    <label>Deadline</label>
+                                    <input
+                                        type="date"
+                                        className="cd-input"
+                                        value={editFormData.deadline}
+                                        onChange={(e) => setEditFormData({ ...editFormData, deadline: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-actions">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowEditModal(false)}
+                                    className="btn-modal-secondary"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn-modal-primary"
+                                    disabled={editLoading}
+                                >
+                                    {editLoading ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

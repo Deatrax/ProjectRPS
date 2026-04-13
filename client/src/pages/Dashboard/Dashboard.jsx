@@ -64,7 +64,14 @@ const Dashboard = () => {
                         pomoDraftSeconds: task.pomoDraftSeconds || null,
                         pomoPlannedSeconds: task.pomoPlannedSeconds || null,
                         createdAt: task.createdAt
-                    }));
+                    })).sort((a, b) => {
+                        // First group by status (incomplete first)
+                        if (a.completed !== b.completed) {
+                            return a.completed ? 1 : -1;
+                        }
+                        // Then sort by deadline
+                        return new Date(a.deadline) - new Date(b.deadline);
+                    });
 
                     setTasks(formattedTasks);
                     calculatePainScore(formattedTasks);
@@ -211,7 +218,12 @@ const Dashboard = () => {
         for (let i = 0; i < 21; i++) {
             const date = new Date(today);
             date.setDate(today.getDate() + i);
-            const dateStr = date.toISOString().split('T')[0];
+            
+            // Format local date confidently to offset timezone shifts from toISOString
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const dayNum = String(date.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${dayNum}`;
 
             timeline.push({
                 date: dateStr,
@@ -403,7 +415,7 @@ const Dashboard = () => {
                                                 </div>
 
                                                 {/* Hover Card */}
-                                                <div className="task-hover-card">
+                                                <div className={`task-hover-card ${task.position < 2 ? 'align-left' : task.position > 18 ? 'align-right' : ''}`}>
                                                     <div className="card-content">
                                                         {/* Arrow (optional, handled by CSS placement mostly) */}
                                                         {/* <div className="card-arrow"></div> */}

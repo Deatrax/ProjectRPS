@@ -514,4 +514,153 @@
     .task-details-root .meta-info-grid {
         grid-template-columns: 1fr;
     }
+
+    .task-details-root .floating-button-wrapper {
+        position: relative;
+        right: auto;
+        margin-top: 1.5rem;
+    }
+
+    .task-details-root .btn-left {
+        right: 70px;
+    }
+
+    .task-details-root .btn-right {
+        left: 70px;
+    }
+
+    .task-details-root .btn-bottom {
+        top: 70px;
+    }
+}
+
+/* ── Floating Radial Menu ────────────────────────────────────────── */
+.task-details-root .floating-button-wrapper {
+    position: absolute;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.task-details-root .add-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffe9a6 0%, #e6d08f 100%);
+    border: none;
+    color: #0b1020;
+    cursor: pointer;
+    z-index: 50;
+    box-shadow: 0 8px 25px rgba(255, 233, 166, 0.3);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.task-details-root .add-button.plus-active {
+    transform: rotate(45deg);
+    background: #cccccc;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.task-details-root .action-btn {
+    position: absolute;
+    padding: 0.8rem 1.4rem;
+    border-radius: 50px;
+    border: none;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    white-space: nowrap;
+    cursor: pointer;
+    z-index: 40;
+    animation: cdBounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    transition: all 0.3s ease;
+}
+
+.task-details-root .btn-left {
+    right: 80px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.task-details-root .btn-right {
+    left: 80px;
+    background: linear-gradient(135deg, #ef4444, #dc2626); /* Red for delete */
+}
+
+.task-details-root .btn-bottom {
+    top: 80px;
+    background: linear-gradient(135deg, #10b981, #059669); /* Green for complete */
+}
+
+.task-details-root .btn-left:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+}
+
+.task-details-root .btn-right:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+}
+
+.task-details-root .btn-bottom:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+}
+
+@keyframes cdBounceIn {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ── Edit Modal Specifics ────────────────────────────────────────── */
+.cd-edit-modal {
+    max-width: 30rem;
+    width: 90%;
+}
+
+.cd-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.cd-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cd-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.cd-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(0,0,0,0.4);
 }

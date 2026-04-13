@@ -8,6 +8,7 @@ const materialRoutes = require('./routes/material');
 const taskRoutes = require('./routes/tasks');
 const achievementRoutes = require('./routes/achievements');
 const pomodoroRoutes = require('./routes/pomodoro');
+const apologyRoutes = require('./routes/apologies');
 
 const app = express();
 
@@ -41,6 +42,9 @@ app.use('/api/achievements', achievementRoutes);
 
 // Use pomodoro routes
 app.use('/api/pomodoro', pomodoroRoutes);
+
+// Use apology routes
+app.use('/api/apologies', apologyRoutes);
 
 // Define the port
 const PORT = process.env.PORT || 5000;

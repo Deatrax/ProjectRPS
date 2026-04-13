@@ -107,6 +107,11 @@ const AllTasks = () => {
             return true;
         })
         .sort((a, b) => {
+            // First group by status (incomplete first)
+            const aComp = a.status === 'completed';
+            const bComp = b.status === 'completed';
+            if (aComp !== bComp) return aComp ? 1 : -1;
+
             if (sortBy === 'deadline') {
                 return new Date(a.deadline) - new Date(b.deadline);
             } else if (sortBy === 'priority') {
