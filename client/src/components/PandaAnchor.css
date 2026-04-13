@@ -48,7 +48,7 @@
 
 /* --- ANGRY REACTION (DASHBOARD) --- */
 .panda.reaction-angry {
-  animation: dashboardPandaFloat 4s ease-in-out infinite, pandaShake 0.15s ease-in-out infinite !important;
+  animation: dashboardPandaFloat 4s ease-in-out infinite !important;
 }
 
 .panda.reaction-angry .eye {
