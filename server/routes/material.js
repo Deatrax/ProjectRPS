@@ -31,14 +31,16 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
-// Course materials
-router.get('/all', protect, getAllMaterials); // Add this before other routes
-router.post('/:courseId', protect, upload.single('materialFile'), uploadMaterial);
-router.get('/:courseId', protect, getCourseMaterials);
+// NOTE: Static/prefixed routes must come BEFORE wildcard routes like /:courseId
+router.get('/all', protect, getAllMaterials);
 
-// Task materials
+// Task materials — must be before /:courseId or 'task' gets captured as a courseId
 router.post('/task/:taskId', protect, upload.single('materialFile'), uploadTaskMaterial);
 router.get('/task/:taskId', protect, getTaskMaterials);
+
+// Course materials
+router.post('/:courseId', protect, upload.single('materialFile'), uploadMaterial);
+router.get('/:courseId', protect, getCourseMaterials);
 
 // General delete (by material ID)
 router.delete('/:materialId', protect, deleteMaterial);
