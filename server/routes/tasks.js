@@ -6,6 +6,18 @@ const { protect } = require('../middleware/authMiddleware');
 // @route   GET api/tasks  Get all tasks for the logged-in user
 router.get('/', protect, async (req, res) => {
     try {
+        const now = new Date();
+
+        // Auto-sweep: mark any past-deadline, non-completed tasks as 'overdue'
+        await Task.updateMany(
+            {
+                user: req.user.id,
+                deadline: { $lt: now },
+                status: { $nin: ['completed', 'overdue'] }
+            },
+            { $set: { status: 'overdue' } }
+        );
+
         const tasks = await Task.find({ user: req.user.id })
             .populate('course', 'courseTitle courseCode color')
             .sort({ deadline: 1 }); // Sort by nearest deadline
@@ -15,6 +27,7 @@ router.get('/', protect, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
 
 // @route   POST api/tasks Create a task
 router.post('/', protect, async (req, res) => {
@@ -86,7 +99,7 @@ router.get('/:id', protect, async (req, res) => {
 
 // @route   PUT api/tasks/:id  Update a task
 router.put('/:id', protect, async (req, res) => {
-    const { title, description, deadline, category, difficulty, weight, materials, course, status, completed } = req.body;
+    const { title, description, deadline, category, difficulty, weight, materials, course, status, completed, lastAttemptedAt, pomoDraftSeconds } = req.body;
 
     // Build task object
     const taskFields = {};
@@ -98,6 +111,8 @@ router.put('/:id', protect, async (req, res) => {
     if (weight) taskFields.weight = weight;
     if (materials) taskFields.materials = materials;
     if (course !== undefined) taskFields.course = course; // allow clearing course
+    if (lastAttemptedAt !== undefined) taskFields.lastAttemptedAt = lastAttemptedAt;
+    if (pomoDraftSeconds !== undefined) taskFields.pomoDraftSeconds = pomoDraftSeconds; // null clears draft
     if (status) {
         taskFields.status = status;
         if (status === 'completed') {
@@ -113,6 +128,7 @@ router.put('/:id', protect, async (req, res) => {
         if (completed) taskFields.completedAt = Date.now();
         else taskFields.completedAt = null;
     }
+
 
     try {
         let task = await Task.findById(req.params.id);
