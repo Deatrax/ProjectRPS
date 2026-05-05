@@ -12,6 +12,27 @@ Project RPS is an advanced, gamified academic and personal productivity system d
 - **Apology Letters**: A unique accountability feature! If you miss a deadline, the system locks you out until you write a handwritten (digital) apology letter of 50+ words to your future self, which is saved permanently to your profile.
 - **Dark Mode UI**: Beautiful, vibrant, dark-themed responsive UI with smooth micro-animations.
 
+## Image Previews:
+<table>
+  <tr>
+    <td><img width="1470" height="796" src="https://github.com/user-attachments/assets/8c398d78-e173-4dde-b300-f99cca3ae7bf" /></td>
+    <td><img width="1470" height="795" src="https://github.com/user-attachments/assets/2bea8849-aac2-41d2-9e21-ab5379da1be3" /></td>
+  </tr>
+  <tr>
+    <td><img width="1470" height="792" src="https://github.com/user-attachments/assets/8344ab33-66a8-4802-a970-6bc4dc188c57" /></td>
+    <td><img width="1470" height="793" src="https://github.com/user-attachments/assets/af025777-6e8e-45a8-a46f-56e8d69c1f09" /></td>
+  </tr>
+   <tr>
+      <td><img width="1470" height="795" alt="Screenshot 2026-05-05 at 9 53 16 AM" src="https://github.com/user-attachments/assets/2b7b11fd-8f88-42e6-b3b5-6942804cd648" />
+</td>
+      <td><img width="1470" height="793" alt="Screenshot 2026-05-05 at 9 53 41 AM" src="https://github.com/user-attachments/assets/388af5ac-211d-4446-8a24-880910b2238b" />
+</td>
+   </tr>
+</table>
+
+
+
+
 ## 🛠️ Technology Stack
 
 **Frontend:**
